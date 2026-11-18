@@ -132,6 +132,8 @@ html.bw{filter:grayscale(1)}
 .srw{display:flex;align-items:center;gap:12px;width:100%;padding:14px 2px;border-bottom:1px solid var(--bd);text-align:left;color:inherit}
 .srw .t{flex:1;display:flex;flex-direction:column}.srw small{font-size:12px}.srw em{font-style:normal;font-size:22px;color:var(--mut)}
 .cams .drop{margin:6px 0}
+.vf{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:4px;border-radius:50%;background:#1d9bf0;color:#fff;font-size:10px;font-weight:900;line-height:1;vertical-align:middle}
+.pr p .vf{width:17px;height:17px;font-size:11px}
 </style>
 </head>
 <body>
@@ -176,9 +178,11 @@ function notifs(){
 }
 const EM=['🦎','🐊','🐸','🐢','🦖','🐍','🌴','🔥','😎','🌈','🍉','⚡'];
 let ef='all',rmute=false,tapT,db,user,assets,me=null,tab='home',filt='all',pt='posts',q='',vu=null,openP=null,ready=false,io=null,lastTap=0,pdel=null,pav=null,tmr=null;
-let P={},POSTS=[],LK=[],CM=[],FL=[],SV=[],MS=[],cu=null,lastN=-1,myEmail='',pfile=null;
+let VF=[],P={},POSTS=[],LK=[],CM=[],FL=[],SV=[],MS=[],cu=null,lastN=-1,myEmail='',pfile=null;
 const ago=t=>{const s=(Date.now()-t)/1e3;if(s<60)return'agora';if(s<3600)return Math.floor(s/60)+' min';if(s<86400)return Math.floor(s/3600)+' h';return Math.floor(s/86400)+' d'};
 const nm=u=>(P[u]&&P[u].name)||'lagarto';
+const isV=u=>VF.some(v=>v.id===u);
+const vb=u=>isV(u)?'<span class="vf" title="Verificado">✓</span>':'';
 const av=(u,c='')=>{const a=(P[u]&&P[u].av)||'🦎';return /^(https?:|\/_blob|data:)/.test(a)?`<img class="av ${c}" src="${esc(a)}" alt="">`:`<span class="av ${c}">${esc(a)}</span>`};
 const seen=u=>{try{return+(localStorage.getItem('seen_'+u)||0)}catch(e){return 0}};
 const unread=u=>MS.some(m=>m.from===u&&m.to===me&&m.ts>seen(u));
@@ -201,7 +205,10 @@ function fillChat(){
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
 }
-function sendm(){const i=$('#cmi'),t=i.value.trim();if(!t||!need())return;i.value='';w(db.collection('messages').add({from:me,to:cu,text:t,ts:Date.now()}));i.focus()}
+function sendm(){const i=$('#cmi'),t=i.value.trim();if(!t||!need())return;
+  const m=t.match(/^\/(verificar|desverificar)\s+(\S+)(?:\s+(eu))?$/i);
+  if(m){i.value='';const on=m[1].toLowerCase()==='verificar';sb.rpc('verificar',{alvo:m[3]?me:cu,acao:on?'on':'off',senha:m[2]}).then(r=>toast(r.error?(/senha/i.test(r.error.message)?'Senha incorreta':'Não foi possível verificar'):on?'Perfil verificado ✓':'Verificado removido'));return}
+  i.value='';w(db.collection('messages').add({from:me,to:cu,text:t,ts:Date.now()}));i.focus()}
 const likes=p=>LK.filter(l=>l.pid===p).length;
 const liked=p=>LK.some(l=>l.pid===p&&l.uid===me);
 const ncm=p=>CM.filter(c=>c.pid===p).length;
@@ -217,10 +224,10 @@ function small(f,max=640){return new Promise((ok,no)=>{const i=new Image();i.onl
 function card(p){
   const m=p.type==='video'?`<video src="${esc(p.url)}" controls loop playsinline preload="metadata"></video>`:`<img src="${esc(p.url)}" alt="">`;
   const n=ncm(p.id),sv=SV.some(s=>s.pid===p.id&&s.uid===me);
-  return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="del" data-id="${p.id}">${I('trash',20)}</button>`:''}</div>
+  return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="del" data-id="${p.id}">${I('trash',20)}</button>`:''}</div>
   <div class="md" data-a="dbl" data-id="${p.id}">${m}</div>
   <div class="ac"><button class="ic ${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',26)}</button><button class="ic" data-a="open" data-id="${p.id}">${I('comment',26)}</button><button class="ic" data-a="share" data-id="${p.id}">${I('share',26)}</button><button class="ic r ${sv?'sv':''}" data-a="save" data-id="${p.id}">${I('bookmark',26)}</button></div>
-  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}</b> ${esc(p.cap)}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
+  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${esc(p.cap)}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
 }
 const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img src="${esc(p.url)}" alt="">`}</a>`;
 
@@ -243,12 +250,12 @@ function render(){
   }else if(tab==='dm'){
     const ps=[...new Set(MS.map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).sort((x,y)=>y.l.ts-x.l.ts);
     const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}</b></a></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off"><button class="lnk" data-a="sendm">Enviar</button></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off"><button class="lnk" data-a="sendm">Enviar</button></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
-    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
+    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
   }else{
     const u=vu||me;
     if(!u||!P[u]){h=`<div class="empty">${me?'Crie seu perfil para aparecer aqui.':'Entre na sua conta para criar seu perfil.'}<br><br>${me?'<button class="btn" data-a="editprof">Criar perfil</button>':''}</div>`}
@@ -256,7 +263,7 @@ function render(){
       const mine=u===me,ps=POSTS.filter(p=>p.uid===u),sv=POSTS.filter(p=>SV.some(s=>s.pid===p.id&&s.uid===me));
       const list=pt==='saved'&&mine?sv:pt==='reels'?ps.filter(p=>p.type==='video'):ps.filter(p=>p.type!=='video');
       h=`<div class="pr"><div class="row">${av(u,'l')}<div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
-      <p><b>${esc(P[u].name)}</b><br>${esc(P[u].bio||'')}</p>
+      <p><b>${esc(P[u].name)}${vb(u)}</b><br>${esc(P[u].bio||'')}</p>
       ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${amF(u)?'g':''}" data-a="follow" data-id="${esc(u)}">${amF(u)?'Seguindo':'Seguir'}</button>${amF(u)?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
       <div class="tabs2"><button class="${pt==='posts'?'on':''}" data-a="pt" data-id="posts">${I('grid',17)} Posts</button><button class="${pt==='reels'?'on':''}" data-a="pt" data-id="reels">${I('reels',17)} Reels</button>${mine?`<button class="${pt==='saved'?'on':''}" data-a="pt" data-id="saved">${I('bookmark',17)} Salvos</button>`:''}</div></div>
       ${list.length?`<div class="grid">${list.map(gi).join('')}</div>`:'<div class="empty">Nada por aqui ainda.</div>'}`;
@@ -285,7 +292,7 @@ function fillEx(){
   }else{
     const people=ef==='all'?Object.keys(P).filter(u=>(P[u].name||'').toLowerCase().includes(k)||(P[u].bio||'').toLowerCase().includes(k)):[];
     const found=POSTS.filter(p=>okT(p)&&(p.cap||'').toLowerCase().includes(k));
-    if(people.length)h+=`<p class="mut" style="padding:4px 14px 0"><b>Pessoas</b></p>`+people.map(u=>`<a class="cm" data-a="prof" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<div><b>${esc(P[u].name)}</b><div class="mut">${esc(P[u].bio||'')}</div></div></a>`).join('');
+    if(people.length)h+=`<p class="mut" style="padding:4px 14px 0"><b>Pessoas</b></p>`+people.map(u=>`<a class="cm" data-a="prof" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<div><b>${esc(P[u].name)}${vb(u)}</b><div class="mut">${esc(P[u].bio||'')}</div></div></a>`).join('');
     const imgs=found.filter(p=>p.type!=='video'),vids=found.filter(p=>p.type==='video');
     if(imgs.length)h+=`<p class="mut" style="padding:10px 14px 4px"><b>📷 Fotos</b></p><div class="grid">${imgs.map(gi).join('')}</div>`;
     if(vids.length)h+=`<p class="mut" style="padding:10px 14px 4px"><b>🎬 Reels</b></p><div class="grid">${vids.map(gi).join('')}</div>`;
@@ -301,7 +308,7 @@ function openPost(id){openP=id;modal(`<div id="mcard"></div><div id="cl"></div><
 function fillPost(){
   const p=POSTS.find(x=>x.id===openP);if(!p||$('#mo').hidden){if(!p)closeM();return}
   $('#mcard').innerHTML=card(p);
-  $('#cl').innerHTML=CM.filter(c=>c.pid===openP).sort((a,b)=>a.ts-b.ts).map(c=>`<div class="cm"><a data-a="prof" data-id="${esc(c.uid)}">${av(c.uid,'s')}</a><div><b>${esc(nm(c.uid))}</b> ${esc(c.text)}<div class="mut">${ago(c.ts)}${c.uid===me?` · <a data-a="delc" data-id="${c.id}">excluir</a>`:''}</div></div></div>`).join('')||'<p class="mut">Nenhum comentário ainda. Seja o primeiro!</p>';
+  $('#cl').innerHTML=CM.filter(c=>c.pid===openP).sort((a,b)=>a.ts-b.ts).map(c=>`<div class="cm"><a data-a="prof" data-id="${esc(c.uid)}">${av(c.uid,'s')}</a><div><b>${esc(nm(c.uid))}${vb(c.uid)}</b> ${esc(c.text)}<div class="mut">${ago(c.ts)}${c.uid===me?` · <a data-a="delc" data-id="${c.id}">excluir</a>`:''}</div></div></div>`).join('')||'<p class="mut">Nenhum comentário ainda. Seja o primeiro!</p>';
 }
 function send(){const i=$('#ci'),t=i.value.trim();if(!t||!need())return;i.value='';w(db.collection('comments').add({pid:openP,uid:me,text:t,ts:Date.now()}))}
 function newPost(rl){if(!need())return;pfile=null;
@@ -410,7 +417,7 @@ function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])editProf(true)}});
   sub('posts',a=>POSTS=a.sort((x,y)=>y.ts-x.ts));
-  sub('likes',a=>LK=a);sub('comments',a=>CM=a);sub('follows',a=>FL=a);sub('saves',a=>SV=a);sub('messages',a=>MS=a);
+  sub('likes',a=>LK=a);sub('comments',a=>CM=a);sub('follows',a=>FL=a);sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
