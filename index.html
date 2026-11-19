@@ -134,12 +134,17 @@ html.bw{filter:grayscale(1)}
 .cams .drop{margin:6px 0}
 .vf{width:16px;height:16px;margin-left:4px;vertical-align:-3px;display:inline-block}
 .pr p .vf{width:19px;height:19px;vertical-align:-4px}
-.ap{width:100%;max-width:380px}.ap[hidden]{display:none}
-.pw{position:relative}.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.65;padding:4px}
-.alk{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);left:0;right:0;text-align:center;margin:0}
-.lk2{color:var(--ac);font-weight:700;text-decoration:underline;cursor:pointer}
-.aback{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;font-size:26px;padding:6px 10px;color:var(--fg)}
-.wring{width:110px;height:110px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:var(--ac);background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(135deg,#2e9e4f,#f5c518) border-box;border:4px solid transparent}
+#auth{position:fixed;inset:0;z-index:50;background:var(--bg);padding:14px 24px 18px;flex-direction:column;overflow:auto}
+#auth .ic{width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:flex-start;color:var(--fg)}
+#auth h2{font-size:26px;margin:14px 0 8px;line-height:1.2}#auth p{margin:0}
+#auth .af{position:relative;border:1px solid var(--bd);border-radius:14px;background:var(--card);padding:8px 14px;margin:12px 0}
+#auth .af:focus-within{border-color:var(--ac)}#auth .af label{display:block;font-size:12px;color:var(--mut)}
+#auth .af input{width:100%;background:none;border:0;outline:0;font-size:17px;padding:4px 38px 2px 0;color:var(--fg)}
+#auth .ax{position:absolute;right:10px;top:50%;transform:translateY(-50%);padding:6px;color:var(--mut);display:flex}
+#auth .aerr{color:var(--red);min-height:20px;margin:8px 0;font-size:14px}
+#auth .btn{padding:13px 16px;border-radius:99px;font-size:16px;margin-top:4px}
+#auth .lnk{margin-top:auto;padding:18px 0 6px;text-align:center;color:var(--ac);font-weight:700;display:block;width:100%}
+.obe{width:46px;height:46px;font-size:26px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;border:2px solid transparent}.obe.on{border-color:var(--ac)}
 </style>
 </head>
 <body>
@@ -148,25 +153,7 @@ html.bw{filter:grayscale(1)}
 <main id="app"><div class="empty">Carregando…</div></main>
 </div>
 <nav class="bar"></nav>
-<div id="auth" style="display:none;position:fixed;inset:0;z-index:50;background:var(--bg);padding:24px;flex-direction:column;justify-content:center;align-items:center">
-<div class="ap" id="a-login"><div class="logo" style="font-size:34px;text-align:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center">A rede social da nossa rua</p>
-<input class="sr" style="width:100%;margin:6px 0" id="le" type="email" placeholder="E-mail" autocomplete="email">
-<div class="pw"><input class="sr" style="width:100%;margin:6px 0" id="lp" type="password" placeholder="Senha" autocomplete="current-password"><button type="button" class="eye" onclick="eye('lp',this)" aria-label="Mostrar senha">👁</button></div>
-<button class="btn" id="bl" style="margin-top:8px" onclick="auth(false)">Entrar</button>
-<p class="mut" id="lm" style="text-align:center;min-height:20px"></p>
-<p class="alk mut">Não tem uma conta? <a class="lk2" onclick="showA('a-sign')">Crie uma</a></p></div>
-<div class="ap" id="a-sign" hidden><button type="button" class="aback" onclick="showA('a-login')" aria-label="Voltar">←</button>
-<h2 style="margin:0 0 6px;font-size:26px">Crie sua conta</h2><p class="mut" style="margin:0 0 12px">Informe seu e-mail, crie uma senha com pelo menos 6 caracteres e digite o código da rua.</p>
-<input class="sr" style="width:100%;margin:6px 0" id="se" type="email" placeholder="E-mail" autocomplete="email">
-<div class="pw"><input class="sr" style="width:100%;margin:6px 0" id="sp" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password"><button type="button" class="eye" onclick="eye('sp',this)" aria-label="Mostrar senha">👁</button></div>
-<input class="sr" style="width:100%;margin:6px 0" id="sc" type="text" placeholder="Código da rua" autocomplete="off">
-<button class="btn" id="bs" style="margin-top:8px" onclick="auth(true)">Criar conta</button>
-<p class="mut" id="sm" style="text-align:center;min-height:20px"></p>
-<p class="alk"><a class="lk2" onclick="showA('a-login')">Já tenho uma conta</a></p></div>
-<div class="ap" id="a-wel" hidden style="text-align:center"><div class="wring"><svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-<h2 style="margin:18px 0 8px;font-size:28px">Bem-vindo ao Lagarto Reels</h2><p class="mut" style="margin:0 0 22px">Sua conta foi criada! Toque em concluir para entrar e ver os posts da turma. 🦎</p>
-<button class="btn" onclick="location.reload()">Concluir o cadastro</button></div>
-</div>
+<div id="auth" style="display:none"></div>
 <div class="mo" id="mo" hidden><div class="mb"><button class="x" data-a="close">✕</button><div id="mbody"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
@@ -425,23 +412,77 @@ db={
   }),
   doc:p=>{const[c,id]=p.split('/');return{set:d=>sb.from('docs').upsert({col:c,id,data:d}).then(chk),delete:()=>sb.from('docs').delete().eq('col',c).eq('id',id).then(chk)}}
 };
-function showA(id){['a-login','a-sign','a-wel'].forEach(x=>{$('#'+x).hidden=x!==id});['lm','sm'].forEach(x=>$('#'+x).textContent='')}
-function eye(id,b){const i=$('#'+id),h=i.type==='password';i.type=h?'text':'password';b.style.opacity=h?1:.65}
-async function auth(sign){
-  const k=sign?'s':'l',e=$('#'+k+'e').value.trim(),p=$('#'+k+'p').value,m=$('#'+k+'m');
-  if(!e||!p){m.textContent='Preencha o e-mail e a senha.';return}
-  if(sign&&p.length<6){m.textContent='A senha precisa ter pelo menos 6 caracteres.';return}
-  m.textContent='Aguarde…';
-  const r=sign?await sb.auth.signUp({email:e,password:p,options:{data:{codigo:$('#sc').value.trim()}}}):await sb.auth.signInWithPassword({email:e,password:p});
-  if(r.error){const t=r.error.message||'';m.textContent=/Database error/i.test(t)?'Código da rua incorreto.':/Invalid login/i.test(t)?'E-mail ou senha incorretos.':/already registered/i.test(t)?'Esse e-mail já tem conta. Toque em “Já tenho uma conta”.':t;return}
-  if(!r.data.session){m.textContent='Conta criada! Confirme o e-mail e depois entre com a sua senha.';return}
-  if(sign){showA('a-wel');return}
-  location.reload();
+PA.eye='<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';PA.x='<path d="M6 6l12 12M18 6 6 18"/>';
+const AU={s:'login',e:'',p:'',c:''};
+function authView(){
+  const a=$('#auth'),s=AU.s;
+  const fld=(id,lb,ty,v,ac,ex)=>`<div class="af"><label for="${id}">${lb}</label><input id="${id}" type="${ty}" value="${esc(v)}" autocomplete="${ac}" autocapitalize="off" spellcheck="false">${ex||''}</div>`;
+  const eye=`<button type="button" class="ax" id="aeye" aria-label="Mostrar senha">${I('eye',22)}</button>`;
+  const clr=`<button type="button" class="ax" id="aclr" aria-label="Limpar">${I('x',20)}</button>`;
+  const hd=(t,d)=>`<h2>${t}</h2><p class="mut">${d}</p>`;
+  const bk=`<button class="ic" type="button" onclick="authGo()" aria-label="Voltar">${I('back',26)}</button>`;
+  const go=t=>`<button class="btn" type="button" onclick="authNext()">${t}</button><p class="aerr" id="am"></p>`;
+  const lnk='<a class="lnk" onclick="AU.s=\'login\';authView()">Já tenho uma conta</a>';
+  a.innerHTML=s==='login'?`<div style="margin:auto 0"><div class="logo" style="font-size:34px;justify-content:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center;margin-bottom:14px">A rede social da nossa rua</p>${fld('ae','E-mail','email',AU.e,'email')}${fld('ap','Senha','password',AU.p,'current-password',eye)}${go('Entrar')}<button class="btn g" type="button" onclick="keep();AU.s='e';authView()">Criar nova conta</button></div>`
+   :s==='e'?bk+hd('Qual é o seu e-mail?','Insira o e-mail para entrar na sua conta. Ninguém verá essa informação no seu perfil.')+fld('ae','E-mail','email',AU.e,'email',clr)+go('Avançar')+lnk
+   :s==='p'?bk+hd('Crie uma senha','Use pelo menos 6 letras ou números. Escolha algo que outras pessoas não consigam adivinhar.')+fld('ap','Senha','password',AU.p,'new-password',eye)+go('Avançar')+lnk
+   :s==='c'?bk+hd('Qual é o código da rua?','Peça o código para um vizinho. Ele garante que só moradores entram no Lagarto Reels.')+fld('ac','Código da rua','text',AU.c,'off')+go('Criar conta')+lnk
+   :bk+hd('Confirme seu e-mail',`Enviamos um link para <b>${esc(AU.e)}</b>. Depois de confirmar, volte e toque em Entrar.`)+`<button class="btn" type="button" style="margin-top:18px" onclick="AU.s='login';authView()">Ir para o login</button>`;
+  const ey=$('#aeye');if(ey)ey.onclick=()=>{const i=$('#ap');i.type=i.type==='password'?'text':'password'};
+  const cl=$('#aclr');if(cl)cl.onclick=()=>{$('#ae').value='';$('#ae').focus()};
+  a.onkeydown=ev=>{if(ev.key==='Enter'&&AU.s!=='done')authNext()};
+  const f=a.querySelector('.af input');if(f&&s!=='login')f.focus();
 }
-document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(e.target.id==='lp'||e.target.id==='le')auth(false);else if(e.target.id==='sc'||e.target.id==='sp')auth(true)});
+PA.ok='<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>';
+const OB={s:'name',n:'',a:'🦎',f:null,u:'',p:false};
+const obName=()=>$('#on').value.trim().replace(/\s+/g,'_');
+const nameOk=n=>n.length>=2&&!Object.keys(P).some(u=>u!==me&&(P[u].name||'').toLowerCase()===n.toLowerCase());
+function onboard(){const a=$('#auth');a.style.display='flex';a.onkeydown=ev=>{if(ev.key==='Enter'&&OB.s==='name')obNext()};obView()}
+function obView(){
+  const a=$('#auth');
+  if(OB.s==='name'){
+    a.innerHTML=`<h2 style="margin-top:56px">Crie um nome de usuário</h2><p class="mut">Escolha como os vizinhos vão ver você. Você poderá alterar isso quando quiser.</p><div class="af" style="margin-top:22px"><label for="on">Nome de usuário</label><input id="on" maxlength="24" value="${esc(OB.n)}" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="obChk()"><span class="ax" id="ok" style="color:var(--ac);display:none">${I('ok',24)}</span></div><p class="aerr" id="am"></p><button class="btn" type="button" onclick="obNext()">Avançar</button>`;
+    $('#on').focus();obChk();
+  }else{
+    a.innerHTML=`<button class="ic" type="button" onclick="OB.s='name';obView()" aria-label="Voltar">${I('back',26)}</button><h2>Adicione uma foto do perfil</h2><p class="mut">Adicione uma foto para que seus vizinhos saibam que é você. Todos poderão ver sua foto.</p><div id="obp" style="width:150px;height:150px;flex:none;margin:22px auto 14px;border-radius:50%;border:4px solid var(--bd);background:var(--card);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:76px"></div><p class="mut" style="text-align:center;margin-bottom:10px">Ou escolha um emoji</p><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${EM.map(e=>`<button type="button" class="obe" data-e="${e}" onclick="obEmo('${e}')">${e}</button>`).join('')}</div><div style="margin-top:auto;padding-top:18px"><p class="aerr" id="am"></p><label class="btn" style="cursor:pointer">Adicionar foto<input type="file" id="of" accept="image/*" hidden onchange="obFile(this.files[0])"></label><button class="btn g" id="obs" type="button" style="margin-top:8px" onclick="obDone()"></button></div>`;
+    obPrev();
+  }
+}
+function obChk(){const n=obName(),ok=nameOk(n);$('#ok').style.display=ok?'flex':'none';$('#am').textContent=n.length>=2&&!ok?'Esse nome já está em uso.':''}
+function obNext(){const n=obName();if(n.length<2){$('#am').textContent='Escolha um nome com pelo menos 2 letras.';return}if(!nameOk(n)){$('#am').textContent='Esse nome já está em uso.';return}OB.n=n;OB.s='photo';obView()}
+function obEmo(e){OB.a=e;OB.f=null;OB.p=true;obPrev()}
+function obFile(f){if(!f)return;OB.f=f;OB.p=true;if(OB.u)URL.revokeObjectURL(OB.u);OB.u=URL.createObjectURL(f);obPrev()}
+function obPrev(){$('#obp').innerHTML=OB.f?`<img src="${OB.u}" alt="" style="width:100%;height:100%;object-fit:cover">`:esc(OB.a);document.querySelectorAll('.obe').forEach(b=>b.classList.toggle('on',!OB.f&&OB.p&&b.dataset.e===OB.a));$('#obs').textContent=OB.p?'Concluir':'Pular'}
+async function obDone(){
+  const m=$('#am'),b=$('#obs');b.disabled=true;m.textContent='Salvando…';
+  try{let av=OB.a;if(OB.f)av=await up(OB.f);
+    await db.doc('profiles/'+me).set({name:OB.n,bio:'',av,ts:Date.now()});
+    $('#auth').style.display='none';$('#auth').innerHTML='';toast('Bem-vindo ao Lagarto Reels! 🦎')}
+  catch(e){console.error(e);m.textContent=(e&&e.message)||'Falha ao salvar.';b.disabled=false}
+}
+function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
+function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
+async function authNext(){
+  keep();const s=AU.s,m=$('#am'),e=AU.e,p=AU.p,er=t=>{m.textContent=t};
+  if(s==='login'){
+    if(!e||!p)return er('Preencha o e-mail e a senha.');er('Aguarde…');
+    const r=await sb.auth.signInWithPassword({email:e,password:p});
+    if(r.error)return er(/Invalid login/i.test(r.error.message)?'E-mail ou senha incorretos.':/not confirmed/i.test(r.error.message)?'Confirme seu e-mail antes de entrar.':r.error.message);
+    return location.reload();
+  }
+  if(s==='e'){if(!/^\S+@\S+\.\S+$/.test(e))return er('Digite um e-mail válido.');AU.s='p';return authView()}
+  if(s==='p'){if(p.length<6)return er('A senha precisa ter pelo menos 6 caracteres.');AU.s='c';return authView()}
+  if(s==='c'){
+    if(!AU.c)return er('Digite o código da rua.');er('Criando sua conta…');
+    const r=await sb.auth.signUp({email:e,password:p,options:{data:{codigo:AU.c}}});
+    if(r.error)return er(/Database error/i.test(r.error.message)?'Código da rua incorreto.':/registered/i.test(r.error.message)?'Esse e-mail já tem conta. Toque em "Já tenho uma conta".':r.error.message);
+    if(!r.data.session){AU.s='done';return authView()}
+    location.reload();
+  }
+}
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
-  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])editProf(true)}});
+  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   sub('posts',a=>POSTS=a.sort((x,y)=>y.ts-x.ts));
   sub('likes',a=>LK=a);sub('comments',a=>CM=a);sub('follows',a=>FL=a);sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
@@ -449,7 +490,7 @@ function start(){
 (async()=>{
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
   const{data}=await sb.auth.getSession();
-  if(!data.session){$('#auth').style.display='flex';return}
+  if(!data.session){authView();$('#auth').style.display='flex';return}
   me=data.session.user.id;myEmail=data.session.user.email||'';try{rmute=localStorage.getItem('rsnd')==='0'}catch(e){}start();
 })();
 </script>
