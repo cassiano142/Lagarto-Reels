@@ -245,7 +245,7 @@ function render(){
   const keep=pv&&{s:pv.getAttribute('src'),t:pv.currentTime},rl0=a.querySelector('.rl'),st=rl0?rl0.scrollTop:0;
   let h='';
   if(tab==='home'){
-    const st=Object.keys(P).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
+    const st=Object.keys(P).filter(u=>!hid(u)).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
     const list=POSTS.filter(p=>p.type!=='video'&&(filt==='all'||p.uid===me||amF(p.uid)));
     h=`${st?`<div class="stories">${st}</div>`:''}<div class="chips"><button class="chip ${filt==='all'?'on':''}" data-a="chip" data-id="all">Todos</button><button class="chip ${filt==='fol'?'on':''}" data-a="chip" data-id="fol">Seguindo</button></div>`+(list.length?list.map(card).join(''):`<div class="empty">Nenhuma foto ainda.<br>Toque em ➕ e seja o primeiro lagarto a postar! 🦎<br><span class="mut">Os vídeos ficam na aba 🎬 Reels.</span></div>`);
   }else if(tab==='explore'){
@@ -296,7 +296,7 @@ function fillEx(){
     const l=POSTS.filter(okT);
     h+=l.length?`<div class="grid">${l.map(gi).join('')}</div>`:`<div class="empty">${ef==='vid'?'Ainda não há reels.':ef==='img'?'Ainda não há fotos.':'Nada para explorar ainda.'}</div>`;
   }else{
-    const people=ef==='all'?Object.keys(P).filter(u=>(P[u].name||'').toLowerCase().includes(k)||(P[u].bio||'').toLowerCase().includes(k)):[];
+    const people=ef==='all'?Object.keys(P).filter(u=>!hid(u)&&((P[u].name||'').toLowerCase().includes(k)||(P[u].bio||'').toLowerCase().includes(k))):[];
     const found=POSTS.filter(p=>okT(p)&&(p.cap||'').toLowerCase().includes(k));
     if(people.length)h+=`<p class="mut" style="padding:4px 14px 0"><b>Pessoas</b></p>`+people.map(u=>`<a class="cm" data-a="prof" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<div><b>${esc(P[u].name)}${vb(u)}</b><div class="mut">${esc(P[u].bio||'')}</div></div></a>`).join('');
     const imgs=found.filter(p=>p.type!=='video'),vids=found.filter(p=>p.type==='video');
@@ -337,7 +337,7 @@ function settings(cat){
   const chip=(v,l)=>`<button class="chip ${t===v?'on':''}" data-a="theme" data-id="${v}">${l}</button>`;
   let h;
   if(cat==='look')h=back('Aparência')+`<b>Tema</b><div class="chips" style="padding:8px 0">${chip('auto','Automático')}${chip('light','Claro')}${chip('dark','Escuro')}</div><label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
-  else if(cat==='acc')h=back('Conta')+`<p class="mut">Conectado como <b>${n0}</b><br>${esc(myEmail)}</p><button class="btn g" data-a="editprof">Editar perfil</button>`;
+  else if(cat==='acc')h=back('Conta')+`<p class="mut">Conectado como <b>${n0}</b><br>${esc(myEmail)}</p><button class="btn g" data-a="editprof">Editar perfil</button>`+accx();
   else if(cat==='pw')h=back('Senha e segurança')+`<input type="password" id="np" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"><input type="password" id="np2" placeholder="Repita a nova senha" autocomplete="new-password"><button class="btn" style="margin-top:6px" data-a="chpw">Alterar senha</button><p id="pwm" class="mut"></p>`;
   else if(cat==='reel')h=back('Reels e vídeos')+`<label class="srow"><input type="checkbox" data-a="rsound" ${ls('rsnd','1')==='1'?'checked':''}> Começar os vídeos com som</label>`;
   else if(cat==='about')h=back('Sobre')+`<p><b>Lagarto Reels</b><br>A rede social da nossa rua 🦎</p><p class="mut">Seus posts, curtidas e mensagens ficam guardados na nuvem e você pode entrar de qualquer aparelho.</p>`;
@@ -354,7 +354,7 @@ async function saveProf(){
   if(Object.keys(P).some(u=>u!==me&&P[u].name.toLowerCase()===n.toLowerCase())){st.textContent='Esse nome já está em uso.';return}
   $('#sp').disabled=true;st.textContent='Salvando…';
   try{const f=$('#af').files[0];let a=pav||'🦎';if(f)a=await up(f);
-    await db.doc('profiles/'+me).set({name:n,bio:$('#pbio').value.trim(),av:a,ts:(P[me]&&P[me].ts)||Date.now()});closeM();toast('Perfil salvo!')}
+    await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].oculto?{oculto:true}:{}));closeM();toast('Perfil salvo!')}
   catch(e){console.error(e);st.textContent=(e&&e.message)||'Falha ao salvar.';$('#sp').disabled=false}
 }
 function pop(el){const s=document.createElement('div');s.className='pop';s.textContent='❤️';el.append(s);setTimeout(()=>s.remove(),700)}
@@ -390,6 +390,9 @@ document.addEventListener('click',e=>{
   else if(a==='bw'){lset('bw',t.checked?'1':'0');applyTheme()}
   else if(a==='rsound'){lset('rsnd',t.checked?'1':'0');rmute=!t.checked}
   else if(a==='chpw'){const p=$('#np').value,p2=$('#np2').value,m=$('#pwm');if(p.length<6){m.textContent='A senha precisa ter pelo menos 6 caracteres.';return}if(p!==p2){m.textContent='As senhas não são iguais.';return}m.textContent='Salvando…';sb.auth.updateUser({password:p}).then(r=>{m.textContent=r.error?r.error.message:'Senha alterada!';if(!r.error){$('#np').value='';$('#np2').value=''}})}
+  else if(a==='achide')acctHide();
+  else if(a==='acdel')acctDelAsk();
+  else if(a==='acgo')acctDel();
   else if(a==='logout')sb.auth.signOut().then(()=>location.reload());
   else if(a==='emo'){pav=id;document.querySelectorAll('.emo .ic').forEach(b=>b.classList.toggle('on',b.dataset.id===id));$('#af').value=''}
   else if(a==='send')send();
@@ -460,6 +463,34 @@ async function obDone(){
     $('#auth').style.display='none';$('#auth').innerHTML='';toast('Bem-vindo ao Lagarto Reels! 🦎')}
   catch(e){console.error(e);m.textContent=(e&&e.message)||'Falha ao salvar.';b.disabled=false}
 }
+const RAW={p:[],l:[],c:[],f:[]};
+const hid=u=>u!==me&&!!(P[u]&&P[u].oculto);
+function vis(){POSTS=RAW.p.filter(x=>!hid(x.uid)).sort((x,y)=>y.ts-x.ts);LK=RAW.l.filter(x=>!hid(x.uid));CM=RAW.c.filter(x=>!hid(x.uid));FL=RAW.f.filter(x=>!hid(x.from)&&!hid(x.to))}
+function accx(){
+  const oc=!!(P[me]&&P[me].oculto);
+  return `<h4 style="margin:24px 0 6px">Ocultar conta</h4><p class="mut" style="margin:0 0 8px">${oc?'Sua conta está oculta: seu perfil, posts, curtidas e comentários não aparecem para os outros.':'Seu perfil, posts, curtidas e comentários deixam de aparecer para os outros. Você pode mostrar de novo quando quiser.'}</p><button class="btn g" data-a="achide">${oc?'Mostrar minha conta':'Ocultar minha conta'}</button><h4 style="margin:24px 0 6px">Excluir conta</h4><p class="mut" style="margin:0 0 8px">Apaga para sempre seu perfil, posts, curtidas, comentários e mensagens. Não dá para desfazer.</p><button class="btn" style="background:var(--red);box-shadow:none" data-a="acdel">Excluir minha conta</button><div id="dz"></div>`;
+}
+function acctHide(){
+  const p=P[me];if(!p)return;const h=!!p.oculto;
+  if(!h&&!confirm('Ocultar sua conta? Seu perfil, posts, curtidas e comentários deixam de aparecer para os outros até você mostrar de novo.'))return;
+  const d=Object.assign({},p);delete d.id;if(h)delete d.oculto;else d.oculto=true;
+  P[me]=Object.assign({id:me},d);vis();settings('acc');render();
+  w(db.doc('profiles/'+me).set(d));toast(h?'Sua conta está visível de novo':'Sua conta está oculta');
+}
+function acctDelAsk(){
+  $('#dz').innerHTML='<p class="mut" style="margin:16px 0 6px">Para confirmar, digite <b>EXCLUIR</b>:</p><input class="sr" style="width:100%;margin:0 0 8px" id="dc" autocomplete="off" autocapitalize="characters"><button class="btn" style="background:var(--red);box-shadow:none" data-a="acgo">Excluir para sempre</button><p id="dm" style="color:var(--red);font-size:14px;margin:8px 0"></p>';
+  $('#dc').focus();
+}
+async function acctDel(){
+  const m=$('#dm');if($('#dc').value.trim().toUpperCase()!=='EXCLUIR'){m.textContent='Digite EXCLUIR para confirmar.';return}
+  m.textContent='Excluindo…';
+  try{
+    try{const l=await sb.storage.from('midia').list(me);if(l.data&&l.data.length)await sb.storage.from('midia').remove(l.data.map(f=>me+'/'+f.name))}catch(e){}
+    const r=await sb.rpc('excluir_minha_conta');if(r.error)throw r.error;
+    try{await sb.auth.signOut({scope:'local'})}catch(e){}
+    location.reload();
+  }catch(e){m.textContent=/function|schema cache/i.test((e&&e.message)||'')?'Falta rodar o arquivo excluir-conta.sql no Supabase.':'Não foi possível excluir agora. Tente de novo.'}
+}
 function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
 function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
 async function authNext(){
@@ -482,9 +513,9 @@ async function authNext(){
 }
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
-  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
-  sub('posts',a=>POSTS=a.sort((x,y)=>y.ts-x.ts));
-  sub('likes',a=>LK=a);sub('comments',a=>CM=a);sub('follows',a=>FL=a);sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
+  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
+  sub('posts',a=>{RAW.p=a;vis()});
+  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
