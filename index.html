@@ -159,6 +159,12 @@ html.bw{filter:grayscale(1)}
 .aud small{font-size:12px;opacity:.85;flex:none}
 .cimg{max-width:70%;max-height:320px;border-radius:18px;object-fit:cover;background:var(--card);cursor:pointer}
 .lbx{position:fixed;inset:0;z-index:90;background:#000e;display:flex;align-items:center;justify-content:center}.lbx img{max-width:100%;max-height:100%}
+#call{position:fixed;inset:0;z-index:80;background:linear-gradient(160deg,#0f2a1a,#123d2a 60%,#0b1f33);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px}
+#call .av{width:128px;height:128px;font-size:64px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff1f;margin-bottom:10px}
+#call h2{margin:0;font-size:26px}#call p{margin:0;opacity:.8}
+.cbt{display:flex;gap:44px;margin-top:70px}
+.cbn{width:68px;height:68px;border-radius:50%;background:#ffffff26;color:#fff;display:flex;align-items:center;justify-content:center}
+.cbn.rd{background:#ed4956}.cbn.rd svg{transform:rotate(135deg)}.cbn.gr{background:#2e9e4f}.cbn.wh{background:#fff;color:#111}
 </style>
 </head>
 <body>
@@ -222,7 +228,7 @@ function fillChat(){
   let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="prof" data-id="${esc(cu)}">Ver perfil</button></div>`,pv=0;
   ms.forEach(m=>{const mine=m.from===me;if(!pv||m.ts-pv>36e5){h+=`<div class="mut" style="text-align:center;font-size:12px;margin:10px 0">${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`}pv=m.ts;
     const row=x=>`<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px 0">${x}</div>`;
-    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
+    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I('phone',18)}<span>${m.d?'Chamada de voz · '+fmtD(m.d):mine?'Sem resposta':'Chamada perdida'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
   el.innerHTML=h;
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
@@ -272,9 +278,9 @@ function render(){
   }else if(tab==='dm'){
     const ps=[...new Set(MS.map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).sort((x,y)=>y.l.ts-x.l.ts);
     const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.k==='c'?'📞 Chamada de voz':p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a><button class="ic" data-a="call" style="margin-left:auto" aria-label="Ligar">${I('phone',22)}</button></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
     h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
@@ -396,6 +402,10 @@ document.addEventListener('click',e=>{
   else if(a==='crsend')recEnd(true);
   else if(a==='aplay')aPlay(t);
   else if(a==='cimg')lbx(t.dataset.url);
+  else if(a==='call')startCall(cu);
+  else if(a==='cacc')callAcc();
+  else if(a==='cend')callEnd(true,'');
+  else if(a==='cmute'){if(CALL){CALL.mute=!CALL.mute;CALL.ms.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);callUI()}}
   else if(a==='sendm')sendm();
   else if(a==='more'){const p=POSTS.find(x=>x.id===id);t.dataset.a=p&&p.uid===me?'del':'save';t.click()}
   else if(a==='like')toggleLike(id);
@@ -558,6 +568,66 @@ function aPlay(t){
 }
 function lbx(u){const o=document.createElement('div');o.className='lbx';o.innerHTML=`<img src="${esc(u)}" alt="">`;o.onclick=()=>o.remove();document.body.append(o)}
 document.addEventListener('change',e=>{if(e.target.id==='cfc'||e.target.id==='cfg'){sendImg(e.target.files[0]);e.target.value=''}});
+PA.phone='<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>';PA.micx='<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/>';
+const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
+let CALL=null,SIG=null;const OUT={};
+function initCalls(){if(SIG||!me)return;SIG=sb.channel('call-'+me).on('broadcast',{event:'sig'},m=>onSig(m.payload)).subscribe()}
+function sig(to,type,d,cid){const k='call-'+to;let c=OUT[k];if(!c){c=OUT[k]=sb.channel(k);c.subscribe()}c.send({type:'broadcast',event:'sig',payload:{from:me,to,type,d,cid}})}
+function callUI(){
+  let o=$('#call');if(!CALL){if(o)o.remove();return}
+  if(!o){o=document.createElement('div');o.id='call';document.body.append(o)}
+  const c=CALL,st=c.st==='in'?'Chamada de voz do Lagarto Reels':c.st==='out'?'Chamando…':c.st==='conn'?'Conectando…':fmtD(c.sec||0);
+  o.innerHTML=`${av(c.peer)}<h2>${esc(nm(c.peer))}</h2><p>${st}</p><div class="cbt">`+(c.st==='in'?`<button class="cbn rd" data-a="cend" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="cacc" aria-label="Atender">${I('phone',28)}</button>`:`<button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="cend" aria-label="Desligar">${I('phone',28)}</button>`)+`</div>`;
+}
+function mkPc(){
+  const c=CALL,pc=c.pc=new RTCPeerConnection(ICE);
+  pc.onicecandidate=e=>{if(e.candidate)sig(c.peer,'ice',e.candidate,c.cid)};
+  pc.ontrack=e=>{let a=$('#rau');if(!a){a=document.createElement('audio');a.id='rau';a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=e.streams[0];a.play().catch(()=>{})};
+  pc.onconnectionstatechange=()=>{if(CALL!==c)return;const s=pc.connectionState;
+    if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);callUI()},1000);callUI()}
+    else if(s==='failed'||s==='closed')callEnd(true,'A chamada caiu.')};
+}
+async function startCall(peer){
+  if(!need())return;if(CALL){toast('Você já está em uma chamada.');return}
+  if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta chamadas.');return}
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){toast('Permita o microfone para ligar.');return}
+  const c=CALL={peer,cid:me+Date.now(),st:'out',ms,mine:true,ice:[]};
+  mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
+  const o=await c.pc.createOffer();await c.pc.setLocalDescription(o);
+  sig(peer,'offer',o,c.cid);callUI();
+  c.to=setTimeout(()=>{if(CALL===c&&c.st==='out')callEnd(true,'Ninguém atendeu.')},45000);
+}
+async function onSig(p){
+  if(!p||p.to!==me)return;const c=CALL;
+  if(p.type==='offer'){
+    if(c){sig(p.from,'busy',null,p.cid);return}
+    CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false};callUI();
+    if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
+    if(document.hidden&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png'})}catch(e){}
+    return}
+  if(!c||p.cid!==c.cid)return;
+  if(p.type==='answer'&&c.pc){clearTimeout(c.to);c.st='conn';await c.pc.setRemoteDescription(p.d);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];callUI()}
+  else if(p.type==='ice'){if(c.pc&&c.pc.remoteDescription)c.pc.addIceCandidate(p.d).catch(()=>{});else c.ice.push(p.d)}
+  else if(p.type==='end')callEnd(false,'Chamada encerrada.');
+  else if(p.type==='busy')callEnd(false,'Está em outra chamada.');
+}
+async function callAcc(){
+  const c=CALL;if(!c||c.st!=='in')return;
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){toast('Permita o microfone para atender.');callEnd(true,'');return}
+  if(navigator.vibrate)navigator.vibrate(0);
+  c.ms=ms;c.st='conn';mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
+  await c.pc.setRemoteDescription(c.offer);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];
+  const a=await c.pc.createAnswer();await c.pc.setLocalDescription(a);sig(c.peer,'answer',a,c.cid);callUI();
+}
+function callEnd(notify,note){
+  const c=CALL;if(!c)return;CALL=null;clearTimeout(c.to);clearInterval(c.tk);
+  if(notify)sig(c.peer,'end',null,c.cid);
+  try{if(c.pc)c.pc.close()}catch(e){}
+  if(c.ms)c.ms.getTracks().forEach(t=>t.stop());
+  const a=$('#rau');if(a)a.remove();if(navigator.vibrate)navigator.vibrate(0);
+  if(c.mine)w(db.collection('messages').add({from:me,to:c.peer,text:'',k:'c',d:c.t0?Math.round((Date.now()-c.t0)/1e3):0,ts:Date.now()}));
+  callUI();if(note)toast(note);
+}
 function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
 function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
 async function authNext(){
@@ -581,7 +651,7 @@ async function authNext(){
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
-  sub('posts',a=>{RAW.p=a;vis()});
+  initCalls();sub('posts',a=>{RAW.p=a;vis()});
   sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
