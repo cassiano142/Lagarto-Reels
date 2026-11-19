@@ -233,7 +233,7 @@ function badge(){
   if(REC&&(tab!=='chat'||cu!==REC.to))recEnd(false);
   if(!me)return;
   const ns=notifs();if(tab==='notif')setNs(Date.now());
-  const sn=nseen(),c=ns.filter(n=>n.ts>sn).length,nb=$('#ntb');
+  const sn=nseen(),c=ns.filter(n=>n.ts>sn).length+reqs().length,nb=$('#ntb');
   if(nb)nb.innerHTML=I('bell')+(c?`<em class="cnt">${c>9?'9+':c}</em>`:'');
   const fr=ns.filter(n=>n.ts>loadTs&&!knownN.has(n.id));ns.forEach(n=>knownN.add(n.id));
   if(fr.length&&tab!=='notif'){const n=fr[0],tx=nm(n.u)+(n.k==='c'?' comentou na sua publicação':n.k==='l'?' curtiu sua publicação':' postou algo novo');toast('🔔 '+tx+(fr.length>1?' (+'+(fr.length-1)+')':''));if(document.hidden&&window.Notification&&Notification.permission==='granted')try{new Notification('Lagarto Reels',{body:tx,icon:'icon-192.png'})}catch(e){}}
@@ -289,7 +289,7 @@ function render(){
     h=`<input class="sr" id="sq" placeholder="Buscar no Lagarto Reels…" value="${esc(q)}"><div id="exr"></div>`;
   }else if(tab==='notif'){
     const ns=notifs();
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
   }else if(tab==='dm'){
     const ps=[...new Set(MS.map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).sort((x,y)=>y.l.ts-x.l.ts);
     const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
@@ -306,10 +306,10 @@ function render(){
       const mine=u===me,ps=POSTS.filter(p=>p.uid===u),sv=POSTS.filter(p=>SV.some(s=>s.pid===p.id&&s.uid===me));
       const list=pt==='saved'&&mine?sv:pt==='reels'?ps.filter(p=>p.type==='video'):ps.filter(p=>p.type!=='video');
       h=`<div class="pr"><div class="row">${av(u,'l')}<div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
-      <p><b>${esc(P[u].name)}${vb(u)}</b><br>${esc(P[u].bio||'')}</p>
-      ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${amF(u)?'g':''}" data-a="follow" data-id="${esc(u)}">${amF(u)?'Seguindo':'Seguir'}</button>${amF(u)?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
+      <p><b>${esc(P[u].name)}${vb(u)}${isPriv(u)?' '+I('lock',14):''}</b><br>${esc(P[u].bio||'')}</p>
+      ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${fst(u)!=='none'?'g':''}" data-a="follow" data-id="${esc(u)}">${{ok:'Seguindo',pending:'Solicitado',none:'Seguir'}[fst(u)]}</button>${fst(u)==='ok'?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
       <div class="tabs2"><button class="${pt==='posts'?'on':''}" data-a="pt" data-id="posts">${I('grid',17)} Posts</button><button class="${pt==='reels'?'on':''}" data-a="pt" data-id="reels">${I('reels',17)} Reels</button>${mine?`<button class="${pt==='saved'?'on':''}" data-a="pt" data-id="saved">${I('bookmark',17)} Salvos</button>`:''}</div></div>
-      ${list.length?`<div class="grid">${list.map(gi).join('')}</div>`:'<div class="empty">Nada por aqui ainda.</div>'}`;
+      ${!mine&&!canSee(u)?`<div class="empty">${I('lock',34)}<br><b>Esta conta é privada</b><br>Siga para ver as publicações.</div>`:list.length?`<div class="grid">${list.map(gi).join('')}</div>`:'<div class="empty">Nada por aqui ainda.</div>'}`;
     }
   }
   a.innerHTML=h;
@@ -375,10 +375,11 @@ function settings(cat){
   let h;
   if(cat==='look')h=back('Aparência')+`<b>Tema</b><div class="chips" style="padding:8px 0">${chip('auto','Automático')}${chip('light','Claro')}${chip('dark','Escuro')}</div><label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
   else if(cat==='acc')h=back('Conta')+`<p class="mut">Conectado como <b>${n0}</b><br>${esc(myEmail)}</p><button class="btn g" data-a="editprof">Editar perfil</button>`+accx();
+  else if(cat==='priv'){const pv=isPriv(me),rq=reqs();h=back('Privacidade')+`<label class="srow"><input type="checkbox" data-a="privtog" ${pv?'checked':''}> Conta privada</label><p class="mut" style="margin:0 0 14px">${pv?'Só quem você aprovar consegue ver suas publicações. Quem já seguia você continua seguindo.':'Qualquer pessoa pode ver suas publicações e te seguir.'}</p><b>Pedidos para seguir (${rq.length})</b>`+(rq.length?reqRows(rq):'<p class="mut">Nenhum pedido no momento.</p>')}
   else if(cat==='pw')h=back('Senha e segurança')+`<input type="password" id="np" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"><input type="password" id="np2" placeholder="Repita a nova senha" autocomplete="new-password"><button class="btn" style="margin-top:6px" data-a="chpw">Alterar senha</button><p id="pwm" class="mut"></p>`;
   else if(cat==='reel')h=back('Reels e vídeos')+`<label class="srow"><input type="checkbox" data-a="rsound" ${ls('rsnd','1')==='1'?'checked':''}> Começar os vídeos com som</label>`;
   else if(cat==='about')h=back('Sobre')+`<p><b>Lagarto Reels</b><br>A rede social da nossa rua 🦎</p><p class="mut">Seus posts, curtidas e mensagens ficam guardados na nuvem e você pode entrar de qualquer aparelho.</p>`;
-  else h=`<h3>Configurações</h3><p class="mut" style="margin:0 0 6px">Conectado como <b>${n0}</b></p>`+row('look','sun','Aparência','Tema claro, escuro e preto e branco')+row('acc','user','Conta','Perfil e e-mail')+row('pw','lock','Senha e segurança','Alterar a senha')+row('reel','reels','Reels e vídeos','Som ao abrir os vídeos')+row('about','info','Sobre','Lagarto Reels')+`<button class="btn" style="margin-top:18px;background:var(--red);box-shadow:none" data-a="logout">Sair da conta</button>`;
+  else h=`<h3>Configurações</h3><p class="mut" style="margin:0 0 6px">Conectado como <b>${n0}</b></p>`+row('look','sun','Aparência','Tema claro, escuro e preto e branco')+row('acc','user','Conta','Perfil e e-mail')+row('priv','eye','Privacidade',isPriv(me)?(reqs().length?reqs().length+' pedido(s) para seguir':'Conta privada'):'Conta pública')+row('pw','lock','Senha e segurança','Alterar a senha')+row('reel','reels','Reels e vídeos','Som ao abrir os vídeos')+row('about','info','Sobre','Lagarto Reels')+`<button class="btn" style="margin-top:18px;background:var(--red);box-shadow:none" data-a="logout">Sair da conta</button>`;
   modal(h);
 }
 function editProf(first){
@@ -391,7 +392,7 @@ async function saveProf(){
   if(Object.keys(P).some(u=>u!==me&&P[u].name.toLowerCase()===n.toLowerCase())){st.textContent='Esse nome já está em uso.';return}
   $('#sp').disabled=true;st.textContent='Salvando…';
   try{const f=$('#af').files[0];let a=pav||'🦎';if(f)a=await up(f);
-    await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].oculto?{oculto:true}:{}));closeM();toast('Perfil salvo!')}
+    await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].oculto?{oculto:true}:{},P[me]&&P[me].priv?{priv:true}:{}));closeM();toast('Perfil salvo!')}
   catch(e){console.error(e);st.textContent=(e&&e.message)||'Falha ao salvar.';$('#sp').disabled=false}
 }
 function pop(el){const s=document.createElement('div');s.className='pop';s.textContent='❤️';el.append(s);setTimeout(()=>s.remove(),700)}
@@ -451,7 +452,10 @@ document.addEventListener('click',e=>{
   else if(a==='delc')w(db.doc('comments/'+id).delete());
   else if(a==='share'){const u=location.href;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('Link do app copiado!')).catch(()=>toast('Copie o link na barra do navegador.'))}
   else if(a==='save'){if(!need())return;const r=db.doc('saves/'+id+'_'+me);w(SV.some(s=>s.pid===id&&s.uid===me)?r.delete():r.set({pid:id,uid:me}))}
-  else if(a==='follow'){if(!need())return;const r=db.doc('follows/'+me+'_'+id);w(amF(id)?r.delete():r.set({from:me,to:id}))}
+  else if(a==='follow'){if(!need())return;const r=db.doc('follows/'+me+'_'+id),st=fst(id);w(st==='ok'||st==='pending'?r.delete():r.set({from:me,to:id,ts:Date.now()}));if(st==='none'&&isPriv(id))toast('Pedido enviado. Aguarde a aprovação.')}
+  else if(a==='privtog')setPriv(t.checked);
+  else if(a==='reqok')answer(id,true);
+  else if(a==='reqno')answer(id,false);
   else if(a==='del'){if(pdel===id){pdel=null;w(db.doc('posts/'+id).delete());toast('Publicação excluída')}else{pdel=id;toast('Toque de novo para excluir');setTimeout(()=>pdel=null,4000)}}
 });
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v.matches&&v.matches('.rs video'))v.style.objectFit=v.videoHeight>=v.videoWidth?'cover':'contain'},true);
@@ -459,10 +463,11 @@ document.addEventListener('keydown',e=>{if(e.target.id==='cmi'&&e.key==='Enter')
 document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;fillEx()}});
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const RL={};
 const chk=r=>{if(r.error)throw r.error;return r};
 db={
   collection:c=>({
-    onSnapshot(f){const load=async()=>{const{data}=await sb.from('docs').select('id,data').eq('col',c);f({docs:(data||[]).map(r=>({id:r.id,data:()=>r.data}))})};load();sb.channel('c-'+c).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'col=eq.'+c},load).subscribe()},
+    onSnapshot(f){const load=async()=>{const{data}=await sb.from('docs').select('id,data').eq('col',c);f({docs:(data||[]).map(r=>({id:r.id,data:()=>r.data}))})};RL[c]=load;load();sb.channel('c-'+c).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'col=eq.'+c},load).subscribe()},
     add:d=>sb.from('docs').insert({col:c,id:crypto.randomUUID(),data:d}).then(chk)
   }),
   doc:p=>{const[c,id]=p.split('/');return{set:d=>sb.from('docs').upsert({col:c,id,data:d}).then(chk),delete:()=>sb.from('docs').delete().eq('col',c).eq('id',id).then(chk)}}
@@ -520,7 +525,28 @@ async function obDone(){
 }
 const RAW={p:[],l:[],c:[],f:[]};
 const hid=u=>u!==me&&!!(P[u]&&P[u].oculto);
-function vis(){POSTS=RAW.p.filter(x=>!hid(x.uid)).sort((x,y)=>y.ts-x.ts);LK=RAW.l.filter(x=>!hid(x.uid));CM=RAW.c.filter(x=>!hid(x.uid));FL=RAW.f.filter(x=>!hid(x.from)&&!hid(x.to))}
+let APR=[],psig='',asig='';
+const isPriv=u=>!!(P[u]&&P[u].priv);
+const apRec=f=>APR.find(a=>a.id===f.to+'_'+f.from);
+const apOk=f=>{const a=apRec(f);return !!(a&&a.ok&&(a.ts||0)>=(f.ts||0))};
+const eff=f=>!isPriv(f.to)||apOk(f);
+function fst(u){const f=RAW.f.find(x=>x.from===me&&x.to===u);if(!f)return'none';if(!isPriv(u))return'ok';const a=apRec(f);return a&&(a.ts||0)>=(f.ts||0)?(a.ok?'ok':'none'):'pending'}
+const canSee=u=>u===me||!isPriv(u)||fst(u)==='ok';
+function reqs(){return isPriv(me)?RAW.f.filter(f=>f.to===me&&!hid(f.from)&&!(apRec(f)&&(apRec(f).ts||0)>=(f.ts||0))):[]}
+const reqRows=rq=>rq.map(f=>`<div class="cm" style="padding:8px 0;align-items:center"><a data-a="prof" data-id="${esc(f.from)}" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">${av(f.from,'s')}<b>${esc(nm(f.from))}</b></a><button class="chip on" data-a="reqok" data-id="${esc(f.from)}">Aceitar</button><button class="chip" data-a="reqno" data-id="${esc(f.from)}">Recusar</button></div>`).join('');
+function reqBlock(){const rq=reqs();return rq.length?`<div style="padding:10px 14px;border-bottom:1px solid var(--bd)"><b>Pedidos para seguir (${rq.length})</b>${reqRows(rq)}</div>`:''}
+function answer(id,ok){const key=me+'_'+id,d={ok,ts:Date.now()};APR=APR.filter(x=>x.id!==key).concat(Object.assign({id:key},d));vis();w(db.doc('approvals/'+key).set(d));if($('#mbody').querySelector('[data-a="privtog"]'))settings('priv');render();toast(ok?'Pedido aceito':'Pedido recusado')}
+async function setPriv(v){
+  if(!need()){settings('priv');return}
+  try{
+    if(v)await Promise.all(RAW.f.filter(f=>f.to===me).map(f=>db.doc('approvals/'+me+'_'+f.from).set({ok:true,ts:Date.now()})));
+    const p=Object.assign({},P[me]);delete p.id;if(v)p.priv=true;else delete p.priv;
+    await db.doc('profiles/'+me).set(p);
+    P[me].priv=v;vis();render();toast(v?'Sua conta agora é privada.':'Sua conta agora é pública.');
+  }catch(e){console.error(e);toast('Não foi possível salvar.')}
+  settings('priv');
+}
+function vis(){POSTS=RAW.p.filter(x=>!hid(x.uid)&&canSee(x.uid)).sort((x,y)=>y.ts-x.ts);const ok=new Set(POSTS.map(p=>p.id));LK=RAW.l.filter(x=>!hid(x.uid)&&ok.has(x.pid));CM=RAW.c.filter(x=>!hid(x.uid)&&ok.has(x.pid));FL=RAW.f.filter(x=>!hid(x.from)&&!hid(x.to)&&eff(x))}
 function accx(){
   const oc=!!(P[me]&&P[me].oculto);
   return `<h4 style="margin:24px 0 6px">Ocultar conta</h4><p class="mut" style="margin:0 0 8px">${oc?'Sua conta está oculta: seu perfil, posts, curtidas e comentários não aparecem para os outros.':'Seu perfil, posts, curtidas e comentários deixam de aparecer para os outros. Você pode mostrar de novo quando quiser.'}</p><button class="btn g" data-a="achide">${oc?'Mostrar minha conta':'Ocultar minha conta'}</button><h4 style="margin:24px 0 6px">Excluir conta</h4><p class="mut" style="margin:0 0 8px">Apaga para sempre seu perfil, posts, curtidas, comentários e mensagens. Não dá para desfazer.</p><button class="btn" style="background:var(--red);box-shadow:none" data-a="acdel">Excluir minha conta</button><div id="dz"></div>`;
@@ -732,9 +758,9 @@ async function authNext(){
 }
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
-  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
+  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();{const sg=Object.keys(P).filter(u=>P[u].priv).sort().join();if(sg!==psig){psig=sg;RL.posts&&RL.posts()}}if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   initCalls();sub('posts',a=>{RAW.p=a;vis()});
-  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
+  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
