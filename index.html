@@ -145,6 +145,20 @@ html.bw{filter:grayscale(1)}
 #auth .btn{padding:13px 16px;border-radius:99px;font-size:16px;margin-top:4px}
 #auth .lnk{margin-top:auto;padding:18px 0 6px;text-align:center;color:var(--ac);font-weight:700;display:block;width:100%}
 .obe{width:46px;height:46px;font-size:26px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;border:2px solid transparent}.obe.on{border-color:var(--ac)}
+.cpill{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--bd);border-radius:99px;padding:5px 6px;min-width:0}
+.cpill input#cmi{flex:1;min-width:0;background:none;border:0;outline:0;padding:8px 4px;font-size:16px;color:var(--fg);border-radius:0}
+.ccam{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1877f2,#3fb4ff);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+#cact{display:flex;align-items:center;gap:2px}
+.cb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--fg);border-radius:50%;cursor:pointer}
+.csend{width:42px;height:42px;border-radius:50%;background:var(--fg);color:var(--bg);align-items:center;justify-content:center;flex:none}
+.rdot{width:10px;height:10px;border-radius:50%;background:#ed4956;animation:bp 1s infinite;margin-left:8px}
+.aud{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:22px;background:var(--card);min-width:210px;max-width:78%}
+.aud.me{background:linear-gradient(90deg,#1877f2,#3fb4ff);color:#fff}
+.aplay{display:flex;color:inherit;flex:none}
+.awf{flex:1;display:flex;align-items:center;gap:2px;height:30px}.awf i{flex:1;max-width:4px;min-width:2px;border-radius:2px;background:currentColor;opacity:.5}.awf i.on{opacity:1}
+.aud small{font-size:12px;opacity:.85;flex:none}
+.cimg{max-width:70%;max-height:320px;border-radius:18px;object-fit:cover;background:var(--card);cursor:pointer}
+.lbx{position:fixed;inset:0;z-index:90;background:#000e;display:flex;align-items:center;justify-content:center}.lbx img{max-width:100%;max-height:100%}
 </style>
 </head>
 <body>
@@ -195,6 +209,7 @@ const unread=u=>MS.some(m=>m.from===u&&m.to===me&&m.ts>seen(u));
 const conv=u=>MS.filter(m=>(m.from===me&&m.to===u)||(m.from===u&&m.to===me)).sort((a,b)=>a.ts-b.ts);
 function badge(){
   const b=$('#dmb');if(b)b.innerHTML=I('mail')+(MS.some(m=>m.to===me&&m.ts>seen(m.from))?'<em class="dot"></em>':'');
+  if(REC&&(tab!=='chat'||cu!==REC.to))recEnd(false);
   if(!me)return;
   const ns=notifs();if(tab==='notif')setNs(Date.now());
   const sn=nseen(),c=ns.filter(n=>n.ts>sn).length,nb=$('#ntb');
@@ -206,7 +221,8 @@ function fillChat(){
   const ms=conv(cu),el=$('#cmsgs');if(!el)return;
   let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="prof" data-id="${esc(cu)}">Ver perfil</button></div>`,pv=0;
   ms.forEach(m=>{const mine=m.from===me;if(!pv||m.ts-pv>36e5){h+=`<div class="mut" style="text-align:center;font-size:12px;margin:10px 0">${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`}pv=m.ts;
-    h+=`<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px 0"><div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div></div>`});
+    const row=x=>`<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px 0">${x}</div>`;
+    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
   el.innerHTML=h;
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
@@ -214,7 +230,7 @@ function fillChat(){
 function sendm(){const i=$('#cmi'),t=i.value.trim();if(!t||!need())return;
   const m=t.match(/^\/(verificar|desverificar)\s+(\S+)(?:\s+(eu))?$/i);
   if(m){i.value='';const on=m[1].toLowerCase()==='verificar';sb.rpc('verificar',{alvo:m[3]?me:cu,acao:on?'on':'off',senha:m[2]}).then(r=>toast(r.error?(/senha/i.test(r.error.message)?'Senha incorreta':'Não foi possível verificar'):on?'Perfil verificado ✓':'Verificado removido'));return}
-  i.value='';w(db.collection('messages').add({from:me,to:cu,text:t,ts:Date.now()}));i.focus()}
+  i.value='';w(db.collection('messages').add({from:me,to:cu,text:t,ts:Date.now()}));chTog();i.focus()}
 const likes=p=>LK.filter(l=>l.pid===p).length;
 const liked=p=>LK.some(l=>l.pid===p&&l.uid===me);
 const ncm=p=>CM.filter(c=>c.pid===p).length;
@@ -256,9 +272,9 @@ function render(){
   }else if(tab==='dm'){
     const ps=[...new Set(MS.map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).sort((x,y)=>y.l.ts-x.l.ts);
     const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off"><button class="lnk" data-a="sendm">Enviar</button></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
     h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
@@ -375,6 +391,11 @@ document.addEventListener('click',e=>{
   else if(a==='notif'){closeM();nview=nseen();setNs(Date.now());tab='notif';if(window.Notification&&Notification.permission==='default')Notification.requestPermission();render();scrollTo(0,0)}
   else if(a==='dm'){tab='dm';render();scrollTo(0,0)}
   else if(a==='chat'){if(!need())return;cu=id;lastN=-1;tab='chat';render()}
+  else if(a==='cmic')recStart();
+  else if(a==='crcancel')recEnd(false);
+  else if(a==='crsend')recEnd(true);
+  else if(a==='aplay')aPlay(t);
+  else if(a==='cimg')lbx(t.dataset.url);
   else if(a==='sendm')sendm();
   else if(a==='more'){const p=POSTS.find(x=>x.id===id);t.dataset.a=p&&p.uid===me?'del':'save';t.click()}
   else if(a==='like')toggleLike(id);
@@ -491,6 +512,52 @@ async function acctDel(){
     location.reload();
   }catch(e){m.textContent=/function|schema cache/i.test((e&&e.message)||'')?'Falta rodar o arquivo excluir-conta.sql no Supabase.':'Não foi possível excluir agora. Tente de novo.'}
 }
+PA.mic='<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>';PA.up='<path d="M12 19V5M6 11l6-6 6 6"/>';PA.play='<path d="M7 4.500v15l13-7.500z" fill="currentColor"/>';PA.pause='<path d="M8 5v14M16 5v14" stroke-width="3.200"/>';
+const fmtD=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
+function chTog(){const i=$('#cmi');if(!i)return;const t=i.value.trim();$('#cact').style.display=t?'none':'flex';$('#csend').style.display=t?'flex':'none'}
+async function shrink(f){try{const bm=await createImageBitmap(f),k=Math.min(1,1280/Math.max(bm.width,bm.height));if(k===1&&f.size<8e5)return f;const c=document.createElement('canvas');c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));return new File([b],'foto.jpg',{type:'image/jpeg'})}catch(e){return f}}
+async function sendImg(f){if(!f||!need())return;const to=cu;toast('Enviando foto…');try{const u=await up(await shrink(f));await db.collection('messages').add({from:me,to,text:'',k:'i',url:u,ts:Date.now()})}catch(e){console.error(e);toast('Não foi possível enviar a foto.')}}
+let REC=null,AP=null;
+async function recStart(){
+  if(!need())return;
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Seu navegador não consegue gravar áudio.');return}
+  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Permita o microfone para gravar.');return}
+  const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+  const mr=new MediaRecorder(st,mt?{mimeType:mt}:{}),ch=[],lv=[],ac=new(window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();
+  an.fftSize=512;ac.createMediaStreamSource(st).connect(an);const buf=new Uint8Array(an.fftSize),t0=Date.now();
+  const tk=setInterval(()=>{an.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));lv.push(m);const s=Math.floor((Date.now()-t0)/1e3),r=$('#rtm');if(r)r.textContent=fmtD(s);if(s>=120)recEnd(true)},100);
+  mr.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+  REC={mr,ch,lv,st,ac,tk,t0,mt,to:cu};mr.start();
+  $('#cpill').style.display='none';$('#crec').style.display='flex';
+}
+function recEnd(send){
+  const R=REC;if(!R)return;REC=null;clearInterval(R.tk);
+  const p=$('#cpill'),c=$('#crec');if(p)p.style.display='flex';if(c)c.style.display='none';
+  R.mr.onstop=async()=>{
+    R.st.getTracks().forEach(t=>t.stop());try{R.ac.close()}catch(e){}
+    if(!send)return;
+    const d=Math.round((Date.now()-R.t0)/1e3);if(d<1){toast('Áudio muito curto.');return}
+    const type=(R.mt||'audio/webm').split(';')[0],f=new File([new Blob(R.ch,{type})],'audio.'+(type.includes('mp4')?'m4a':'webm'),{type}),N=36,bars=[];
+    for(let i=0;i<N;i++){const a=Math.floor(i*R.lv.length/N),b=Math.max(a+1,Math.floor((i+1)*R.lv.length/N));bars.push(Math.max(0,...R.lv.slice(a,b)))}
+    const mx=Math.max(...bars,1),wf=bars.map(v=>Math.max(10,Math.round(v/mx*100)));
+    toast('Enviando áudio…');
+    try{const u=await up(f);await db.collection('messages').add({from:me,to:R.to,text:'',k:'a',url:u,w:wf,d,ts:Date.now()})}catch(e){console.error(e);toast('Não foi possível enviar o áudio.')}
+  };
+  try{R.mr.stop()}catch(e){}
+}
+function aUI(id,p,pl){const b=document.querySelector('.aplay[data-id="'+id+'"]');if(!b)return;b.innerHTML=I(pl?'pause':'play',20);const bs=b.parentNode.querySelectorAll('.awf i');bs.forEach((x,i)=>x.classList.toggle('on',p>0&&i/bs.length<p))}
+function aPlay(t){
+  const id=t.dataset.id;
+  if(AP&&AP.id===id){AP.a.paused?AP.a.play().catch(()=>{}):AP.a.pause();return}
+  if(AP){AP.a.pause();aUI(AP.id,0,false)}
+  const a=new Audio(t.dataset.url);AP={a,id};
+  const pr=()=>a.duration?a.currentTime/a.duration:0;
+  a.ontimeupdate=()=>aUI(id,pr(),!a.paused);a.onplay=()=>aUI(id,pr(),true);a.onpause=()=>aUI(id,pr(),false);
+  a.onended=()=>{aUI(id,0,false);if(AP&&AP.id===id)AP=null};a.onerror=()=>toast('Não foi possível tocar o áudio.');
+  a.play().catch(()=>toast('Não foi possível tocar o áudio.'));
+}
+function lbx(u){const o=document.createElement('div');o.className='lbx';o.innerHTML=`<img src="${esc(u)}" alt="">`;o.onclick=()=>o.remove();document.body.append(o)}
+document.addEventListener('change',e=>{if(e.target.id==='cfc'||e.target.id==='cfg'){sendImg(e.target.files[0]);e.target.value=''}});
 function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
 function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
 async function authNext(){
