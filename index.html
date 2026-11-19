@@ -173,6 +173,13 @@ html.bw{filter:grayscale(1)}
 .vt b{position:absolute;left:12px;bottom:10px;font-size:13px;text-shadow:0 1px 4px #000}
 .vbar{display:flex;justify-content:center;gap:26px;padding:6px 0 2px}.vbar .cbn{width:56px;height:56px}
 .vend{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:20px;z-index:2;padding:10px 24px;border-radius:99px;background:#ed4956;color:#fff;display:flex}.vend svg{transform:rotate(135deg)}
+#acs{position:fixed;inset:0;z-index:70}.acb{position:absolute;inset:0;background:#0007}
+.acsh{position:absolute;left:0;right:0;bottom:0;max-width:470px;margin:0 auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 14px calc(16px + env(safe-area-inset-bottom,0px));max-height:70vh;overflow:auto}
+.acg{width:40px;height:4px;border-radius:2px;background:var(--bd);margin:0 auto 10px}.acsh h3{margin:0 0 6px}
+.acr{display:flex;align-items:center;gap:12px;width:100%;padding:10px 6px;border-radius:14px;text-align:left;color:var(--fg)}.acr:active{background:var(--card)}
+.acr .t{flex:1;min-width:0;display:flex;flex-direction:column}.acr .t small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acr .ok{color:var(--ac);display:flex}.acr .plus{display:flex;align-items:center;justify-content:center;background:var(--card)}
+nav.bar button{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 </style>
 </head>
 <body>
@@ -435,7 +442,10 @@ document.addEventListener('click',e=>{
   else if(a==='achide')acctHide();
   else if(a==='acdel')acctDelAsk();
   else if(a==='acgo')acctDel();
-  else if(a==='logout')sb.auth.signOut().then(()=>location.reload());
+  else if(a==='acclose')closeAcs();
+  else if(a==='acsw')acctSwitch(id);
+  else if(a==='acadd')acctAdd();
+  else if(a==='logout'){setAccts(accts().filter(x=>x.id!==me));sb.auth.signOut().then(()=>location.reload())}
   else if(a==='emo'){pav=id;document.querySelectorAll('.emo .ic').forEach(b=>b.classList.toggle('on',b.dataset.id===id));$('#af').value=''}
   else if(a==='send')send();
   else if(a==='delc')w(db.doc('comments/'+id).delete());
@@ -468,7 +478,7 @@ function authView(){
   const bk=`<button class="ic" type="button" onclick="authGo()" aria-label="Voltar">${I('back',26)}</button>`;
   const go=t=>`<button class="btn" type="button" onclick="authNext()">${t}</button><p class="aerr" id="am"></p>`;
   const lnk='<a class="lnk" onclick="AU.s=\'login\';authView()">Já tenho uma conta</a>';
-  a.innerHTML=s==='login'?`<div style="margin:auto 0"><div class="logo" style="font-size:34px;justify-content:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center;margin-bottom:14px">A rede social da nossa rua</p>${fld('ae','E-mail','email',AU.e,'email')}${fld('ap','Senha','password',AU.p,'current-password',eye)}${go('Entrar')}<button class="btn g" type="button" onclick="keep();AU.s='e';authView()">Criar nova conta</button></div>`
+  a.innerHTML=s==='login'?`<div style="margin:auto 0"><div class="logo" style="font-size:34px;justify-content:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center;margin-bottom:14px">A rede social da nossa rua</p>${accTiles()}${fld('ae','E-mail','email',AU.e,'email')}${fld('ap','Senha','password',AU.p,'current-password',eye)}${go('Entrar')}<button class="btn g" type="button" onclick="keep();AU.s='e';authView()">Criar nova conta</button></div>`
    :s==='e'?bk+hd('Qual é o seu e-mail?','Insira o e-mail para entrar na sua conta. Ninguém verá essa informação no seu perfil.')+fld('ae','E-mail','email',AU.e,'email',clr)+go('Avançar')+lnk
    :s==='p'?bk+hd('Crie uma senha','Use pelo menos 6 letras ou números. Escolha algo que outras pessoas não consigam adivinhar.')+fld('ap','Senha','password',AU.p,'new-password',eye)+go('Avançar')+lnk
    :s==='c'?bk+hd('Qual é o código da rua?','Peça o código para um vizinho. Ele garante que só moradores entram no Lagarto Reels.')+fld('ac','Código da rua','text',AU.c,'off')+go('Criar conta')+lnk
@@ -532,7 +542,7 @@ async function acctDel(){
   try{
     try{const l=await sb.storage.from('midia').list(me);if(l.data&&l.data.length)await sb.storage.from('midia').remove(l.data.map(f=>me+'/'+f.name))}catch(e){}
     const r=await sb.rpc('excluir_minha_conta');if(r.error)throw r.error;
-    try{await sb.auth.signOut({scope:'local'})}catch(e){}
+    setAccts(accts().filter(x=>x.id!==me));try{await sb.auth.signOut({scope:'local'})}catch(e){}
     location.reload();
   }catch(e){m.textContent=/function|schema cache/i.test((e&&e.message)||'')?'Falta rodar o arquivo excluir-conta.sql no Supabase.':'Não foi possível excluir agora. Tente de novo.'}
 }
@@ -660,6 +670,46 @@ function callEnd(notify,note){
   if(c.mine)w(db.collection('messages').add({from:me,to:c.peer,text:'',k:'c',v:c.video?1:0,ts:Date.now()}));
   RV.srcObject=null;LV.srcObject=null;callUI();if(note)toast(note);
 }
+const AK='lr_accts';
+const accts=()=>{try{return JSON.parse(localStorage.getItem(AK)||'[]')}catch(e){return[]}};
+const setAccts=l=>{try{localStorage.setItem(AK,JSON.stringify(l))}catch(e){}};
+function saveAcct(s){
+  if(!s||!s.user)return;const l=accts(),i=l.findIndex(a=>a.id===s.user.id),p=P[s.user.id],old=i>=0?l[i]:{};
+  const o=Object.assign(old,{id:s.user.id,email:s.user.email||'',at:s.access_token,rt:s.refresh_token,name:(p&&p.name)||old.name||'',av:(p&&p.av)||old.av||''});
+  if(i<0)l.push(o);setAccts(l);
+}
+function acctRef(){const l=accts(),i=l.findIndex(a=>a.id===me);if(i>=0&&P[me]){l[i].name=P[me].name;l[i].av=P[me].av;setAccts(l)}}
+const accNm=a=>(P[a.id]&&P[a.id].name)||a.name||(a.email||'').split('@')[0];
+const accAv=a=>{const x=(P[a.id]&&P[a.id].av)||a.av||'🦎';return /^(https?:|\/_blob|data:)/.test(x)?`<img class="av" src="${esc(x)}" alt="">`:`<span class="av">${esc(x)}</span>`};
+function accTiles(){const L=accts();return L.length?`<p class="mut" style="margin:0 0 6px;text-align:center">Contas salvas</p>`+L.map(a=>`<button class="acr" type="button" data-a="acsw" data-id="${esc(a.id)}">${accAv(a)}<span class="t"><b>Continuar como @${esc(accNm(a))}</b><small class="mut">${esc(a.email||'')}</small></span></button>`).join('')+`<p class="mut" style="margin:10px 0 0;text-align:center">ou entre em outra conta</p>`:''}
+const closeAcs=()=>{const o=$('#acs');if(o)o.remove()};
+function acctSheet(){
+  closeAcs();const o=document.createElement('div');o.id='acs';
+  o.innerHTML=`<div class="acb" data-a="acclose"></div><div class="acsh"><div class="acg"></div><h3>Contas</h3>`+accts().map(a=>`<button class="acr" data-a="acsw" data-id="${esc(a.id)}">${accAv(a)}<span class="t"><b>@${esc(accNm(a))}</b><small class="mut">${esc(a.email||'')}</small></span>${a.id===me?`<em class="ok">${I('ok',22)}</em>`:''}</button>`).join('')+`<button class="acr" data-a="acadd"><span class="av plus">${I('plus',22)}</span><span class="t"><b>Adicionar conta</b></span></button></div>`;
+  document.body.append(o);
+}
+async function acctSwitch(id){
+  if(id===me){closeAcs();return}
+  const a=accts().find(x=>x.id===id);if(!a)return;
+  toast('Trocando de conta…');
+  let cur=null;try{cur=(await sb.auth.getSession()).data.session;saveAcct(cur)}catch(e){}
+  let ok=false;try{const r=await sb.auth.setSession({access_token:a.at,refresh_token:a.rt});ok=!r.error&&!!r.data.session}catch(e){}
+  if(ok){location.reload();return}
+  setAccts(accts().filter(x=>x.id!==id));
+  if(cur){try{await sb.auth.setSession({access_token:cur.access_token,refresh_token:cur.refresh_token})}catch(e){}}
+  toast('Essa conta precisa entrar de novo.');setTimeout(()=>location.reload(),1200);
+}
+async function acctAdd(){
+  try{saveAcct((await sb.auth.getSession()).data.session)}catch(e){}
+  try{sb.auth.stopAutoRefresh()}catch(e){}
+  Object.keys(localStorage).filter(k=>/^sb-.*-auth-token/.test(k)).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+let lpT=null,lpDone=false;const LPS='nav.bar [data-id="profile"]';
+document.addEventListener('pointerdown',e=>{if(!e.target.closest(LPS))return;lpDone=false;clearTimeout(lpT);lpT=setTimeout(()=>{lpDone=true;if(navigator.vibrate)navigator.vibrate(15);acctSheet()},500)});
+['pointerup','pointercancel'].forEach(v=>document.addEventListener(v,()=>clearTimeout(lpT)));
+document.addEventListener('contextmenu',e=>{if(e.target.closest(LPS))e.preventDefault()});
+document.addEventListener('click',e=>{if(lpDone&&e.target.closest(LPS)){e.stopImmediatePropagation();e.preventDefault();lpDone=false}},true);
 function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
 function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
 async function authNext(){
@@ -682,13 +732,14 @@ async function authNext(){
 }
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
-  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
+  sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   initCalls();sub('posts',a=>{RAW.p=a;vis()});
   sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  sb.auth.onAuthStateChange((ev,s)=>{if(s)saveAcct(s)});
   const{data}=await sb.auth.getSession();
   if(!data.session){authView();$('#auth').style.display='flex';return}
   me=data.session.user.id;myEmail=data.session.user.email||'';try{rmute=localStorage.getItem('rsnd')==='0'}catch(e){}start();
