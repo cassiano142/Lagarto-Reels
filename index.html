@@ -134,6 +134,12 @@ html.bw{filter:grayscale(1)}
 .cams .drop{margin:6px 0}
 .vf{width:16px;height:16px;margin-left:4px;vertical-align:-3px;display:inline-block}
 .pr p .vf{width:19px;height:19px;vertical-align:-4px}
+.ap{width:100%;max-width:380px}.ap[hidden]{display:none}
+.pw{position:relative}.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.65;padding:4px}
+.alk{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);left:0;right:0;text-align:center;margin:0}
+.lk2{color:var(--ac);font-weight:700;text-decoration:underline;cursor:pointer}
+.aback{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;font-size:26px;padding:6px 10px;color:var(--fg)}
+.wring{width:110px;height:110px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;color:var(--ac);background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(135deg,#2e9e4f,#f5c518) border-box;border:4px solid transparent}
 </style>
 </head>
 <body>
@@ -143,12 +149,24 @@ html.bw{filter:grayscale(1)}
 </div>
 <nav class="bar"></nav>
 <div id="auth" style="display:none;position:fixed;inset:0;z-index:50;background:var(--bg);padding:24px;flex-direction:column;justify-content:center;align-items:center">
-<div style="width:100%;max-width:380px"><div class="logo" style="font-size:34px;text-align:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center">A rede social da nossa rua</p>
-<input class="sr" style="width:100%;margin:6px 0" id="ae" type="email" placeholder="E-mail" autocomplete="email">
-<input class="sr" style="width:100%;margin:6px 0" id="ap" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password">
-<input class="sr" style="width:100%;margin:6px 0" id="ac" type="text" placeholder="Código da rua (só para criar conta)">
-<button class="btn" id="bl" onclick="auth(false)">Entrar</button><button class="btn g" style="margin-top:8px" id="bs" onclick="auth(true)">Criar conta</button>
-<p class="mut" id="am" style="text-align:center"></p></div></div>
+<div class="ap" id="a-login"><div class="logo" style="font-size:34px;text-align:center"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></div><p class="mut" style="text-align:center">A rede social da nossa rua</p>
+<input class="sr" style="width:100%;margin:6px 0" id="le" type="email" placeholder="E-mail" autocomplete="email">
+<div class="pw"><input class="sr" style="width:100%;margin:6px 0" id="lp" type="password" placeholder="Senha" autocomplete="current-password"><button type="button" class="eye" onclick="eye('lp',this)" aria-label="Mostrar senha">👁</button></div>
+<button class="btn" id="bl" style="margin-top:8px" onclick="auth(false)">Entrar</button>
+<p class="mut" id="lm" style="text-align:center;min-height:20px"></p>
+<p class="alk mut">Não tem uma conta? <a class="lk2" onclick="showA('a-sign')">Crie uma</a></p></div>
+<div class="ap" id="a-sign" hidden><button type="button" class="aback" onclick="showA('a-login')" aria-label="Voltar">←</button>
+<h2 style="margin:0 0 6px;font-size:26px">Crie sua conta</h2><p class="mut" style="margin:0 0 12px">Informe seu e-mail, crie uma senha com pelo menos 6 caracteres e digite o código da rua.</p>
+<input class="sr" style="width:100%;margin:6px 0" id="se" type="email" placeholder="E-mail" autocomplete="email">
+<div class="pw"><input class="sr" style="width:100%;margin:6px 0" id="sp" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password"><button type="button" class="eye" onclick="eye('sp',this)" aria-label="Mostrar senha">👁</button></div>
+<input class="sr" style="width:100%;margin:6px 0" id="sc" type="text" placeholder="Código da rua" autocomplete="off">
+<button class="btn" id="bs" style="margin-top:8px" onclick="auth(true)">Criar conta</button>
+<p class="mut" id="sm" style="text-align:center;min-height:20px"></p>
+<p class="alk"><a class="lk2" onclick="showA('a-login')">Já tenho uma conta</a></p></div>
+<div class="ap" id="a-wel" hidden style="text-align:center"><div class="wring"><svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+<h2 style="margin:18px 0 8px;font-size:28px">Bem-vindo ao Lagarto Reels</h2><p class="mut" style="margin:0 0 22px">Sua conta foi criada! Toque em concluir para entrar e ver os posts da turma. 🦎</p>
+<button class="btn" onclick="location.reload()">Concluir o cadastro</button></div>
+</div>
 <div class="mo" id="mo" hidden><div class="mb"><button class="x" data-a="close">✕</button><div id="mbody"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
@@ -407,13 +425,20 @@ db={
   }),
   doc:p=>{const[c,id]=p.split('/');return{set:d=>sb.from('docs').upsert({col:c,id,data:d}).then(chk),delete:()=>sb.from('docs').delete().eq('col',c).eq('id',id).then(chk)}}
 };
+function showA(id){['a-login','a-sign','a-wel'].forEach(x=>{$('#'+x).hidden=x!==id});['lm','sm'].forEach(x=>$('#'+x).textContent='')}
+function eye(id,b){const i=$('#'+id),h=i.type==='password';i.type=h?'text':'password';b.style.opacity=h?1:.65}
 async function auth(sign){
-  const e=$('#ae').value.trim(),p=$('#ap').value,m=$('#am');m.textContent='Aguarde…';
-  const r=sign?await sb.auth.signUp({email:e,password:p,options:{data:{codigo:$('#ac').value.trim()}}}):await sb.auth.signInWithPassword({email:e,password:p});
-  if(r.error){m.textContent=/Database error/i.test(r.error.message)?'Código da rua incorreto.':r.error.message;return}
-  if(!r.data.session){m.textContent='Conta criada! Confirme o e-mail e depois toque em Entrar.';return}
+  const k=sign?'s':'l',e=$('#'+k+'e').value.trim(),p=$('#'+k+'p').value,m=$('#'+k+'m');
+  if(!e||!p){m.textContent='Preencha o e-mail e a senha.';return}
+  if(sign&&p.length<6){m.textContent='A senha precisa ter pelo menos 6 caracteres.';return}
+  m.textContent='Aguarde…';
+  const r=sign?await sb.auth.signUp({email:e,password:p,options:{data:{codigo:$('#sc').value.trim()}}}):await sb.auth.signInWithPassword({email:e,password:p});
+  if(r.error){const t=r.error.message||'';m.textContent=/Database error/i.test(t)?'Código da rua incorreto.':/Invalid login/i.test(t)?'E-mail ou senha incorretos.':/already registered/i.test(t)?'Esse e-mail já tem conta. Toque em “Já tenho uma conta”.':t;return}
+  if(!r.data.session){m.textContent='Conta criada! Confirme o e-mail e depois entre com a sua senha.';return}
+  if(sign){showA('a-wel');return}
   location.reload();
 }
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(e.target.id==='lp'||e.target.id==='le')auth(false);else if(e.target.id==='sc'||e.target.id==='sp')auth(true)});
 function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])editProf(true)}});
