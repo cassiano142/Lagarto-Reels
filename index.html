@@ -165,6 +165,14 @@ html.bw{filter:grayscale(1)}
 .cbt{display:flex;gap:44px;margin-top:70px}
 .cbn{width:68px;height:68px;border-radius:50%;background:#ffffff26;color:#fff;display:flex;align-items:center;justify-content:center}
 .cbn.rd{background:#ed4956}.cbn.rd svg{transform:rotate(135deg)}.cbn.gr{background:#2e9e4f}.cbn.wh{background:#fff;color:#111}
+#call.vid{justify-content:flex-start;gap:8px;background:#000;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
+.vt{position:relative;flex:1;min-height:0;width:100%;border-radius:20px;overflow:hidden;background:#1d1d1f;display:flex;align-items:center;justify-content:center}
+.vt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vt.off video{display:none}
+#call .vt .av{width:110px;height:110px;font-size:54px;margin:0}
+.vt b{position:absolute;left:12px;bottom:10px;font-size:13px;text-shadow:0 1px 4px #000}
+.vbar{display:flex;justify-content:center;gap:26px;padding:6px 0 2px}.vbar .cbn{width:56px;height:56px}
+.vend{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:20px;z-index:2;padding:10px 24px;border-radius:99px;background:#ed4956;color:#fff;display:flex}.vend svg{transform:rotate(135deg)}
 </style>
 </head>
 <body>
@@ -228,7 +236,7 @@ function fillChat(){
   let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="prof" data-id="${esc(cu)}">Ver perfil</button></div>`,pv=0;
   ms.forEach(m=>{const mine=m.from===me;if(!pv||m.ts-pv>36e5){h+=`<div class="mut" style="text-align:center;font-size:12px;margin:10px 0">${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`}pv=m.ts;
     const row=x=>`<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px 0">${x}</div>`;
-    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I('phone',18)}<span>${m.d?'Chamada de voz · '+fmtD(m.d):mine?'Sem resposta':'Chamada perdida'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
+    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I(m.v?'vid':'phone',18)}<span>${m.v?'Chamada de vídeo':'Chamada de voz'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
   el.innerHTML=h;
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
@@ -278,9 +286,9 @@ function render(){
   }else if(tab==='dm'){
     const ps=[...new Set(MS.map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).sort((x,y)=>y.l.ts-x.l.ts);
     const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.k==='c'?'📞 Chamada de voz':p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':''}${esc(p.l.k==='c'?(p.l.v?'📹 Chamada de vídeo':'📞 Chamada de voz'):p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a><button class="ic" data-a="call" style="margin-left:auto" aria-label="Ligar">${I('phone',22)}</button></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="prof" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<b>${esc(nm(cu))}${vb(cu)}</b></a><span style="margin-left:auto;display:flex"><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span></div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
     h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
@@ -402,7 +410,10 @@ document.addEventListener('click',e=>{
   else if(a==='crsend')recEnd(true);
   else if(a==='aplay')aPlay(t);
   else if(a==='cimg')lbx(t.dataset.url);
-  else if(a==='call')startCall(cu);
+  else if(a==='call')startCall(cu,false);
+  else if(a==='vcall')startCall(cu,true);
+  else if(a==='ccam')camTog();
+  else if(a==='cflip')camFlip();
   else if(a==='cacc')callAcc();
   else if(a==='cend')callEnd(true,'');
   else if(a==='cmute'){if(CALL){CALL.mute=!CALL.mute;CALL.ms.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);callUI()}}
@@ -468,12 +479,15 @@ function authView(){
   const f=a.querySelector('.af input');if(f&&s!=='login')f.focus();
 }
 PA.ok='<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>';
-const OB={s:'name',n:'',a:'🦎',f:null,u:'',p:false};
+const OB={s:'welcome',n:'',a:'🦎',f:null,u:'',p:false};
 const obName=()=>$('#on').value.trim().replace(/\s+/g,'_');
 const nameOk=n=>n.length>=2&&!Object.keys(P).some(u=>u!==me&&(P[u].name||'').toLowerCase()===n.toLowerCase());
 function onboard(){const a=$('#auth');a.style.display='flex';a.onkeydown=ev=>{if(ev.key==='Enter'&&OB.s==='name')obNext()};obView()}
 function obView(){
   const a=$('#auth');
+  if(OB.s==='welcome'){
+    a.innerHTML=`<div style="margin:auto 0;text-align:center"><svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true"><defs><linearGradient id="gw" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f5c518"/><stop offset="1" stop-color="#2e9e4f"/></linearGradient></defs><circle cx="60" cy="60" r="55" fill="none" stroke="url(#gw)" stroke-width="5"/><path d="M38 62l16 16 30-34" fill="none" stroke="url(#gw)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><h2 style="margin:22px 0 10px;font-size:28px">Bem-vindo ao Lagarto Reels 🦎</h2><p class="mut" style="margin-bottom:26px">Sua conta foi criada! Agora vamos escolher seu nome de usuário e sua foto de perfil. Você poderá alterar isso quando quiser em Configurações.</p><button class="btn" type="button" onclick="OB.s='name';obView()">Concluir o cadastro</button></div><p class="mut" style="text-align:center;font-size:12px;margin:0">Ao concluir, você concorda em tratar os vizinhos com respeito.</p>`;
+    return}
   if(OB.s==='name'){
     a.innerHTML=`<h2 style="margin-top:56px">Crie um nome de usuário</h2><p class="mut">Escolha como os vizinhos vão ver você. Você poderá alterar isso quando quiser.</p><div class="af" style="margin-top:22px"><label for="on">Nome de usuário</label><input id="on" maxlength="24" value="${esc(OB.n)}" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="obChk()"><span class="ax" id="ok" style="color:var(--ac);display:none">${I('ok',24)}</span></div><p class="aerr" id="am"></p><button class="btn" type="button" onclick="obNext()">Avançar</button>`;
     $('#on').focus();obChk();
@@ -572,50 +586,68 @@ PA.phone='<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-
 const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
 let CALL=null,SIG=null;const OUT={};
 function initCalls(){if(SIG||!me)return;SIG=sb.channel('call-'+me).on('broadcast',{event:'sig'},m=>onSig(m.payload)).subscribe()}
-function sig(to,type,d,cid){const k='call-'+to;let c=OUT[k];if(!c){c=OUT[k]=sb.channel(k);c.subscribe()}c.send({type:'broadcast',event:'sig',payload:{from:me,to,type,d,cid}})}
+function sig(to,type,d,cid,v){const k='call-'+to;let c=OUT[k];if(!c){c=OUT[k]=sb.channel(k);c.subscribe()}c.send({type:'broadcast',event:'sig',payload:{from:me,to,type,d,cid,v}})}
 function callUI(){
   let o=$('#call');if(!CALL){if(o)o.remove();return}
   if(!o){o=document.createElement('div');o.id='call';document.body.append(o)}
-  const c=CALL,st=c.st==='in'?'Chamada de voz do Lagarto Reels':c.st==='out'?'Chamando…':c.st==='conn'?'Conectando…':fmtD(c.sec||0);
-  o.innerHTML=`${av(c.peer)}<h2>${esc(nm(c.peer))}</h2><p>${st}</p><div class="cbt">`+(c.st==='in'?`<button class="cbn rd" data-a="cend" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="cacc" aria-label="Atender">${I('phone',28)}</button>`:`<button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="cend" aria-label="Desligar">${I('phone',28)}</button>`)+`</div>`;
+  const c=CALL,live=c.video&&(c.st==='conn'||c.st==='on');
+  o.className=live?'vid':'';
+  if(live){
+    o.innerHTML=`<button class="vend" data-a="cend" aria-label="Desligar">${I('phone',22)}</button><div class="vt ${c.rcam===false?'off':''}" id="rvw">${av(c.peer)}<b>${esc(nm(c.peer))}</b></div><div class="vt ${c.camoff?'off':''}" id="lvw">${av(me)}<b>Você</b></div><div class="vbar"><button class="cbn ${c.camoff?'wh':''}" data-a="ccam" aria-label="Câmera">${I(c.camoff?'vidx':'vid',24)}</button><button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',24)}</button><button class="cbn" data-a="cflip" aria-label="Virar câmera">${I('flip',24)}</button></div>`;
+    $('#rvw').prepend(RV);$('#lvw').prepend(LV);RV.play().catch(()=>{});LV.play().catch(()=>{});
+    return}
+  const st=c.st==='in'?(c.video?'Chamada de vídeo do Lagarto Reels':'Chamada de voz do Lagarto Reels'):c.st==='out'?'Chamando…':c.st==='conn'?'Conectando…':fmtD(c.sec||0);
+  o.innerHTML=`${av(c.peer)}<h2>${esc(nm(c.peer))}</h2><p id="cst">${st}</p><div class="cbt">`+(c.st==='in'?`<button class="cbn rd" data-a="cend" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="cacc" aria-label="Atender">${I(c.video?'vid':'phone',28)}</button>`:`<button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="cend" aria-label="Desligar">${I('phone',28)}</button>`)+`</div>`;
+}
+const RV=document.createElement('video'),LV=document.createElement('video');
+RV.autoplay=LV.autoplay=true;RV.playsInline=LV.playsInline=true;RV.muted=LV.muted=true;LV.style.transform='scaleX(-1)';
+PA.vid='<rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3z"/>';PA.vidx='<rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3zM4 4l16 16"/>';PA.flip='<path d="M4 8a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 16a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/>';
+function camTog(){const c=CALL;if(!c||!c.video)return;c.camoff=!c.camoff;c.ms.getVideoTracks().forEach(t=>t.enabled=!c.camoff);sig(c.peer,'cam',!c.camoff,c.cid);callUI()}
+async function camFlip(){
+  const c=CALL;if(!c||!c.video)return;const fm=c.fm==='user'?'environment':'user';
+  try{const n=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:fm}}}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0],sn=c.pc.getSenders().find(x=>x.track&&x.track.kind==='video');
+    if(sn)await sn.replaceTrack(t);c.ms.removeTrack(old);old.stop();c.ms.addTrack(t);t.enabled=!c.camoff;c.fm=fm;LV.srcObject=c.ms;LV.style.transform=fm==='user'?'scaleX(-1)':'none'}
+  catch(e){toast('Não foi possível virar a câmera.')}
 }
 function mkPc(){
   const c=CALL,pc=c.pc=new RTCPeerConnection(ICE);
   pc.onicecandidate=e=>{if(e.candidate)sig(c.peer,'ice',e.candidate,c.cid)};
-  pc.ontrack=e=>{let a=$('#rau');if(!a){a=document.createElement('audio');a.id='rau';a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=e.streams[0];a.play().catch(()=>{})};
+  pc.ontrack=e=>{let a=$('#rau');if(!a){a=document.createElement('audio');a.id='rau';a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=e.streams[0];a.play().catch(()=>{});if(e.track.kind==='video')RV.srcObject=e.streams[0]};
   pc.onconnectionstatechange=()=>{if(CALL!==c)return;const s=pc.connectionState;
-    if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);callUI()},1000);callUI()}
+    if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);const e=$('#cst');if(e)e.textContent=fmtD(c.sec)},1000);callUI()}
     else if(s==='failed'||s==='closed')callEnd(true,'A chamada caiu.')};
 }
-async function startCall(peer){
+async function startCall(peer,video){
   if(!need())return;if(CALL){toast('Você já está em uma chamada.');return}
   if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta chamadas.');return}
-  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){toast('Permita o microfone para ligar.');return}
-  const c=CALL={peer,cid:me+Date.now(),st:'out',ms,mine:true,ice:[]};
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:video?{facingMode:'user',width:{ideal:720},height:{ideal:960}}:false})}catch(e){toast(video?'Permita o microfone e a câmera para ligar.':'Permita o microfone para ligar.');return}
+  const c=CALL={peer,cid:me+Date.now(),st:'out',ms,mine:true,ice:[],video:!!video,fm:'user'};
+  if(video)LV.srcObject=ms;
   mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
   const o=await c.pc.createOffer();await c.pc.setLocalDescription(o);
-  sig(peer,'offer',o,c.cid);callUI();
+  sig(peer,'offer',o,c.cid,!!video);callUI();
   c.to=setTimeout(()=>{if(CALL===c&&c.st==='out')callEnd(true,'Ninguém atendeu.')},45000);
 }
 async function onSig(p){
   if(!p||p.to!==me)return;const c=CALL;
   if(p.type==='offer'){
     if(c){sig(p.from,'busy',null,p.cid);return}
-    CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false};callUI();
+    CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false,video:!!p.v,fm:'user'};callUI();
     if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
     if(document.hidden&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png'})}catch(e){}
     return}
   if(!c||p.cid!==c.cid)return;
   if(p.type==='answer'&&c.pc){clearTimeout(c.to);c.st='conn';await c.pc.setRemoteDescription(p.d);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];callUI()}
   else if(p.type==='ice'){if(c.pc&&c.pc.remoteDescription)c.pc.addIceCandidate(p.d).catch(()=>{});else c.ice.push(p.d)}
+  else if(p.type==='cam'){c.rcam=!!p.d;callUI()}
   else if(p.type==='end')callEnd(false,'Chamada encerrada.');
   else if(p.type==='busy')callEnd(false,'Está em outra chamada.');
 }
 async function callAcc(){
   const c=CALL;if(!c||c.st!=='in')return;
-  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){toast('Permita o microfone para atender.');callEnd(true,'');return}
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:c.video?{facingMode:'user',width:{ideal:720},height:{ideal:960}}:false})}catch(e){toast('Permita o microfone'+(c.video?' e a câmera':'')+' para atender.');callEnd(true,'');return}
   if(navigator.vibrate)navigator.vibrate(0);
-  c.ms=ms;c.st='conn';mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
+  c.ms=ms;c.st='conn';if(c.video)LV.srcObject=ms;mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
   await c.pc.setRemoteDescription(c.offer);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];
   const a=await c.pc.createAnswer();await c.pc.setLocalDescription(a);sig(c.peer,'answer',a,c.cid);callUI();
 }
@@ -625,8 +657,8 @@ function callEnd(notify,note){
   try{if(c.pc)c.pc.close()}catch(e){}
   if(c.ms)c.ms.getTracks().forEach(t=>t.stop());
   const a=$('#rau');if(a)a.remove();if(navigator.vibrate)navigator.vibrate(0);
-  if(c.mine)w(db.collection('messages').add({from:me,to:c.peer,text:'',k:'c',d:c.t0?Math.round((Date.now()-c.t0)/1e3):0,ts:Date.now()}));
-  callUI();if(note)toast(note);
+  if(c.mine)w(db.collection('messages').add({from:me,to:c.peer,text:'',k:'c',v:c.video?1:0,ts:Date.now()}));
+  RV.srcObject=null;LV.srcObject=null;callUI();if(note)toast(note);
 }
 function keep(){['e','p','c'].forEach(k=>{const i=$('#a'+(k==='e'?'e':k==='p'?'p':'c'));if(i)AU[k]=k==='p'?i.value:i.value.trim()})}
 function authGo(){keep();AU.s={e:'login',p:'e',c:'p',done:'login'}[AU.s]||'login';authView()}
