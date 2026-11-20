@@ -188,6 +188,18 @@ nav.bar button{-webkit-touch-callout:none;user-select:none;-webkit-user-select:n
 .gph{display:flex;align-items:center;justify-content:center;width:190px;height:190px;border-radius:50%;margin:34px auto 0;background:var(--card);border:6px solid var(--bg);box-shadow:0 0 0 1px var(--bd);overflow:hidden;cursor:pointer}.gph img{width:100%;height:100%;object-fit:cover}.gsil{font-size:84px}
 .gfoot{padding:12px 0 calc(env(safe-area-inset-bottom,0px) + 16px)}.gfoot .btn{width:100%;padding:13px}.gfoot label.btn{cursor:pointer}
 .btn[disabled]{opacity:.45;pointer-events:none}body.gfo{overflow:hidden}
+
+.dmn{display:flex;gap:14px;overflow-x:auto;padding:28px 14px 12px;scrollbar-width:none}.dmn::-webkit-scrollbar{display:none}
+.dnote{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;width:72px;flex:none;color:inherit}
+.dnote .av{width:64px;height:64px;font-size:34px}
+.dnote small{max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.dnw{position:relative;display:flex}
+.dnb{position:absolute;top:-24px;left:50%;transform:translateX(-50%);z-index:1;max-width:76px;min-width:34px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:14px;padding:4px 8px;font-size:11px;line-height:1.25;text-align:center;box-shadow:0 1px 4px #0002;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dnp{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#fff;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center}
+.dmt{display:flex;border-bottom:1px solid var(--bd)}
+.dmt button{flex:1;padding:12px 0;font-weight:700;color:var(--mut);border-bottom:2px solid transparent}
+.dmt button.on{color:var(--fg);border-bottom-color:var(--ac)}
+.dmt i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3797f0;margin-left:6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -229,6 +241,7 @@ const EM=['🦎','🐊','🐸','🐢','🦖','🐍','🌴','🔥','😎','🌈',
 let ef='all',rmute=false,tapT,db,user,assets,me=null,tab='home',filt='all',pt='posts',q='',vu=null,openP=null,ready=false,io=null,lastTap=0,pdel=null,pav=null,tmr=null;
 let GR=[],VF=[],P={},POSTS=[],LK=[],CM=[],FL=[],SV=[],MS=[],cu=null,lastN=-1,myEmail='',pfile=null;
 const ago=t=>{const s=(Date.now()-t)/1e3;if(s<60)return'agora';if(s<3600)return Math.floor(s/60)+' min';if(s<86400)return Math.floor(s/3600)+' h';return Math.floor(s/86400)+' d'};
+let dmtab='c',dq='',NT=[];
 const isG=u=>typeof u==='string'&&u.startsWith('g_');
 const gOf=u=>GR.find(g=>'g_'+g.id===u);
 const inG=g=>!!g&&(g.members||[]).includes(me);
@@ -250,6 +263,39 @@ function badge(){
   const fr=ns.filter(n=>n.ts>loadTs&&!knownN.has(n.id));ns.forEach(n=>knownN.add(n.id));
   if(fr.length&&tab!=='notif'){const n=fr[0],tx=nm(n.u)+(n.k==='c'?' comentou na sua publicação':n.k==='l'?' curtiu sua publicação':' postou algo novo');toast('🔔 '+tx+(fr.length>1?' (+'+(fr.length-1)+')':''));if(document.hidden&&window.Notification&&Notification.permission==='granted')try{new Notification('Lagarto Reels',{body:tx,icon:'icon-192.png'})}catch(e){}}
 }
+function fillDm(){
+  const n=$('#dmn'),t=$('#dmt'),l=$('#dml');if(!n||!t||!l)return;
+  const gq=dq.trim().toLowerCase(),ok=u=>!gq||nm(u).toLowerCase().includes(gq);
+  const ps=[...new Set(MS.filter(m=>!isG(m.to)).map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).concat(GR.filter(inG).map(g=>({u:'g_'+g.id,l:conv('g_'+g.id).slice(-1)[0]||{from:'',ts:g.ts||0,text:'Grupo criado'}}))).sort((x,y)=>y.l.ts-x.l.ts);
+  const unC=ps.some(p=>!isG(p.u)&&unread(p.u)),unG=ps.some(p=>isG(p.u)&&unread(p.u));
+  const now=Date.now(),nts=NT.filter(x=>x.text&&now-x.ts<864e5&&!hid(x.id)&&(x.id===me||amF(x.id)));
+  const mine=nts.find(x=>x.id===me),others=nts.filter(x=>x.id!==me).sort((a,b)=>b.ts-a.ts);
+  const bub=x=>`<span class="dnb">${esc(x)}</span>`;
+  const sl=n.scrollLeft;
+  n.innerHTML=`<a class="dnote" data-a="notemy">${mine?bub(mine.text):''}<span class="dnw">${av(me)}${mine?'':`<em class="dnp">${I('plus',14,3)}</em>`}</span><small class="mut">${mine?'Sua nota':'Deixe uma nota'}</small></a>`+others.map(x=>`<a class="dnote" data-a="chat" data-id="${esc(x.id)}">${bub(x.text)}<span class="dnw">${av(x.id)}</span><small class="mut">${esc(nm(x.id))}</small></a>`).join('');
+  n.scrollLeft=sl;
+  t.innerHTML=`<button class="${dmtab==='c'?'on':''}" data-a="dmt" data-id="c">Conversas${unC?'<i></i>':''}</button><button class="${dmtab==='g'?'on':''}" data-a="dmt" data-id="g">Grupos${unG?'<i></i>':''}</button>`;
+  const row=p=>{const un=unread(p.u),m=p.l,pre=m.from===me?'Você: ':isG(p.u)&&m.from?esc(nm(m.from).split(' ')[0])+': ':'';
+    return `<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="${un?'':'mut'}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${un?'font-weight:700':''}">${pre}${esc(m.k==='c'?(m.v?'📹 Chamada de vídeo':'📞 Chamada de voz'):m.k==='a'?'🎤 Áudio':m.k==='i'?'📷 Foto':m.text)}${m.ts?' · '+ago(m.ts):''}</div></div>${un?'<span style="color:#3797f0">●</span>':''}</a>`};
+  const rows=ps.filter(p=>isG(p.u)===(dmtab==='g')&&ok(p.u));
+  let h='';
+  if(dmtab==='g'){
+    h=`<a class="cm" data-a="gnew" style="padding:10px 14px;align-items:center"><span class="av">${I('plus',22)}</span><b>Novo grupo</b></a>`+(rows.length?rows.map(row).join(''):`<div class="empty">${gq?'Nenhum grupo encontrado.':'Você ainda não está em nenhum grupo.'}</div>`);
+  }else{
+    h=rows.length?rows.map(row).join(''):`<div class="empty">${gq?'Nenhuma conversa encontrada.':'Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.'}</div>`;
+    const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)&&ok(f.to)).map(f=>f.to);
+    if(fo.length)h+=`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join('');
+  }
+  l.innerHTML=h;
+}
+function noteEd(){if(!need())return;const n=NT.find(x=>x.id===me&&x.text&&Date.now()-x.ts<864e5);
+  modal(`<h3 style="margin:0 0 4px">Sua nota</h3><p class="mut" style="margin:0 0 10px">Quem você segue vê sua nota por 24 horas.</p><input class="sr" id="nti" maxlength="60" placeholder="Escreva algo curto…" value="${esc(n?n.text:'')}" autocomplete="off" style="width:100%;margin:0 0 10px"><div style="display:flex;gap:8px"><button class="btn" data-a="notesave">Compartilhar</button>${n?'<button class="btn g" data-a="notedel">Excluir nota</button>':''}</div>`);
+  const i=$('#nti');i.addEventListener('keydown',e=>{if(e.key==='Enter')noteSave()});setTimeout(()=>i.focus(),50)}
+function noteSave(){const t=(($('#nti')||{}).value||'').trim().slice(0,60);if(!t){toast('Escreva algo para compartilhar.');return}
+  const d={text:t,ts:Date.now()};NT=NT.filter(x=>x.id!==me).concat([Object.assign({id:me},d)]);closeM();render();
+  w(db.doc('notes/'+me).set(d).then(()=>{if(RL.notes)RL.notes()}));toast('Nota compartilhada')}
+function noteDel(){NT=NT.filter(x=>x.id!==me);closeM();render();
+  w(db.doc('notes/'+me).delete().then(()=>{if(RL.notes)RL.notes()}));toast('Nota excluída')}
 function fillChat(){
   const ms=conv(cu),el=$('#cmsgs');if(!el)return;
   let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${isG(cu)?((gOf(cu)||{}).members||[]).length+' membros':esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}">${isG(cu)?'Ver membros':'Ver perfil'}</button></div>`,pv=0;
@@ -290,6 +336,7 @@ function render(){
   if(!ready)return;
   const a=$('#app');
   if(tab==='chat'&&$('#cm')&&$('#cm').dataset.u===cu){fillChat();badge();return}
+  if(tab==='dm'&&$('#dml')&&document.activeElement&&document.activeElement.id==='dq'){fillDm();badge();return}
   const pv=[...a.querySelectorAll('video')].find(v=>!v.paused);
   const keep=pv&&{s:pv.getAttribute('src'),t:pv.currentTime},rl0=a.querySelector('.rl'),st=rl0?rl0.scrollTop:0;
   let h='';
@@ -303,9 +350,7 @@ function render(){
     const ns=notifs();
     h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
   }else if(tab==='dm'){
-    const ps=[...new Set(MS.filter(m=>!isG(m.to)).map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).concat(GR.filter(inG).map(g=>({u:'g_'+g.id,l:conv('g_'+g.id).slice(-1)[0]||{from:'',ts:g.ts||0,text:'Grupo criado'}}))).sort((x,y)=>y.l.ts-x.l.ts);
-    const fo=FL.filter(f=>f.from===me&&!ps.some(p=>p.u===f.to)).map(f=>f.to);
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home">‹</button><b>Mensagens</b><button class="chip" style="margin-left:auto" data-a="gnew">+ Novo grupo</button></div>`+(ps.length?ps.map(p=>`<a class="cm" data-a="chat" data-id="${esc(p.u)}" style="padding:10px 14px">${av(p.u)}<div style="flex:1;min-width:0"><b>${esc(nm(p.u))}${vb(p.u)}</b><div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l.from===me?'Você: ':isG(p.u)&&p.l.from?esc(nm(p.l.from).split(' ')[0])+': ':''}${esc(p.l.k==='c'?(p.l.v?'📹 Chamada de vídeo':'📞 Chamada de voz'):p.l.k==='a'?'🎤 Áudio':p.l.k==='i'?'📷 Foto':p.l.text)}</div></div>${unread(p.u)?'<span style="color:#3797f0">●</span>':''}</a>`).join(''):'<div class="empty">Nenhuma conversa ainda.<br>Siga alguém e toque em “Mensagem” no perfil.</div>')+(fo.length?`<p class="mut" style="padding:8px 14px 0">Conversar com quem você segue</p>`+fo.map(u=>`<a class="cm" data-a="chat" data-id="${esc(u)}" style="padding:8px 14px">${av(u)}<b>${esc(nm(u))}</b></a>`).join(''):'');
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">‹</button><b style="font-size:20px">Mensagens</b><button class="ic" style="margin-left:auto" data-a="gnew" aria-label="Novo grupo">${I('plus',24)}</button></div><input class="sr" id="dq" placeholder="Pesquisar" value="${esc(dq)}" autocomplete="off"><div class="dmn" id="dmn"></div><div class="dmt" id="dmt"></div><div id="dml"></div>`;
   }else if(tab==='chat'){
     h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(nm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<button class="ic" style="margin-left:auto" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
@@ -329,6 +374,7 @@ function render(){
   document.body.classList.toggle('rv',tab==='reels'&&POSTS.some(p=>p.type==='video'));
   document.body.classList.toggle('chat',tab==='chat');document.body.classList.toggle('nh',tab==='dm'||tab==='chat'||tab==='notif');
   if(tab==='chat')fillChat();
+  if(tab==='dm')fillDm();
   if(tab==='explore')fillEx();
   document.querySelectorAll('nav.bar button').forEach((b,i)=>b.classList.toggle('on',b.dataset.id===tab));
   $('#who').textContent=me&&P[me]?'@'+P[me].name:'';badge();
@@ -423,7 +469,7 @@ document.addEventListener('click',e=>{
   else if(a==='rmute'){rmute=!rmute;document.querySelectorAll('.rs video').forEach(v=>v.muted=rmute);t.innerHTML=I(rmute?'mute':'vol',22)}
   else if(a==='newreel')newPost(true);
   else if(a==='notif'){closeM();nview=nseen();setNs(Date.now());tab='notif';if(window.Notification&&Notification.permission==='default')Notification.requestPermission();render();scrollTo(0,0)}
-  else if(a==='dm'){tab='dm';render();scrollTo(0,0)}
+  else if(a==='dm'){tab='dm';dq='';render();scrollTo(0,0)}
   else if(a==='chat'){if(!need())return;cu=id;lastN=-1;tab='chat';render()}
   else if(a==='cmic')recStart();
   else if(a==='crcancel')recEnd(false);
@@ -431,6 +477,10 @@ document.addEventListener('click',e=>{
   else if(a==='aplay')aPlay(t);
   else if(a==='cimg')lbx(t.dataset.url);
   else if(a==='gnew')gNew();
+  else if(a==='dmt'){dmtab=id;render()}
+  else if(a==='notemy')noteEd();
+  else if(a==='notesave')noteSave();
+  else if(a==='notedel')noteDel();
   else if(a==='gback'){if(GS.step>1){GS.step--;gStep()}else gClose()}
   else if(a==='gnext'){if(GS.step===1&&GS.name.trim().length<2)return;GS.step++;gStep()}
   else if(a==='gsel'){GS.sel.has(id)?GS.sel.delete(id):GS.sel.add(id);const k=t.querySelector('.gck');if(k)k.textContent=GS.sel.has(id)?'✅':'⬜'}
@@ -483,7 +533,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v.matches&&v.matches('.rs video'))v.style.objectFit=v.videoHeight>=v.videoWidth?'cover':'contain'},true);
 document.addEventListener('keydown',e=>{if(e.target.id==='cmi'&&e.key==='Enter')sendm()});
-document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;fillEx()}});
+document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const RL={};
@@ -811,7 +861,7 @@ function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();{const sg=Object.keys(P).filter(u=>P[u].priv).sort().join();if(sg!==psig){psig=sg;RL.posts&&RL.posts()}}if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   initCalls();sub('posts',a=>{RAW.p=a;vis()});
-  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
+  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
