@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lagarto Reels</title>
 <meta name="theme-color" content="#2e9e4f">
-<script>try{var _t=localStorage.getItem("theme");if(/^(light|dark|forest|midnight|neon|coffee)$/.test(_t))document.documentElement.dataset.theme=_t;if(localStorage.getItem("bw")==="1")document.documentElement.classList.add("bw")}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("theme");if(/^(light|dark|forest|midnight|neon|coffee|vice)$/.test(_t))document.documentElement.dataset.theme=_t;if(localStorage.getItem("bw")==="1")document.documentElement.classList.add("bw")}catch(e){}</script>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <style>
@@ -16,6 +16,10 @@
 :root[data-theme="midnight"]{--bg:#080d1c;--fg:#e8eeff;--mut:#8b97bd;--bd:#1c2547;--card:#141b36;--ac:#4a8dff}
 :root[data-theme="neon"]{--bg:#0d0a18;--fg:#f1eaff;--mut:#a090c4;--bd:#2a1f4a;--card:#1a1230;--ac:#a855f7}
 :root[data-theme="coffee"]{--bg:#17110d;--fg:#f6ece2;--mut:#b09a85;--bd:#3a2c22;--card:#261c16;--ac:#e0a25c}
+:root[data-theme="vice"]{--bg:#14041f;--fg:#fff0f8;--mut:#b48ac0;--bd:#3d1a5c;--card:#261040;--ac:#ff4fa3}
+:root[data-theme="vice"] body{background:linear-gradient(180deg,#14041f 0%,#2b0b45 65%,#431052 100%) fixed}
+:root[data-theme="vice"] body::after{content:"";position:fixed;left:50%;transform:translateX(-50%);bottom:calc(52px + env(safe-area-inset-bottom,0px));width:min(470px,100%);height:130px;pointer-events:none;z-index:19;opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 160'%3E%3Cg fill='%233a0d4f' stroke='%23ff4fa3' stroke-opacity='.55' stroke-width='1' stroke-linejoin='round'%3E%3Cpath d='M50 30Q25 18 4 40Q28 28 50 33Z'/%3E%3Cpath d='M50 30Q30 2 8 8Q32 12 50 30Z'/%3E%3Cpath d='M50 30Q18 30 10 64Q30 42 50 34Z'/%3E%3Cpath d='M50 30Q44 6 50 0Q56 6 50 30Z'/%3E%3Cpath d='M 50 30 Q 75 18 96 40 Q 72 28 50 33 Z'/%3E%3Cpath d='M 50 30 Q 70 2 92 8 Q 68 12 50 30 Z'/%3E%3Cpath d='M 50 30 Q 82 30 90 64 Q 70 42 50 34 Z'/%3E%3C/g%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%233a0d4f' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%23ff4fa3' stroke-opacity='.35' stroke-width='1' transform='translate%282.5 0%29'/%3E%3C/svg%3E") left 4px bottom/auto 100% no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 160'%3E%3Cg transform='translate%28100 0%29 scale%28-1 1%29'%3E%3Cg fill='%233a0d4f' stroke='%23ff4fa3' stroke-opacity='.55' stroke-width='1' stroke-linejoin='round'%3E%3Cpath d='M50 30Q25 18 4 40Q28 28 50 33Z'/%3E%3Cpath d='M50 30Q30 2 8 8Q32 12 50 30Z'/%3E%3Cpath d='M50 30Q18 30 10 64Q30 42 50 34Z'/%3E%3Cpath d='M50 30Q44 6 50 0Q56 6 50 30Z'/%3E%3Cpath d='M 50 30 Q 75 18 96 40 Q 72 28 50 33 Z'/%3E%3Cpath d='M 50 30 Q 70 2 92 8 Q 68 12 50 30 Z'/%3E%3Cpath d='M 50 30 Q 82 30 90 64 Q 70 42 50 34 Z'/%3E%3C/g%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%233a0d4f' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%23ff4fa3' stroke-opacity='.35' stroke-width='1' transform='translate%282.5 0%29'/%3E%3C/g%3E%3C/svg%3E") right 4px bottom/auto 82% no-repeat}
+:root[data-theme="vice"] body.rv::after,:root[data-theme="vice"] body.chat::after,:root[data-theme="vice"] body.gfo::after{display:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -540,8 +544,9 @@ const APPT=[
   {id:'forest',n:'Floresta',bg:'#0a140d',card:'#12241a',ac:'#3ddc6a',mut:'#3f6b4a',tx:'#eaf5ec'},
   {id:'midnight',n:'Meia-noite',bg:'#080d1c',card:'#141b36',ac:'#4a8dff',mut:'#3a4a85',tx:'#e8eeff'},
   {id:'neon',n:'Neon roxo',bg:'#0d0a18',card:'#1a1230',ac:'#a855f7',mut:'#52358a',tx:'#f1eaff'},
-  {id:'coffee',n:'Café',bg:'#17110d',card:'#261c16',ac:'#e0a25c',mut:'#6b4d3a',tx:'#f6ece2'}];
-const THEME_RE=/^(light|dark|forest|midnight|neon|coffee)$/;
+  {id:'coffee',n:'Café',bg:'#17110d',card:'#261c16',ac:'#e0a25c',mut:'#6b4d3a',tx:'#f6ece2'},
+  {id:'vice',n:'Vice City',bg:'#14041f',card:'#261040',ac:'#ff4fa3',mut:'#7a3d8f',tx:'#fff0f8'}];
+const THEME_RE=/^(light|dark|forest|midnight|neon|coffee|vice)$/;
 const themeCur=()=>{const t=ls('theme','auto');return THEME_RE.test(t)?t:(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')};
 function applyTheme(){const t=ls('theme','auto'),r=document.documentElement;if(THEME_RE.test(t))r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('bw',ls('bw','0')==='1')}
 function settings(cat){
@@ -550,7 +555,7 @@ function settings(cat){
   const back=ti=>`<button class="lnk" data-a="settings" style="margin-bottom:6px">‹ Configurações</button><h3>${ti}</h3>`;
   const chip=(v,l)=>`<button class="chip ${t===v?'on':''}" data-a="theme" data-id="${v}">${l}</button>`;
   let h;
-  if(cat==='look')h=back('Aparência')+`<b>Tema do app</b><div class="tg">${APPT.map(x=>{const on=x.id===themeCur();return `<button type="button" class="tp ${on?'on':''}" data-a="theme" data-id="${x.id}" style="--pb:${x.bg};--pc:${x.card};--pa:${x.ac};--pm:${x.mut};--pt:${x.tx}"><span class="tpv"><b><i></i>Lagarto Reels</b><span class="tpr"><i></i><i></i><i></i><i></i></span><span class="tpc"></span><span class="tpn"><i></i><i></i><i class="a"></i><i></i><i></i></span></span><span>${x.n}${on?' (atual)':''}</span></button>`}).join('')}</div><label class="srow"><input type="checkbox" data-a="themeauto" ${t==='auto'?'checked':''}> Seguir o tema do aparelho</label><label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
+  if(cat==='look')h=back('Aparência')+`<b>Tema do app</b><div class="tg">${APPT.map(x=>{const on=x.id===themeCur();return `<button type="button" class="tp ${on?'on':''}" data-a="theme" data-id="${x.id}" style="--pb:${x.bg};--pc:${x.card};--pa:${x.ac};--pm:${x.mut};--pt:${x.tx}"><span class="tpv"><b><i></i>Lagarto Reels${x.id==='vice'?' 🌴':''}</b><span class="tpr"><i></i><i></i><i></i><i></i></span><span class="tpc"></span><span class="tpn"><i></i><i></i><i class="a"></i><i></i><i></i></span></span><span>${x.n}${on?' (atual)':''}</span></button>`}).join('')}</div><label class="srow"><input type="checkbox" data-a="themeauto" ${t==='auto'?'checked':''}> Seguir o tema do aparelho</label><label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
   else if(cat==='acc')h=back('Conta')+`<p class="mut">Conectado como <b>${n0}</b><br>${esc(myEmail)}</p><button class="btn g" data-a="editprof">Editar perfil</button>`+accx();
   else if(cat==='priv'){const pv=isPriv(me),rq=reqs();h=back('Privacidade')+`<label class="srow"><input type="checkbox" data-a="privtog" ${pv?'checked':''}> Conta privada</label><p class="mut" style="margin:0 0 14px">${pv?'Só quem você aprovar consegue ver suas publicações. Quem já seguia você continua seguindo.':'Qualquer pessoa pode ver suas publicações e te seguir.'}</p><b>Pedidos para seguir (${rq.length})</b>`+(rq.length?reqRows(rq):'<p class="mut">Nenhum pedido no momento.</p>')}
   else if(cat==='pw')h=back('Senha e segurança')+`<input type="password" id="np" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"><input type="password" id="np2" placeholder="Repita a nova senha" autocomplete="new-password"><button class="btn" style="margin-top:6px" data-a="chpw">Alterar senha</button><p id="pwm" class="mut"></p>`;
