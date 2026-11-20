@@ -726,7 +726,8 @@ document.addEventListener('change',e=>{if(e.target.id==='cfc'||e.target.id==='cf
 PA.phone='<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>';PA.micx='<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/>';
 const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
 let CALL=null,SIG=null;const OUT={};
-let PUSHON=false;
+let PUSHON=false;const ENDED=new Set();
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='call'){try{sb.realtime.connect()}catch(_){}}});
 const b64u=x=>{const p='='.repeat((4-x.length%4)%4),r=atob((x+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
 async function pushSub(ask){
   if(!me||!('serviceWorker' in navigator)||!('PushManager' in window)||!window.Notification){if(ask)toast('Este navegador não suporta notificações push.');return false}
@@ -774,7 +775,7 @@ async function camFlip(){
 }
 function mkPc(){
   const c=CALL,pc=c.pc=new RTCPeerConnection(ICE);
-  pc.onicecandidate=e=>{if(e.candidate)sig(c.peer,'ice',e.candidate,c.cid)};
+  pc.onicecandidate=e=>{if(e.candidate){if(c.mine)(c.sent=c.sent||[]).push(e.candidate);sig(c.peer,'ice',e.candidate,c.cid)}};
   pc.ontrack=e=>{let a=$('#rau');if(!a){a=document.createElement('audio');a.id='rau';a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=e.streams[0];a.play().catch(()=>{});if(e.track.kind==='video')RV.srcObject=e.streams[0]};
   pc.onconnectionstatechange=()=>{if(CALL!==c)return;const s=pc.connectionState;
     if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);const e=$('#cst');if(e)e.textContent=fmtD(c.sec)},1000);callUI()}
@@ -789,12 +790,14 @@ async function startCall(peer,video){
   mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
   const o=await c.pc.createOffer();await c.pc.setLocalDescription(o);
   sig(peer,'offer',o,c.cid,!!video);callUI();
+  c.rs=setInterval(()=>{if(CALL!==c||c.st!=='out'){clearInterval(c.rs);return}sig(peer,'offer',o,c.cid,!!video);(c.sent||[]).forEach(x=>sig(peer,'ice',x,c.cid))},3000);
   try{sb.functions.invoke('dynamic-handler',{body:{type:'call',to:peer,video:!!video}}).catch(()=>{})}catch(e){}
   c.to=setTimeout(()=>{if(CALL===c&&c.st==='out')callEnd(true,'Ninguém atendeu.')},45000);
 }
 async function onSig(p){
   if(!p||p.to!==me)return;const c=CALL;
   if(p.type==='offer'){
+    if(ENDED.has(p.cid)||(c&&c.cid===p.cid))return;
     if(c){sig(p.from,'busy',null,p.cid);return}
     CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false,video:!!p.v,fm:'user'};callUI();
     if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
@@ -802,7 +805,7 @@ async function onSig(p){
     return}
   if(!c||p.cid!==c.cid)return;
   if(p.type==='answer'&&c.pc){clearTimeout(c.to);c.st='conn';await c.pc.setRemoteDescription(p.d);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];callUI()}
-  else if(p.type==='ice'){if(c.pc&&c.pc.remoteDescription)c.pc.addIceCandidate(p.d).catch(()=>{});else c.ice.push(p.d)}
+  else if(p.type==='ice'){const k=JSON.stringify(p.d);c.seen=c.seen||new Set();if(c.seen.has(k))return;c.seen.add(k);if(c.pc&&c.pc.remoteDescription)c.pc.addIceCandidate(p.d).catch(()=>{});else c.ice.push(p.d)}
   else if(p.type==='cam'){c.rcam=!!p.d;callUI()}
   else if(p.type==='end')callEnd(false,'Chamada encerrada.');
   else if(p.type==='busy')callEnd(false,'Está em outra chamada.');
@@ -816,7 +819,7 @@ async function callAcc(){
   const a=await c.pc.createAnswer();await c.pc.setLocalDescription(a);sig(c.peer,'answer',a,c.cid);callUI();
 }
 function callEnd(notify,note){
-  const c=CALL;if(!c)return;CALL=null;clearTimeout(c.to);clearInterval(c.tk);
+  const c=CALL;if(!c)return;CALL=null;ENDED.add(c.cid);clearTimeout(c.to);clearInterval(c.tk);clearInterval(c.rs);
   if(notify)sig(c.peer,'end',null,c.cid);
   try{if(c.pc)c.pc.close()}catch(e){}
   if(c.ms)c.ms.getTracks().forEach(t=>t.stop());

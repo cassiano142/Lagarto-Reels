@@ -12,21 +12,27 @@ self.addEventListener('push',e=>{
     await self.registration.showNotification(d.title||'Lagarto Reels',{
       body:d.body||'',
       icon:'icon-192.png',
-      badge:'icon-192.png',
+      badge:'badge.png',
       tag:d.tag||undefined,
       renotify:!!d.tag,
-      vibrate:d.call?[400,200,400,200,400]:[150],
+      silent:false,
+      vibrate:d.call?[500,250,500,250,500,250,500]:[200,100,200],
       requireInteraction:!!d.call,
-      data:{url:d.url||'./index.html'}
+      data:{url:d.url||'./index.html',call:!!d.call}
     });
   })());
 });
 
 self.addEventListener('notificationclick',e=>{
   e.notification.close();
-  const url=(e.notification.data&&e.notification.data.url)||'./index.html';
-  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{
-    for(const c of cs){if('focus' in c)return c.focus()}
+  const dt=e.notification.data||{},url=dt.url||'./index.html';
+  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async cs=>{
+    for(const c of cs){
+      if('focus' in c){
+        if(dt.call)c.postMessage({t:'call'});
+        return c.focus();
+      }
+    }
     return self.clients.openWindow(url);
   }));
 });
