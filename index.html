@@ -789,7 +789,7 @@ async function startCall(peer,video){
   mkPc();ms.getTracks().forEach(t=>c.pc.addTrack(t,ms));
   const o=await c.pc.createOffer();await c.pc.setLocalDescription(o);
   sig(peer,'offer',o,c.cid,!!video);callUI();
-  try{sb.functions.invoke('push',{body:{type:'call',to:peer,video:!!video}}).catch(()=>{})}catch(e){}
+  try{sb.functions.invoke('dynamic-handler',{body:{type:'call',to:peer,video:!!video}}).catch(()=>{})}catch(e){}
   c.to=setTimeout(()=>{if(CALL===c&&c.st==='out')callEnd(true,'Ninguém atendeu.')},45000);
 }
 async function onSig(p){
