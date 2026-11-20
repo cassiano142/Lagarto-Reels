@@ -200,6 +200,28 @@ nav.bar button{-webkit-touch-callout:none;user-select:none;-webkit-user-select:n
 .dmt button{flex:1;padding:12px 0;font-weight:700;color:var(--mut);border-bottom:2px solid transparent}
 .dmt button.on{color:var(--fg);border-bottom-color:var(--ac)}
 .dmt i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3797f0;margin-left:6px;vertical-align:middle}
+
+.gfl.gx{padding-left:0;padding-right:0}
+.gx .gtop{display:flex;align-items:center;gap:6px;padding:0 14px 6px}
+.gx .gback{display:flex;align-items:center;padding:6px 10px 6px 0}
+.gx .gbd{flex:1;overflow:auto;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
+.gpa{display:flex;justify-content:center;padding:10px 0 8px}.gpa .av{width:88px;height:88px;font-size:46px}
+.gpa.two .av{width:66px;height:66px;font-size:34px;border:3px solid var(--bg)}.gpa.two .av+.av{margin-left:-20px;margin-top:24px}
+.gnm{text-align:center;font-size:21px;font-weight:800;margin:8px 0 2px;padding:0 18px;overflow-wrap:anywhere}
+.glk{display:block;text-align:center;color:var(--ac);font-weight:600}
+.gacts{display:flex;justify-content:space-around;padding:22px 8px 20px;border-bottom:1px solid var(--bd)}
+.gacts button{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:13px;color:var(--fg);min-width:64px}
+.gacts button.on{color:var(--ac)}
+.grw{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;text-align:left;color:var(--fg)}
+.grw .t{flex:1;min-width:0;display:flex;flex-direction:column}.grw small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut)}
+.grw .ch{font-size:24px;color:var(--mut);line-height:1}
+.gto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.gch{display:inline-flex;gap:6px;flex-wrap:wrap}
+.gch b{background:var(--ac);color:#fff;padding:6px 14px;border-radius:99px;font-size:15px}
+.gto input{flex:1;min-width:90px;border:0;outline:0;background:transparent;color:var(--fg);font-size:16px;padding:6px 0}
+.gck.rd{width:24px;height:24px;border-radius:50%;border:2px solid var(--mut);display:inline-flex;align-items:center;justify-content:center;flex:none;color:#fff;font-size:14px}
+.gck.rd.on{background:var(--ac);border-color:var(--ac)}.gck.rd.on::after{content:"✓"}
+.gx #gl .cm{padding-left:14px!important;padding-right:14px!important}
 </style>
 </head>
 <body>
@@ -251,7 +273,8 @@ const VFI='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAA
 const vb=u=>isV(u)?`<img class="vf" src="${VFI}" alt="Verificado" title="Verificado">`:'';
 const av=(u,c='')=>{if(isG(u)){const g=(gOf(u)||{}).av||'👥';return /^(https?:|\/_blob|data:)/.test(g)?`<img class="av ${c}" src="${esc(g)}" alt="">`:`<span class="av ${c}">${esc(g)}</span>`}const a=(P[u]&&P[u].av)||'🦎';return /^(https?:|\/_blob|data:)/.test(a)?`<img class="av ${c}" src="${esc(a)}" alt="">`:`<span class="av ${c}">${esc(a)}</span>`};
 const seen=u=>{try{return+(localStorage.getItem('seen_'+u)||0)}catch(e){return 0}};
-const unread=u=>isG(u)?MS.some(m=>m.to===u&&m.from!==me&&m.ts>seen(u)):MS.some(m=>m.from===u&&m.to===me&&m.ts>seen(u));
+const gmut=u=>{try{return localStorage.getItem('gm_'+u)==='1'}catch(e){return false}};
+const unread=u=>isG(u)?(!gmut(u)&&MS.some(m=>m.to===u&&m.from!==me&&m.ts>seen(u))):MS.some(m=>m.from===u&&m.to===me&&m.ts>seen(u));
 const conv=u=>MS.filter(m=>isG(u)?m.to===u:((m.from===me&&m.to===u)||(m.from===u&&m.to===me))).sort((a,b)=>a.ts-b.ts);
 function badge(){
   const b=$('#dmb');if(b)b.innerHTML=I('mail')+((MS.some(m=>m.to===me&&m.ts>seen(m.from))||GR.some(g=>inG(g)&&unread('g_'+g.id)))?'<em class="dot"></em>':'');
@@ -404,7 +427,7 @@ function fillEx(){
 let rt;const sched=()=>{clearTimeout(rt);rt=setTimeout(()=>{render();if(openP)fillPost()},120)};
 
 function modal(h){$('#mbody').innerHTML=h;$('#mo').hidden=false}
-function closeM(){$('#mo').hidden=true;$('#mbody').innerHTML='';openP=null;pav=null}
+function closeM(){$('#mo').hidden=true;$('#mbody').innerHTML='';openP=null;pav=null;const f=$('#gfl');if(f&&f.classList.contains('gx'))gClose()}
 function openPost(id){openP=id;modal(`<div id="mcard"></div><div id="cl"></div><div class="cin"><input id="ci" placeholder="Adicione um comentário…" maxlength="300"><button class="lnk" data-a="send">Publicar</button></div>`);fillPost();$('#ci').addEventListener('keydown',e=>{if(e.key==='Enter')send()})}
 function fillPost(){
   const p=POSTS.find(x=>x.id===openP);if(!p||$('#mo').hidden){if(!p)closeM();return}
@@ -483,9 +506,15 @@ document.addEventListener('click',e=>{
   else if(a==='notedel')noteDel();
   else if(a==='gback'){if(GS.step>1){GS.step--;gStep()}else gClose()}
   else if(a==='gnext'){if(GS.step===1&&GS.name.trim().length<2)return;GS.step++;gStep()}
-  else if(a==='gsel'){GS.sel.has(id)?GS.sel.delete(id):GS.sel.add(id);const k=t.querySelector('.gck');if(k)k.textContent=GS.sel.has(id)?'✅':'⬜'}
+  else if(a==='gsel'){GS.sel.has(id)?GS.sel.delete(id):GS.sel.add(id);const k=t.querySelector('.gck');if(k)k.classList.toggle('on',GS.sel.has(id));if(GS.add){gChips();gList()}}
   else if(a==='gcreate')gCreate();
   else if(a==='ginfo')gInfo(id);
+  else if(a==='gx')gClose();
+  else if(a==='gedit')gEdit(id);
+  else if(a==='gedok')gEdSave(id);
+  else if(a==='gsrch'){const x=$('#gmsw');x.hidden=!x.hidden;if(!x.hidden)setTimeout(()=>{const q=$('#gmq');if(q)q.focus()},30)}
+  else if(a==='gppl'){const x=$('#gpl');x.hidden=!x.hidden}
+  else if(a==='gmute'){try{localStorage.setItem('gm_'+id,gmut(id)?'0':'1')}catch(e){}toast(gmut(id)?'Grupo silenciado':'Notificações do grupo ativadas');gInfo(id);render()}
   else if(a==='gadd')gAdd(id);
   else if(a==='gaddok'){if(!GS.sel.size){$('#gm').textContent='Escolha pelo menos 1 pessoa.';return}const id2=GS.add,add=[...GS.sel];gSave(id2,d=>{d.members=[...new Set((d.members||[]).concat(add))]},()=>{toast('Pessoas adicionadas');gInfo(id2)})}
   else if(a==='grm'){const u=t.dataset.u;gSave(id,d=>{d.members=(d.members||[]).filter(x=>x!==u)},()=>gInfo(id))}
@@ -832,7 +861,7 @@ async function authNext(){
 /* ===== GRUPOS ===== */
 let GS={step:1,name:'',file:null,prev:'',sel:new Set()};
 function gNew(){if(!need())return;GS={step:1,name:'',file:null,prev:'',sel:new Set()};gStep()}
-function gClose(){const e=$('#gfl');e.hidden=true;e.innerHTML='';document.body.classList.remove('gfo')}
+function gClose(){const e=$('#gfl');e.hidden=true;e.innerHTML='';e.classList.remove('gx');document.body.classList.remove('gfo')}
 function gStep(){const e=$('#gfl'),s=GS.step,ok=GS.name.trim().length>=2;e.hidden=false;document.body.classList.add('gfo');
   const back='<button class="gback" data-a="gback" aria-label="Voltar">←</button>';
   if(s===1)e.innerHTML=back+`<div class="gbody"><h2>Crie um nome para o grupo</h2><p class="mut">Escolha um nome que todos reconheçam.</p><div class="gfld"><label for="gnm">Nome do grupo</label><input id="gnm" maxlength="40" value="${esc(GS.name)}" autocomplete="off" oninput="gName(this)"><span id="gok" class="gok" ${ok?'':'hidden'}>✓</span></div><button class="btn" id="gnx" data-a="gnext" ${ok?'':'disabled'}>Avançar</button></div>`;
@@ -843,16 +872,35 @@ function gName(i){GS.name=i.value;const ok=i.value.trim().length>=2,k=$('#gok'),
 function gPhoto(i){const f=i.files&&i.files[0];if(!f)return;if(GS.prev)try{URL.revokeObjectURL(GS.prev)}catch(e){}GS.file=f;GS.prev=URL.createObjectURL(f);gStep()}
 function gList(){const q=($('#gq')?$('#gq').value:'').toLowerCase(),cur=GS.add?((gOf(GS.add)||{}).members||[]):[];
   const us=Object.keys(P).filter(u=>u!==me&&!cur.includes(u)&&(P[u].name||'').toLowerCase().includes(q)).sort((a,b)=>amF(b)-amF(a));
-  $('#gl').innerHTML=us.length?us.map(u=>`<a class="cm" data-a="gsel" data-id="${esc(u)}" style="padding:8px 4px;align-items:center">${av(u)}<div style="flex:1;min-width:0"><b>${esc(nm(u))}${vb(u)}</b>${amF(u)?'<div class="mut" style="font-size:12px">Você segue</div>':''}</div><span class="gck">${GS.sel.has(u)?'✅':'⬜'}</span></a>`).join(''):'<div class="empty">Ninguém encontrado.</div>'}
+  $('#gl').innerHTML=us.length?us.map(u=>`<a class="cm" data-a="gsel" data-id="${esc(u)}" style="padding:8px 4px;align-items:center">${av(u)}<div style="flex:1;min-width:0"><b>${esc(nm(u))}${vb(u)}</b>${amF(u)?'<div class="mut" style="font-size:12px">Você segue</div>':''}</div><span class="gck rd ${GS.sel.has(u)?'on':''}"></span></a>`).join(''):'<div class="empty">Ninguém encontrado.</div>'}
 async function gCreate(){const m=$('#gm'),n=GS.name.trim();
   if(!GS.sel.size){m.textContent='Escolha pelo menos 1 pessoa.';return}if(GS.sel.size>49){m.textContent='Máximo de 50 pessoas.';return}
   const gid=crypto.randomUUID();m.textContent='Criando…';let a='👥';
   if(GS.file){try{a=await up(await shrink(GS.file))}catch(e){console.error(e);toast('Não consegui enviar a foto; usei o ícone padrão.')}}
   try{chk(await sb.from('docs').insert({col:'groups',id:gid,data:{name:n,av:a,members:[me].concat([...GS.sel]),by:me,ts:Date.now()}}));if(RL.groups)await RL.groups();gClose();cu='g_'+gid;lastN=-1;tab='chat';render()}
   catch(e){console.error(e);m.textContent='Não foi possível criar o grupo. Confira se o SQL dos grupos foi rodado.'}}
-function gInfo(id){const g=gOf(id);if(!g)return;const own=g.by===me,ms=g.members||[];
-  modal(`<div style="text-align:center"><div style="display:flex;justify-content:center">${av(id,'l')}</div><h3 style="margin:8px 0 2px">${esc(g.name)}</h3><div class="mut">${ms.length} membros</div></div><div style="margin-top:10px;max-height:40vh;overflow:auto">${ms.map(u=>`<div class="cm" style="padding:8px 0;align-items:center"><a data-a="prof" data-id="${esc(u)}" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">${av(u)}<div><b>${esc(nm(u))}${vb(u)}</b>${u===g.by?'<div class="mut" style="font-size:12px">Criador</div>':''}</div></a>${own&&u!==me?`<button class="lnk" data-a="grm" data-id="${esc(id)}" data-u="${esc(u)}">Remover</button>`:''}</div>`).join('')}</div>${own?`<button class="btn g" style="margin-top:10px" data-a="gadd" data-id="${esc(id)}">+ Adicionar pessoas</button>`:''}<button class="btn g" style="margin-top:8px;color:#ed4956" data-a="gleave" data-id="${esc(id)}">Sair do grupo</button>${own?`<button class="btn g" style="margin-top:8px;color:#ed4956" data-a="gdel" data-id="${esc(id)}">Excluir grupo</button>`:''}`)}
-function gAdd(id){GS={add:id,sel:new Set()};modal(`<h3>Adicionar ao grupo</h3><input class="sr" id="gq" placeholder="Buscar pessoas…" oninput="gList()" style="width:100%;margin:8px 0"><div id="gl" style="max-height:44vh;overflow:auto"></div><button class="btn" style="margin-top:10px" data-a="gaddok">Adicionar</button><p class="mut" id="gm" style="text-align:center;min-height:18px"></p>`);gList()}
+PA.userplus='<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/>';
+PA.exit='<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>';
+PA.users='<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M21.5 20a6.5 6.5 0 0 0-4-6"/>';
+PA.bellx='<path d="M6 8a6 6 0 0 1 9.5-4.8M18 8c0 3 .7 5 2 7H6M10 21a2 2 0 0 0 4 0M3 3l18 18"/>';
+let GI=null;
+function gShow(){const e=$('#gfl');e.classList.add('gx');e.hidden=false;document.body.classList.add('gfo');return e}
+function gInfo(id){const g=gOf(id);if(!g)return;GI=id;const own=g.by===me,ms=g.members||[],mu=gmut(id),e=gShow();
+  const img=/^(https?:|\/_blob|data:)/.test(g.av||''),two=!img&&ms.length>1;
+  const act=(a,ic,t,on)=>`<button data-a="${a}" data-id="${esc(id)}" class="${on?'on':''}">${I(ic,26)}<span>${t}</span></button>`;
+  e.innerHTML=`<div class="gtop"><button class="gback" data-a="gx" aria-label="Voltar">${I('back',24)}</button></div><div class="gbd"><div class="gpa ${two?'two':''}">${two?av(ms[0],'l')+av(ms[1],'l'):av(id,'l')}</div><div class="gnm">${esc(g.name)}</div>${own?`<a class="glk" data-a="gedit" data-id="${esc(id)}">Alterar nome e foto</a>`:`<div class="mut" style="text-align:center">${ms.length} pessoas</div>`}<div class="gacts">${own?act('gadd','userplus','Adicionar'):''}${act('gsrch','search','Pesquisar')}${act('gmute',mu?'bellx':'bell',mu?'Silenciado':'Silenciar',mu)}${act('gleave','exit','Sair')}</div><div id="gmsw" hidden><input class="sr" id="gmq" placeholder="Pesquisar nas mensagens" oninput="gMs()" autocomplete="off"><div id="gmr"></div></div><button class="grw" data-a="gppl"><span style="width:26px;display:flex">${I('users',24)}</span><div class="t"><b>Pessoas</b><small>${esc(ms.map(nm).join(', '))}</small></div><span class="ch">›</span></button><div id="gpl" hidden>${ms.map(u=>`<div class="cm" style="padding:8px 18px;align-items:center"><a data-a="prof" data-id="${esc(u)}" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">${av(u)}<div><b>${esc(nm(u))}${vb(u)}</b>${u===g.by?'<div class="mut" style="font-size:12px">Criador</div>':''}</div></a>${own&&u!==me?`<button class="lnk" data-a="grm" data-id="${esc(id)}" data-u="${esc(u)}">Remover</button>`:''}</div>`).join('')}</div>${own?`<button class="grw" style="color:#ed4956" data-a="gdel" data-id="${esc(id)}"><span style="width:26px;display:flex">${I('trash',24)}</span><b>Excluir grupo</b></button>`:''}</div>`}
+function gMs(){const o=$('#gmr'),q=(($('#gmq')||{}).value||'').trim().toLowerCase();if(!o)return;if(!q){o.innerHTML='';return}
+  const r=conv(GI).filter(m=>m.text&&m.text.toLowerCase().includes(q)).reverse().slice(0,30);
+  o.innerHTML=r.length?r.map(m=>`<a class="grw" data-a="gx" style="padding:10px 18px"><div class="t"><b>${esc(nm(m.from))}</b><span>${esc(m.text)}</span><small>${ago(m.ts)}</small></div></a>`).join(''):'<div class="empty" style="padding:24px">Nenhuma mensagem encontrada.</div>'}
+function gChips(){const c=$('#gch');if(c)c.innerHTML=[...GS.sel].map(u=>`<b data-a="gsel" data-id="${esc(u)}">${esc(nm(u))}</b>`).join('')}
+function gAdd(id){GS={add:id,sel:new Set()};const e=gShow();
+  e.innerHTML=`<div class="gtop"><button class="gback" data-a="ginfo" data-id="${esc(id)}" aria-label="Voltar">${I('back',24)}</button><b style="font-size:18px">Adicionar pessoas</b><button class="lnk" style="margin-left:auto;font-weight:700;color:var(--ac)" data-a="gaddok">Concluir</button></div><div class="gto"><span class="mut">Para:</span><span class="gch" id="gch"></span><input id="gq" placeholder="Pesquisar" oninput="gList()" autocomplete="off"></div><p class="mut" id="gm" style="text-align:center;min-height:18px;margin:6px 0 0"></p><div class="gbd"><div id="gl"></div></div>`;gList()}
+function gEdit(id){const g=gOf(id);if(!g)return;GS={ed:id,name:g.name||'',file:null,prev:''};const e=gShow(),img=/^(https?:|\/_blob|data:)/.test(g.av||'');
+  e.innerHTML=`<div class="gtop"><button class="gback" data-a="ginfo" data-id="${esc(id)}" aria-label="Voltar">${I('back',24)}</button><b style="font-size:18px">Alterar nome e foto</b><button class="lnk" style="margin-left:auto;font-weight:700;color:var(--ac)" data-a="gedok" data-id="${esc(id)}">Salvar</button></div><div class="gbd" style="padding:0 18px"><label class="gph" for="gpf" id="gpv" style="width:140px;height:140px;margin-top:20px">${img?`<img src="${esc(g.av)}" alt="">`:'<span class="gsil" style="font-size:60px">👥</span>'}</label><input type="file" id="gpf" accept="image/*" hidden onchange="gEdPhoto(this)"><div style="text-align:center;margin:12px 0 22px"><label class="glk" for="gpf">Trocar foto</label></div><div class="gfld"><label for="gnm">Nome do grupo</label><input id="gnm" maxlength="40" value="${esc(GS.name)}" autocomplete="off" oninput="GS.name=this.value"></div></div>`}
+function gEdPhoto(i){const f=i.files&&i.files[0];if(!f)return;GS.file=f;if(GS.prev)try{URL.revokeObjectURL(GS.prev)}catch(e){}GS.prev=URL.createObjectURL(f);const v=$('#gpv');if(v)v.innerHTML=`<img src="${GS.prev}" alt="">`}
+async function gEdSave(id){const g=gOf(id);if(!g||!GS||GS.ed!==id)return;const n=(GS.name||'').trim();if(n.length<2){toast('O nome precisa ter pelo menos 2 letras.');return}
+  let a=g.av;if(GS.file){toast('Enviando foto…');try{a=await up(await shrink(GS.file))}catch(e){console.error(e);toast('Não consegui enviar a foto.');return}}
+  gSave(id,d=>{d.name=n;d.av=a},()=>{toast('Grupo atualizado');gInfo(id)})}
 async function gSave(id,fn,ok){const g=gOf(id);if(!g)return;const d=Object.assign({},g);delete d.id;fn(d);
   try{chk(await sb.from('docs').update({data:d}).eq('col','groups').eq('id',g.id));if(RL.groups)await RL.groups();if(ok)ok()}catch(e){console.error(e);toast('Não foi possível salvar o grupo.')}}
 async function gLeave(id){if(!confirm('Sair do grupo?'))return;const raw=id.slice(2);
