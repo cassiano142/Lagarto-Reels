@@ -222,6 +222,10 @@ nav.bar button{-webkit-touch-callout:none;user-select:none;-webkit-user-select:n
 .gck.rd{width:24px;height:24px;border-radius:50%;border:2px solid var(--mut);display:inline-flex;align-items:center;justify-content:center;flex:none;color:#fff;font-size:14px}
 .gck.rd.on{background:var(--ac);border-color:var(--ac)}.gck.rd.on::after{content:"✓"}
 .gx #gl .cm{padding-left:14px!important;padding-right:14px!important}
+
+.mrow{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.mrow.sel{background:rgba(55,151,240,.24)}
+.mrow img{-webkit-touch-callout:none;-webkit-user-drag:none}
 </style>
 </head>
 <body>
@@ -275,7 +279,8 @@ const av=(u,c='')=>{if(isG(u)){const g=(gOf(u)||{}).av||'👥';return /^(https?:
 const seen=u=>{try{return+(localStorage.getItem('seen_'+u)||0)}catch(e){return 0}};
 const gmut=u=>{try{return localStorage.getItem('gm_'+u)==='1'}catch(e){return false}};
 const unread=u=>isG(u)?(!gmut(u)&&MS.some(m=>m.to===u&&m.from!==me&&m.ts>seen(u))):MS.some(m=>m.from===u&&m.to===me&&m.ts>seen(u));
-const conv=u=>MS.filter(m=>isG(u)?m.to===u:((m.from===me&&m.to===u)||(m.from===u&&m.to===me))).sort((a,b)=>a.ts-b.ts);
+const HM=new Set((()=>{try{return JSON.parse(localStorage.getItem('lr_hm')||'[]')}catch(e){return[]}})());
+const conv=u=>MS.filter(m=>!HM.has(String(m.id))&&(isG(u)?m.to===u:((m.from===me&&m.to===u)||(m.from===u&&m.to===me)))).sort((a,b)=>a.ts-b.ts);
 function badge(){
   const b=$('#dmb');if(b)b.innerHTML=I('mail')+((MS.some(m=>m.to===me&&m.ts>seen(m.from))||GR.some(g=>inG(g)&&unread('g_'+g.id)))?'<em class="dot"></em>':'');
   if(REC&&(tab!=='chat'||cu!==REC.to))recEnd(false);
@@ -289,7 +294,7 @@ function badge(){
 function fillDm(){
   const n=$('#dmn'),t=$('#dmt'),l=$('#dml');if(!n||!t||!l)return;
   const gq=dq.trim().toLowerCase(),ok=u=>!gq||nm(u).toLowerCase().includes(gq);
-  const ps=[...new Set(MS.filter(m=>!isG(m.to)).map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).concat(GR.filter(inG).map(g=>({u:'g_'+g.id,l:conv('g_'+g.id).slice(-1)[0]||{from:'',ts:g.ts||0,text:'Grupo criado'}}))).sort((x,y)=>y.l.ts-x.l.ts);
+  const ps=[...new Set(MS.filter(m=>!isG(m.to)).map(m=>m.from===me?m.to:m.from))].map(u=>({u,l:conv(u).slice(-1)[0]})).filter(x=>x.l).concat(GR.filter(inG).map(g=>({u:'g_'+g.id,l:conv('g_'+g.id).slice(-1)[0]||{from:'',ts:g.ts||0,text:'Grupo criado'}}))).sort((x,y)=>y.l.ts-x.l.ts);
   const unC=ps.some(p=>!isG(p.u)&&unread(p.u)),unG=ps.some(p=>isG(p.u)&&unread(p.u));
   const now=Date.now(),nts=NT.filter(x=>x.text&&now-x.ts<864e5&&!hid(x.id)&&(x.id===me||amF(x.id)));
   const mine=nts.find(x=>x.id===me),others=nts.filter(x=>x.id!==me).sort((a,b)=>b.ts-a.ts);
@@ -319,13 +324,48 @@ function noteSave(){const t=(($('#nti')||{}).value||'').trim().slice(0,60);if(!t
   w(db.doc('notes/'+me).set(d).then(()=>{if(RL.notes)RL.notes()}));toast('Nota compartilhada')}
 function noteDel(){NT=NT.filter(x=>x.id!==me);closeM();render();
   w(db.doc('notes/'+me).delete().then(()=>{if(RL.notes)RL.notes()}));toast('Nota excluída')}
+PA.edit='<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>';
+PA.copy='<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>';
+const SELM=new Set();let SELH='',mlT=0,mlX=0,mlY=0,mlF=false;
+const selMsgs=()=>[...SELM].map(id=>MS.find(m=>String(m.id)===id)).filter(Boolean);
+function selUI(){const h=document.querySelector('.chh');if(!h||tab!=='chat')return;
+  document.querySelectorAll('[data-mid]').forEach(r=>r.classList.toggle('sel',SELM.has(r.dataset.mid)));
+  if(!SELM.size){if(SELH){h.innerHTML=SELH;SELH=''}return}
+  if(!SELH)SELH=h.innerHTML;
+  const ms=selMsgs(),edit=ms.length===1&&ms[0].from===me&&!ms[0].k&&ms[0].text,cp=ms.length&&ms.every(m=>!m.k&&m.text);
+  h.innerHTML=`<button class="ic" data-a="selx" aria-label="Cancelar seleção">${I('x',24)}</button><b style="font-size:19px">${SELM.size}</b><span style="margin-left:auto;display:flex;gap:2px">${edit?`<button class="ic" data-a="msgedit" aria-label="Editar">${I('edit',22)}</button>`:''}${cp?`<button class="ic" data-a="msgcopy" aria-label="Copiar">${I('copy',22)}</button>`:''}<button class="ic" data-a="msgdel" aria-label="Apagar">${I('trash',22)}</button></span>`}
+function togSel(id){id=String(id);SELM.has(id)?SELM.delete(id):SELM.add(id);selUI()}
+document.addEventListener('pointerdown',e=>{mlF=false;clearTimeout(mlT);if(tab!=='chat')return;const r=e.target.closest('[data-mid]');if(!r)return;mlX=e.clientX;mlY=e.clientY;
+  mlT=setTimeout(()=>{mlF=true;if(navigator.vibrate)navigator.vibrate(15);togSel(r.dataset.mid)},450)});
+document.addEventListener('pointermove',e=>{if(Math.abs(e.clientX-mlX)>10||Math.abs(e.clientY-mlY)>10)clearTimeout(mlT)});
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(mlT)));
+document.addEventListener('contextmenu',e=>{if(e.target.closest('[data-mid]'))e.preventDefault()});
+document.addEventListener('click',e=>{
+  if(mlF){mlF=false;e.stopPropagation();e.preventDefault();return}
+  if(!SELM.size)return;const r=e.target.closest('[data-mid]');
+  if(r){e.stopPropagation();e.preventDefault();togSel(r.dataset.mid)}},true);
+function msgDel(){const ms=selMsgs();if(!ms.length)return;const mine=ms.every(m=>m.from===me),n=ms.length>1?ms.length+' mensagens':'mensagem';
+  modal(`<h3 style="margin:0 0 6px">Apagar ${n}?</h3><p class="mut" style="margin:0 0 14px">${mine?'Você pode apagar para todos ou só para você.':'Mensagens de outras pessoas só podem ser apagadas para você.'}</p><div style="display:grid;gap:8px">${mine?'<button class="btn" style="background:#ed4956" data-a="mdall">Apagar para todos</button>':''}<button class="btn g" data-a="mdme">Apagar para mim</button><button class="btn g" data-a="mdno">Cancelar</button></div>`)}
+function msgDelDo(all){const ms=selMsgs();if(!ms.length)return;const ids=ms.map(m=>String(m.id));
+  if(all){MS=MS.filter(m=>!ids.includes(String(m.id)));w(Promise.all(ids.map(id=>db.doc('messages/'+id).delete())))}
+  else{ids.forEach(id=>HM.add(id));try{localStorage.setItem('lr_hm',JSON.stringify([...HM].slice(-3000)))}catch(e){}}
+  SELM.clear();closeM();fillChat();toast(all?'Mensagens apagadas para todos':'Mensagens apagadas para você')}
+function msgEdit(){const ms=selMsgs();if(ms.length!==1)return;const m=ms[0];if(m.from!==me||m.k||!m.text)return;
+  modal(`<h3 style="margin:0 0 10px">Editar mensagem</h3><input class="sr" id="mei" maxlength="500" value="${esc(m.text)}" autocomplete="off" style="width:100%;margin:0 0 10px"><button class="btn" data-a="mesave" data-id="${esc(String(m.id))}">Salvar</button>`);
+  const i=$('#mei');i.addEventListener('keydown',e=>{if(e.key==='Enter')msgSave(m.id)});setTimeout(()=>{i.focus();i.setSelectionRange(i.value.length,i.value.length)},50)}
+function msgSave(id){const m=MS.find(x=>String(x.id)===String(id)),t=(($('#mei')||{}).value||'').trim();if(!m||!t){toast('Escreva a mensagem.');return}
+  if(t===m.text){closeM();return}
+  const d=Object.assign({},m);delete d.id;d.text=t;d.ed=1;m.text=t;m.ed=1;SELM.clear();closeM();fillChat();w(db.doc('messages/'+id).set(d))}
+function msgCopy(){const t=selMsgs().map(m=>m.text).join('\n');SELM.clear();selUI();
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado')).catch(()=>toast('Não foi possível copiar.'))}
 function fillChat(){
   const ms=conv(cu),el=$('#cmsgs');if(!el)return;
   let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${isG(cu)?((gOf(cu)||{}).members||[]).length+' membros':esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}">${isG(cu)?'Ver membros':'Ver perfil'}</button></div>`,pv=0;
   ms.forEach(m=>{const mine=m.from===me;if(!pv||m.ts-pv>36e5){h+=`<div class="mut" style="text-align:center;font-size:12px;margin:10px 0">${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`}pv=m.ts;
-    const row=x=>`<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px 0">${!mine&&isG(cu)?`<div><small class="mut" style="display:block;margin:0 8px 1px;font-weight:700">${esc(nm(m.from))}${vb(m.from)}</small>${x}</div>`:x}</div>`;
-    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I(m.v?'vid':'phone',18)}<span>${m.v?'Chamada de vídeo':'Chamada de voz'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}</div>`)});
+    const row=x=>`<div class="mrow${SELM.has(String(m.id))?' sel':''}" data-mid="${esc(String(m.id))}" style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px -12px;padding:2px 12px">${!mine&&isG(cu)?`<div><small class="mut" style="display:block;margin:0 8px 1px;font-weight:700">${esc(nm(m.from))}${vb(m.from)}</small>${x}</div>`:x}</div>`;
+    h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I(m.v?'vid':'phone',18)}<span>${m.v?'Chamada de vídeo':'Chamada de voz'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere;${mine?'background:#3797f0;color:#fff':'background:var(--card)'}">${esc(m.text)}${m.ed?'<small style="opacity:.65;margin-left:6px;font-size:11px">editada</small>':''}</div>`)});
   el.innerHTML=h;
+  SELM.forEach(id=>{if(!ms.some(m=>String(m.id)===id))SELM.delete(id)});selUI();
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
 }
@@ -396,7 +436,8 @@ function render(){
   {const n=a.querySelector('.rl');if(n)n.scrollTop=st}
   document.body.classList.toggle('rv',tab==='reels'&&POSTS.some(p=>p.type==='video'));
   document.body.classList.toggle('chat',tab==='chat');document.body.classList.toggle('nh',tab==='dm'||tab==='chat'||tab==='notif');
-  if(tab==='chat')fillChat();
+  if(tab!=='chat'&&SELM.size){SELM.clear();SELH=''}
+  if(tab==='chat'){SELH='';fillChat()}
   if(tab==='dm')fillDm();
   if(tab==='explore')fillEx();
   document.querySelectorAll('nav.bar button').forEach((b,i)=>b.classList.toggle('on',b.dataset.id===tab));
@@ -511,6 +552,14 @@ document.addEventListener('click',e=>{
   else if(a==='gcreate')gCreate();
   else if(a==='ginfo')gInfo(id);
   else if(a==='gx')gClose();
+  else if(a==='selx'){SELM.clear();selUI()}
+  else if(a==='msgdel')msgDel();
+  else if(a==='mdall')msgDelDo(true);
+  else if(a==='mdme')msgDelDo(false);
+  else if(a==='mdno')closeM();
+  else if(a==='msgedit')msgEdit();
+  else if(a==='mesave')msgSave(id);
+  else if(a==='msgcopy')msgCopy();
   else if(a==='gedit')gEdit(id);
   else if(a==='gedok')gEdSave(id);
   else if(a==='gsrch'){const x=$('#gmsw');x.hidden=!x.hidden;if(!x.hidden)setTimeout(()=>{const q=$('#gmq');if(q)q.focus()},30)}
