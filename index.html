@@ -985,12 +985,12 @@ function fillPost(){
 }
 function send(){const i=$('#ci'),t=i.value.trim();if(!t||!need())return;i.value='';w(db.collection('comments').add({pid:openP,uid:me,text:t,ts:Date.now()}))}
 PA.bolt='<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>';
-const CMR={'16:9':16/9,'4:3':4/3,'9:16':9/16,'3:4':3/4,'1:1':1};let CAM=null;
+const CMR={'16:9':9/16,'4:3':3/4,'9:16':16/9,'3:4':4/3,'1:1':1};let CAM=null;
 function camR(){const c=CAM,r=CMR[c.rt];return c.m==='post'&&innerWidth>innerHeight?Math.max(r,1/r):r}
 function camLand(){return innerWidth>innerHeight}
 function newPost(rl){if(!need())return;camOpen(rl)}
 function camOpen(rl){let o=$('#cam');if(!o){o=document.createElement('div');o.id='cam';document.body.appendChild(o);o.onclick=camClick;o.onchange=camChange;addEventListener('resize',()=>{if(!CAM||$('#cam').hidden)return;camFit();if(CAM.m==='post'&&CAM.lo!==camLand()&&!CAM.rec){CAM.lo=camLand();camStart()}})}
-  CAM={m:rl?'reel':'post',fm:'user',rt:rl?'9:16':'16:9',lo:camLand(),ct:1,q:'720p',tm:0,gr:0,fl:0,dur:60};o.hidden=false;camUI();camStart()}
+  CAM={m:rl?'reel':'post',fm:'user',rt:'16:9',lo:camLand(),ct:1,q:'720p',tm:0,gr:0,fl:0,dur:60};o.hidden=false;camUI();camStart()}
 function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data-v="${v}" class="${t}">`;
   o.className=c.rec?'rec':'';
   o.innerHTML=`<div class="cmt"><button class="cmb" data-c="x">${I('back',22)}</button><button class="cmnc" data-c="nat">${I('camera',18)} Câmera do celular</button><button class="cmb ${c.fl?'on':''}" data-c="fl">${I('bolt',22)}</button><button class="cmb" data-c="pn">${I('gear',22)}</button></div>
@@ -1003,7 +1003,7 @@ function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data
 <div class="cmmd"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
 function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=(CAM.ct&&CAM.vr)?CAM.vr:camR(),W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
 function camStop(){const c=CAM;if(!c)return;if(c.rec){c.discard=1;try{c.rec.stop()}catch(e){}}clearInterval(c.iv);if(c.ms)c.ms.getTracks().forEach(t=>t.stop());c.ms=null}
-async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=Math.round(q*Math.max(r,1/r)),h=q;
+async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=r>=1?Math.round(q*r):q,h=r>=1?q:Math.round(q/r);
   try{if(!navigator.mediaDevices)throw 0;c.ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:c.fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}},audio:c.m==='reel'})}
   catch(e){c.ms=null;const s=$('#cmst');if(s)s.innerHTML=`<div class="cmfb"><p>Não consegui abrir a câmera aqui. Use a câmera do celular:</p><label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label><label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label></div>`;return}
   const v=$('#cmv');if(!v)return;v.srcObject=c.ms;v.style.transform=c.fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{});
@@ -1021,7 +1021,7 @@ function camClick(e){const t=e.target.closest('[data-c]');if(!t||!CAM)return;con
   else if(a==='ct'){c.ct=+v;camUI();camStart()}
   else if(a==='rt'||a==='q'){if(c.rec)return;c[a]=v;camUI();camStart()}
   else if(a==='dur'){c.dur=+v;t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t))}
-  else if(a==='mode'){if(c.rec||c.m===v)return;c.m=v;c.rt=v==='reel'?'9:16':'16:9';camUI();camStart()}
+  else if(a==='mode'){if(c.rec||c.m===v)return;c.m=v;c.rt='16:9';camUI();camStart()}
   else if(a==='go')camGo()}
 function camChange(e){const i=e.target;if(i.id==='cmz'){const k=CAM.ms&&CAM.ms.getVideoTracks()[0];if(k)k.applyConstraints({advanced:[{zoom:+i.value}]}).catch(()=>{});return}
   const f=i.files&&i.files[0];if(f){i.value='';camReview(f)}}
