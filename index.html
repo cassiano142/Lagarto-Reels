@@ -166,6 +166,24 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 .st.lvl .ring{background:linear-gradient(135deg,#ff2d55,#ff9500);padding:3px}
 .st.lvl small{color:#ff3b5c;font-weight:800}
 .lvtag{position:absolute;margin-top:-10px;background:#e5383b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:1px 5px}
+.lvred{color:#ff3b5c}
+.lvb{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#ff2d55 12%,var(--card));border:1px solid #ff2d5544}
+.lvb span{font-weight:600;min-width:0}
+.lvgo{display:flex;align-items:center;gap:6px;flex:none;background:#e5383b;color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;padding:8px 12px;border-radius:99px;animation:lvpulse 1.4s infinite}
+.lvgo i{width:8px;height:8px;border-radius:50%;background:#fff;animation:lvblink 1s infinite}
+@keyframes lvpulse{0%{box-shadow:0 0 0 0 #ff2d5599}70%{box-shadow:0 0 0 10px #ff2d5500}100%{box-shadow:0 0 0 0 #ff2d5500}}
+@keyframes lvblink{0%,100%{opacity:1}50%{opacity:.25}}
+#lvb{position:relative}
+#lvb.lvon{color:#ff3b5c}
+#lvb.lvon::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:#ff2d55;animation:lvblink 1s infinite}
+#live.sl-up{animation:lvsu .3s ease-out}#live.sl-dn{animation:lvsd .3s ease-out}
+@keyframes lvsu{from{transform:translateY(40%);opacity:0}to{transform:none;opacity:1}}
+@keyframes lvsd{from{transform:translateY(-40%);opacity:0}to{transform:none;opacity:1}}
+#live .lvch{margin-left:auto;position:relative}
+#live .lvch.dot::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#ff2d55}
+#live.lvmin #lvmsgs,#live.lvmin .lvin{display:none}
+#live .lvhint{position:absolute;left:0;right:0;top:calc(70px + env(safe-area-inset-top,0px));text-align:center;font-size:13px;opacity:.9;pointer-events:none;animation:lvhide 4s forwards}
+@keyframes lvhide{0%,70%{opacity:.9}100%{opacity:0}}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -343,7 +361,7 @@ body.ct .chh,body.ct .cin2{background:var(--cbg)}
 </head>
 <body>
 <div class="wrap">
-<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="ntb" data-a="notif" aria-label="Notificações"></button><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="stb" data-a="settings" aria-label="Configurações"></button></span></header>
+<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="lvb" data-a="lvopen" aria-label="Lives"></button><button class="ic" id="ntb" data-a="notif" aria-label="Notificações"></button><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="stb" data-a="settings" aria-label="Configurações"></button></span></header>
 <main id="app"><div class="splash"><img src="logo.png" alt=""><b>Lagarto Reels</b><div class="lbar"><i></i></div></div></main>
 </div>
 <nav class="bar"></nav>
@@ -456,6 +474,8 @@ function ctSet(id){if(!cu||!CTH.some(x=>x.id===id))return;const k=ctKey(cu),d={t
   closeM();ctApply();fillChat();toast('Tema da conversa alterado');
   Promise.resolve(db.doc('chatthemes/'+k).set(d)).then(()=>{if(RL.chatthemes)RL.chatthemes()}).catch(e=>console.warn('chatthemes não sincronizou',e))}
 PA.clock='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+PA.live='<circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19a10 10 0 0 1 0-14"/>';
+PA.chatdots='<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><circle cx="8.5" cy="12" r=".9" fill="currentColor"/><circle cx="12" cy="12" r=".9" fill="currentColor"/><circle cx="15.5" cy="12" r=".9" fill="currentColor"/>';
 PA.edit='<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>';
 PA.copy='<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>';
 const SELM=new Set();let SELH='',mlT=0,mlX=0,mlY=0,mlF=false;
@@ -607,10 +627,10 @@ function mnPick(u){const b=$('#mnbox'),el=b&&document.getElementById(b.dataset.f
 /* ===== LIVE ===== */
 let LIVE=null,LVS={},LVP=null,LVSG='',LVT=0,LVET=0;
 const LVMAX=8,LVEM=['❤️','😂','🔥','👏','😮','🦎'];
-function lvDisc(){if(LVP||!me||typeof sb==='undefined')return;
+function lvDisc(){const hb=$('#lvb');if(hb&&!hb.innerHTML)hb.innerHTML=I('live',22);if(LVP||!me||typeof sb==='undefined')return;
   try{LVP=sb.channel('lagarto-lives',{config:{presence:{key:me}}});
     LVP.on('presence',{event:'sync'},()=>{const st=LVP.presenceState(),n={};Object.keys(st).forEach(k=>{const m=(st[k]||[]).find(x=>x&&x.live);if(m&&k!==me&&P[k])n[k]=m});
-      LVS=n;const sg=Object.keys(n).sort().join();if(sg!==LVSG){LVSG=sg;if(tab==='home'&&!LIVE)render()}})
+      LVS=n;const sg=Object.keys(n).sort().join();if(sg!==LVSG){LVSG=sg;const b=$('#lvb');if(b)b.classList.toggle('lvon',!!sg);if((tab==='home'||tab==='profile')&&!LIVE)render()}})
     .subscribe(s2=>{if(s2==='SUBSCRIBED'&&LIVE&&LIVE.mine)lvTrack()})}catch(e){LVP=null}}
 function lvTrack(){try{if(LVP&&LIVE&&LIVE.mine)LVP.track({live:1,uid:me,cid:LIVE.cid,ts:LIVE.t0})}catch(e){}}
 async function lvStart(){
@@ -631,7 +651,7 @@ function lvChan(){const c=LIVE;
   const ch=c.ch=sb.channel('live-'+c.host,{config:{presence:{key:me},broadcast:{self:true}}});
   ch.on('broadcast',{event:'chat'},m=>{if(LIVE===c)lvMsg(m.payload)})
     .on('broadcast',{event:'emo'},m=>{if(LIVE===c)lvEmo(m.payload)})
-    .on('broadcast',{event:'end'},()=>{if(LIVE===c&&!c.mine)lvLeave(false,'A live acabou.')})
+    .on('broadcast',{event:'end'},()=>{if(LIVE===c&&!c.mine){const h=c.host;lvLeave(false,'A live acabou.');const nx=Object.keys(LVS).filter(x=>x!==h&&P[x])[0];if(nx)setTimeout(()=>lvWatch(nx),500)}})
     .on('presence',{event:'sync'},()=>{if(LIVE!==c)return;const st=ch.presenceState();c.viewers=Object.keys(st).filter(k=>k!==c.host).length;const n=$('#lvn');if(n)n.textContent=c.viewers})
     .subscribe(s2=>{if(s2==='SUBSCRIBED')try{ch.track({uid:me,t:Date.now()})}catch(e){}})}
 function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
@@ -639,11 +659,23 @@ function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
   o.innerHTML=`<video id="lvv" autoplay playsinline ${c.mine?'muted':''} style="${c.mine?'transform:scaleX(-1)':''}"></video>${c.mine?'':'<div class="lvw" id="lvw">Entrando na live…</div>'}
   <div class="lvtop">${av(c.host)}<b>${esc(nm(c.host))}${vb(c.host)}</b><span class="lvbadge">AO VIVO</span><span class="lvcnt">👁 <i id="lvn">0</i></span><button class="lvx" data-a="lvx" aria-label="Sair">✕</button></div>
   <div id="lvfl"></div>
-  <div class="lvbot"><div id="lvmsgs"></div><div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}</div>
+  <div class="lvbot"><div id="lvmsgs"></div><div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}<button class="lvch" data-a="lvchat" aria-label="Minimizar ou mostrar o chat">${I('chatdots',22)}</button></div>
   <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button>`:''}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
+  if(!c.mine&&Object.keys(LVS).filter(x=>x!==c.host).length)o.insertAdjacentHTML('beforeend','<div class="lvhint">⇅ Deslize pra ver outras lives</div>');
+  let ty=null;o.addEventListener('touchstart',e=>{ty=e.target.closest('.lvbot,.lvtop')?null:e.touches[0].clientY},{passive:true});
+  o.addEventListener('touchend',e=>{if(ty==null||!LIVE||LIVE.mine)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70)lvSwitch(dy<0?1:-1)},{passive:true});
   document.body.append(o);const v=$('#lvv');if(c.mine){v.srcObject=c.ms;v.play().catch(()=>{})}c.vel=v}
+const lvList=()=>Object.keys(LVS).filter(u=>P[u]&&!hid(u)).sort((a,b)=>(LVS[b].ts||0)-(LVS[a].ts||0));
+function lvSwitch(dir){const c=LIVE;if(!c||c.mine)return;const l=lvList(),i=l.indexOf(c.host);
+  const ni=i<0?(dir>0?0:l.length-1):i+dir;if(ni<0||ni>=l.length){toast(l.length>1||i<0?'Não há mais lives.':'Só tem uma live agora.');return}
+  const h=l[ni];lvLeave(true);lvWatch(h);const o=$('#live');if(o)o.classList.add(dir>0?'sl-up':'sl-dn')}
+function lvOpen(){if(LIVE){return}const l=lvList();
+  if(!l.length){modal(`<div style="text-align:center;padding:10px 4px"><div style="font-size:44px">🔴</div><h3 style="margin:6px 0">Ninguém está ao vivo agora</h3><p class="mut" style="margin:0 0 14px">Quando alguém começar uma live, ela aparece aqui. Você pode deslizar pra ver outras lives.</p><button class="btn" data-a="lvstart2">Começar minha live</button></div>`);return}
+  lvWatch(l[0])}
+function lvChatTog(){const o=$('#live');if(!o)return;o.classList.toggle('lvmin');const b=o.querySelector('.lvch');if(b)b.classList.remove('dot')}
+function lvBanner(u){return `<div class="lvb"><span><a class="mn" data-a="prof" data-id="${esc(u)}">@${esc(P[u].name)}</a> está em live</span><button class="lvgo" data-a="lvwatch" data-id="${esc(u)}"><i></i>AO VIVO</button></div>`}
 function lvMsg(m){const c=LIVE;if(!c||!m||!m.text)return;c.msgs.push({uid:m.uid,text:String(m.text).slice(0,150)});if(c.msgs.length>40)c.msgs.shift();
-  const el=$('#lvmsgs');if(el)el.innerHTML=c.msgs.slice(-7).map(x=>`<div><b>${esc(nm(x.uid))}${vb(x.uid)}</b>${esc(x.text)}</div>`).join('')}
+  const lo=$('#live');if(lo&&lo.classList.contains('lvmin')){const lb=lo.querySelector('.lvch');if(lb)lb.classList.add('dot')}const el=$('#lvmsgs');if(el)el.innerHTML=c.msgs.slice(-7).map(x=>`<div><b>${esc(nm(x.uid))}${vb(x.uid)}</b>${esc(x.text)}</div>`).join('')}
 function lvEmo(m){const f=$('#lvfl');if(!f||!m||!LVEM.includes(m.e))return;const e=document.createElement('span');e.textContent=m.e;e.style.right=Math.floor(Math.random()*36)+'px';f.append(e);setTimeout(()=>e.remove(),2700)}
 function lvSend(){const i=$('#lvi'),c=LIVE;if(!i||!c||!c.ch)return;const t=i.value.trim();if(!t)return;if(Date.now()-(c.ls||0)<700)return;c.ls=Date.now();
   try{c.ch.send({type:'broadcast',event:'chat',payload:{uid:me,text:t}})}catch(e){}i.value=''}
@@ -769,7 +801,7 @@ function render(){
   const keep=pv&&{s:pv.getAttribute('src'),t:pv.currentTime},rl0=a.querySelector('.rl'),st=rl0?rl0.scrollTop:0;
   let h='';
   if(tab==='home'){
-    const st=`<a class="st" data-a="lvstart"><span class="ring"><span class="av" style="font-size:26px">🔴</span></span><small>Ao vivo</small></a>`+Object.keys(LVS).filter(u=>!hid(u)).map(u=>`<a class="st lvl" data-a="lvwatch" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>🔴 ${esc(P[u].name)}</small></a>`).join('')+Object.keys(P).filter(u=>!hid(u)).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
+    const st=`<a class="st" data-a="lvstart"><span class="ring"><span class="av" style="font-size:26px">🔴</span></span><small>Ao vivo</small></a>`+Object.keys(LVS).filter(u=>!hid(u)).map(u=>`<a class="st lvl" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('')+Object.keys(P).filter(u=>!hid(u)).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
     const list=POSTS.filter(p=>p.type!=='video'&&(filt==='all'||p.uid===me||amF(p.uid)));
     h=`${st?`<div class="stories">${st}</div>`:''}<div class="chips"><button class="chip ${filt==='all'?'on':''}" data-a="chip" data-id="all">Todos</button><button class="chip ${filt==='fol'?'on':''}" data-a="chip" data-id="fol">Seguindo</button></div>`+(list.length?list.map(card).join(''):`<div class="empty">Nenhuma foto ainda.<br>Toque em ➕ e seja o primeiro lagarto a postar! 🦎<br><span class="mut">Os vídeos ficam na aba 🎬 Reels.</span></div>`);
   }else if(tab==='explore'){
@@ -791,8 +823,9 @@ function render(){
       const mine=u===me,ps=POSTS.filter(p=>p.uid===u),sv=POSTS.filter(p=>SV.some(s=>s.pid===p.id&&s.uid===me));
       const list=pt==='saved'&&mine?sv:pt==='reels'?ps.filter(p=>p.type==='video'):ps.filter(p=>p.type!=='video');
       h=`<div class="pr"><div class="row"><button class="avb" data-a="avview" data-id="${esc(u)}" aria-label="Ver foto de perfil">${av(u,'l')}</button><div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
-      <p><b>${esc(P[u].name)}${vb(u)}${isPriv(u)?' '+I('lock',14):''}</b><br>${esc(P[u].bio||'')}</p>
+      <p><b class="${LVS[u]?'lvred':''}">${esc(P[u].name)}${vb(u)}${isPriv(u)?' '+I('lock',14):''}</b><br>${esc(P[u].bio||'')}</p>
       ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${fst(u)!=='none'?'g':''}" data-a="follow" data-id="${esc(u)}">${{ok:'Seguindo',pending:'Solicitado',none:'Seguir'}[fst(u)]}</button>${fst(u)==='ok'?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
+      ${LVS[u]&&!mine?lvBanner(u):''}
       <div class="tabs2"><button class="${pt==='posts'?'on':''}" data-a="pt" data-id="posts">${I('grid',17)} Posts</button><button class="${pt==='reels'?'on':''}" data-a="pt" data-id="reels">${I('reels',17)} Reels</button>${mine?`<button class="${pt==='saved'?'on':''}" data-a="pt" data-id="saved">${I('bookmark',17)} Salvos</button>`:''}</div></div>
       ${!mine&&!canSee(u)?`<div class="empty">${I('lock',34)}<br><b>Esta conta é privada</b><br>Siga para ver as publicações.</div>`:list.length?`<div class="grid">${list.map(gi).join('')}</div>`:'<div class="empty">Nada por aqui ainda.</div>'}`;
     }
@@ -974,6 +1007,9 @@ document.addEventListener('click',e=>{
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
   else if(a==='lvstart')lvStart();
+  else if(a==='lvstart2'){closeM();lvStart()}
+  else if(a==='lvopen')lvOpen();
+  else if(a==='lvchat')lvChatTog();
   else if(a==='lvwatch')lvWatch(id);
   else if(a==='lvx'){if(LIVE&&LIVE.mine){if(confirm('Encerrar a live?'))lvLeave(true,'Live encerrada.')}else lvLeave(true)}
   else if(a==='lvsend')lvSend();
