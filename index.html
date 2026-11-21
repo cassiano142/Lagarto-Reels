@@ -738,7 +738,7 @@ function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
   if(!c.mine&&Object.keys(LVS).filter(x=>x!==c.host).length)o.insertAdjacentHTML('beforeend','<div class="lvhint">⇅ Deslize pra ver outras lives</div>');
   let ty=null;o.addEventListener('touchstart',e=>{ty=e.target.closest('.lvbot,.lvtop')?null:e.touches[0].clientY},{passive:true});
   o.addEventListener('touchend',e=>{if(ty==null||!LIVE||LIVE.mine)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70)lvSwitch(dy<0?1:-1)},{passive:true});
-  document.body.append(o);const v=$('#lvv');if(c.mine){c.vr=0;v.srcObject=c.ms;v.style.objectFit=c.ct?'contain':'cover';v.onloadedmetadata=()=>{c.vr=v.videoWidth/v.videoHeight;camFit()};v.play().catch(()=>{})}c.vel=v}
+  document.body.append(o);const v=$('#lvv');if(c.mine){c.vr=0;v.srcObject=c.ms;v.style.objectFit=c.ct?'contain':'cover';v.onloadedmetadata=()=>{c.vr=v.videoWidth/v.videoHeight;camFit()};try{const t0=c.ms.getVideoTracks()[0],g=t0.getSettings();if(r<1&&g.width&&g.height&&g.width>g.height)t0.applyConstraints({width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}}).catch(()=>{})}catch(e){}v.play().catch(()=>{})}c.vel=v}
 const lvList=()=>Object.keys(LVS).filter(u=>P[u]&&!hid(u)).sort((a,b)=>(LVS[b].ts||0)-(LVS[a].ts||0));
 function lvSwitch(dir){const c=LIVE;if(!c||c.mine)return;const l=lvList(),i=l.indexOf(c.host);
   const ni=i<0?(dir>0?0:l.length-1):i+dir;if(ni<0||ni>=l.length){toast(l.length>1||i<0?'Não há mais lives.':'Só tem uma live agora.');return}
@@ -771,7 +771,7 @@ function lvZoomInit(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTr
 function lvZoomTog(){const c=LIVE;if(!c||!c.mine)return;lvZoomInit();if(!c.zoomOk){toast('Essa câmera não permite ajustar o zoom. Tente a câmera de trás.');return}const z=$('#lvz');if(z)z.hidden=!z.hidden}
 function lvZoom(v){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(t)t.applyConstraints({advanced:[{zoom:+v}]}).catch(()=>{})}
 const LVR={'9:16':9/16,'3:4':3/4,'1:1':1,'4:3':4/3,'16:9':16/9},LVQ={'480p':480,'720p':720,'1080p':1080};
-function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h}}}
+function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}}}
 async function lvRecam(fm){const c=LIVE;if(!c||!c.mine)return false;
   try{const n=await navigator.mediaDevices.getUserMedia({video:lvCons(fm,c)}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];
     Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
@@ -1001,9 +1001,9 @@ function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data
 <div class="cmbt">${c.m==='reel'?`<div class="cmdu">${[15,30,60,90].map(s=>`<button data-c="dur" data-v="${s}" class="${c.dur===s?'on':''}">${s}s</button>`).join('')}</div>`:''}
 <div class="cmsh"><label class="cmgl">${I('image',22)}<input type="file" id="cmg" accept="${c.m==='reel'?'video/*':'image/*,video/*'}" hidden></label><button class="cmsb" data-c="go"><i></i></button><button class="cmb" data-c="flip">${I('flip',22)}</button></div>
 <div class="cmmd"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
-function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=(CAM.ct&&CAM.vr)?CAM.vr:camR(),W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
+function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;f.style.width='100%';f.style.height='100%';f.style.borderRadius='0'}
 function camStop(){const c=CAM;if(!c)return;if(c.rec){c.discard=1;try{c.rec.stop()}catch(e){}}clearInterval(c.iv);if(c.ms)c.ms.getTracks().forEach(t=>t.stop());c.ms=null}
-async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=c.ct?Math.round(q*16/9):(r>=1?Math.round(q*r):q),h=c.ct?q:(r>=1?q:Math.round(q/r));
+async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;
   try{if(!navigator.mediaDevices)throw 0;c.ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:c.fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}},audio:c.m==='reel'})}
   catch(e){c.ms=null;const s=$('#cmst');if(s)s.innerHTML=`<div class="cmfb"><p>Não consegui abrir a câmera aqui. Use a câmera do celular:</p><label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label><label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label></div>`;return}
   const v=$('#cmv');if(!v)return;v.srcObject=c.ms;v.style.transform=c.fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{});
