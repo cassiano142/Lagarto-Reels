@@ -140,7 +140,14 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #mnbox button+button{border-top:1px solid var(--bd)}
 .mnl{font-size:13px;margin-top:3px;color:var(--mut)}
 #live{position:fixed;inset:0;z-index:88;background:#000;color:#fff;overflow:hidden}
-#live video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+#live video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#live.fill video{object-fit:cover}
+#live .lvfm{margin-bottom:8px;background:#000a;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+#live .lvfm[hidden]{display:none}
+#live .lvfr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#live .lvfr b{font-size:12px;opacity:.8;width:74px}
+#live .lvfr button{background:#ffffff26;color:#fff;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+#live .lvfr button.on{background:#fff;color:#111}
 #live .lvw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:30px;background:#000a}
 #live .lvtop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 30px;background:linear-gradient(#000a,transparent)}
 #live .lvtop .av{width:36px;height:36px;font-size:18px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff26}
@@ -393,6 +400,7 @@ const dd=d=>typeof d.data==='function'?d.data():d.data;
 
 const PA={home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',reels:'<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 9h18M9 3l3 6M15 3l3 6"/><path d="m10.5 12.5 4 2.5-4 2.5z" fill="currentColor"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/>',plus:'<path d="M12 5v14M5 12h14"/>',heart:'<path d="M12 21s-8.5-5.100-8.500-11.200A4.600 4.600 0 0 1 12 7.200a4.600 4.600 0 0 1 8.500 2.600C20.500 15.900 12 21 12 21z"/>',comment:'<path d="M21 12a8 8 0 0 1-11.700 7.100L3 21l1.900-5.500A8 8 0 1 1 21 12z"/>',share:'<path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/>',bookmark:'<path d="M6 3h12v18l-6-4.500L6 21z"/>',bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2.500 7.500 2.500 7.500h-17S6 15 6 9z"/><path d="M10 20a2.200 2.200 0 0 0 4 0"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>',camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>',trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',more:'<circle cx="5" cy="12" r="1.600" fill="currentColor"/><circle cx="12" cy="12" r="1.600" fill="currentColor"/><circle cx="19" cy="12" r="1.600" fill="currentColor"/>',vol:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.500 8.500a5 5 0 0 1 0 7M19 6a8.500 8.500 0 0 1 0 12"/>',mute:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="m17 9 5 6M22 9l-5 6"/>',back:'<path d="m15 5-7 7 7 7"/>',upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/>',image:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.800"/><path d="m21 16-5-5-8 8"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="1.500"/><rect x="14" y="3" width="7" height="7" rx="1.500"/><rect x="3" y="14" width="7" height="7" rx="1.500"/><rect x="14" y="14" width="7" height="7" rx="1.500"/>'};
 const I=(n,z=24,sw=2)=>`<svg class="i" viewBox="0 0 24 24" width="${z}" height="${z}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PA[n]}</svg>`;
+PA.ratio='<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v-.01M17 14v.01"/>';
 PA.gear='<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>';
 PA.sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
 PA.lock='<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
@@ -677,8 +685,8 @@ function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
   o.innerHTML=`<video id="lvv" autoplay playsinline ${c.mine?'muted':''} style="${c.mine?'transform:scaleX(-1)':''}"></video>${c.mine?'':'<div class="lvw" id="lvw">Entrando na live…</div>'}
   <div class="lvtop">${av(c.host)}<b>${esc(nm(c.host))}${vb(c.host)}</b><span class="lvbadge">AO VIVO</span><span class="lvcnt">👁 <i id="lvn">0</i></span><button class="lvx" data-a="lvx" aria-label="Sair">✕</button></div>
   <div id="lvfl"></div><div id="lvbig"></div><div id="lvbn"></div>
-  <div class="lvbot"><div id="lvmsgs"></div><div class="lvemp" id="lvemp" hidden>${EMOTES.map(x=>`<button data-a="lvemote" data-id="${x[0]}">${x[0]}<small>${x[1]}</small></button>`).join('')}</div>${c.mine?`<div class="lvz" id="lvz" hidden><span>${I('search',18)}</span><input type="range" id="lvzr" min="1" max="1" step="0.1" value="1"></div>`:''}<div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}<button data-a="lvgift" aria-label="Emotes">🎁</button><button class="lvch" data-a="lvchat" aria-label="Minimizar ou mostrar o chat">${I('chatdots',22)}</button></div>
-  <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button><button class="lvmic lvbtn" data-a="lvzoom" aria-label="Zoom">${I('search',20)}</button><button class="lvmic lvbtn" data-a="lvflip" aria-label="Virar câmera">${I('flip',20)}</button>`:''}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
+  <div class="lvbot"><div id="lvmsgs"></div><div class="lvemp" id="lvemp" hidden>${EMOTES.map(x=>`<button data-a="lvemote" data-id="${x[0]}">${x[0]}<small>${x[1]}</small></button>`).join('')}</div>${c.mine?`<div class="lvz" id="lvz" hidden><span>${I('search',18)}</span><input type="range" id="lvzr" min="1" max="1" step="0.1" value="1"></div><div class="lvfm" id="lvfm" hidden><div class="lvfr"><b>Proporção</b>${Object.keys(LVR).map(k=>`<button data-a="lvrt" data-id="${k}">${k}</button>`).join('')}</div><div class="lvfr"><b>Qualidade</b>${Object.keys(LVQ).map(k=>`<button data-a="lvq" data-id="${k}">${k}</button>`).join('')}</div><div class="lvfr"><b>Tela</b><button data-a="lvfit" id="lvfitb">Caber</button></div></div>`:''}<div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}<button data-a="lvgift" aria-label="Emotes">🎁</button><button class="lvch" data-a="lvchat" aria-label="Minimizar ou mostrar o chat">${I('chatdots',22)}</button></div>
+  <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button><button class="lvmic lvbtn" data-a="lvzoom" aria-label="Zoom">${I('search',20)}</button><button class="lvmic lvbtn" data-a="lvflip" aria-label="Virar câmera">${I('flip',20)}</button><button class="lvmic lvbtn" data-a="lvfmt" aria-label="Proporção e qualidade">${I('ratio',20)}</button>`:`<button class="lvmic lvbtn" data-a="lvfit" aria-label="Ajustar tela">${I('ratio',20)}</button>`}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
   if(!c.mine&&Object.keys(LVS).filter(x=>x!==c.host).length)o.insertAdjacentHTML('beforeend','<div class="lvhint">⇅ Deslize pra ver outras lives</div>');
   let ty=null;o.addEventListener('touchstart',e=>{ty=e.target.closest('.lvbot,.lvtop')?null:e.touches[0].clientY},{passive:true});
   o.addEventListener('touchend',e=>{if(ty==null||!LIVE||LIVE.mine)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70)lvSwitch(dy<0?1:-1)},{passive:true});
@@ -714,12 +722,25 @@ function lvZoomInit(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTr
   c.zoomOk=!!caps.zoom;if(c.zoomOk){r.min=caps.zoom.min;r.max=caps.zoom.max;r.step=caps.zoom.step||0.1;let v=1;try{v=t.getSettings().zoom||caps.zoom.min}catch(e){}r.value=v}}
 function lvZoomTog(){const c=LIVE;if(!c||!c.mine)return;lvZoomInit();if(!c.zoomOk){toast('Essa câmera não permite ajustar o zoom. Tente a câmera de trás.');return}const z=$('#lvz');if(z)z.hidden=!z.hidden}
 function lvZoom(v){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(t)t.applyConstraints({advanced:[{zoom:+v}]}).catch(()=>{})}
-async function lvFlip(){const c=LIVE;if(!c||!c.mine)return;const fm=c.fm==='environment'?'user':'environment';
-  try{const n=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:fm},width:{ideal:720},height:{ideal:1280},aspectRatio:{ideal:9/16}}}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];lvPortrait(t);
+const LVR={'9:16':9/16,'3:4':3/4,'1:1':1,'4:3':4/3,'16:9':16/9},LVQ={'480p':480,'720p':720,'1080p':1080};
+function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}}}
+async function lvRecam(fm){const c=LIVE;if(!c||!c.mine)return false;
+  try{const n=await navigator.mediaDevices.getUserMedia({video:lvCons(fm,c)}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];
     Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
     c.ms.removeTrack(old);old.stop();c.ms.addTrack(t);c.fm=fm;const v=$('#lvv');if(v){v.srcObject=c.ms;v.style.transform=fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{})}
-    const z=$('#lvz');if(z)z.hidden=true;lvZoomInit()}
-  catch(e){toast('Não foi possível virar a câmera.')}}
+    const z=$('#lvz');if(z)z.hidden=true;lvZoomInit();return true}
+  catch(e){toast('Não foi possível trocar a câmera.');return false}}
+async function lvFlip(){const c=LIVE;if(!c||!c.mine)return;await lvRecam(c.fm==='environment'?'user':'environment')}
+async function lvFmtApply(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(!t)return;const r=LVR[c.rt||'9:16'],cs=lvCons(c.fm||'user',c);delete cs.facingMode;
+  let ok=false;try{await t.applyConstraints(cs);const g=t.getSettings();ok=!!(g.width&&g.height)&&Math.abs(g.width/g.height-r)/r<.08}catch(e){}
+  if(!ok&&!(await lvRecam(c.fm||'user')))return;
+  const v=$('#lvv');if(v)v.play().catch(()=>{});const z=$('#lvz');if(z)z.hidden=true;lvZoomInit();lvFmtMark()}
+function lvFmtMark(){const c=LIVE,o=$('#live');if(!c||!o)return;o.querySelectorAll('[data-a="lvrt"]').forEach(b=>b.classList.toggle('on',b.dataset.id===(c.rt||'9:16')));
+  o.querySelectorAll('[data-a="lvq"]').forEach(b=>b.classList.toggle('on',b.dataset.id===(c.q||'720p')));const f=$('#lvfitb');if(f){f.textContent=o.classList.contains('fill')?'Preencher':'Caber';f.classList.add('on')}}
+function lvFmtTog(){const c=LIVE;if(!c||!c.mine)return;const p=$('#lvfm');if(!p)return;p.hidden=!p.hidden;lvFmtMark()}
+function lvFit(){const o=$('#live');if(!o)return;o.classList.toggle('fill');lvFmtMark();toast(o.classList.contains('fill')?'Preenchendo a tela (pode cortar as bordas)':'Imagem inteira (sem cortar)')}
+function lvRt(k){const c=LIVE;if(!c||!c.mine||!LVR[k])return;c.rt=k;lvFmtApply()}
+function lvQ(k){const c=LIVE;if(!c||!c.mine||!LVQ[k])return;c.q=k;lvFmtApply()}
 function lvMic(){const c=LIVE;if(!c||!c.mine)return;c.mute=!c.mute;c.ms.getAudioTracks().forEach(t=>t.enabled=!c.mute);const b=$('#live .lvmic');if(b)b.classList.toggle('off',c.mute)}
 function lvLeave(notify,note){const c=LIVE;if(!c)return;LIVE=null;clearInterval(c.jt);clearInterval(LVT);
   if(c.mine){try{c.ch.send({type:'broadcast',event:'end',payload:{}})}catch(e){}try{if(LVP)LVP.untrack()}catch(e){}}
@@ -1054,6 +1075,10 @@ document.addEventListener('click',e=>{
   else if(a==='lvemote')lvEmoteSend(id);
   else if(a==='lvzoom')lvZoomTog();
   else if(a==='lvflip')lvFlip();
+  else if(a==='lvfmt')lvFmtTog();
+  else if(a==='lvfit')lvFit();
+  else if(a==='lvrt')lvRt(id);
+  else if(a==='lvq')lvQ(id);
   else if(a==='lvwatch')lvWatch(id);
   else if(a==='lvx'){if(LIVE&&LIVE.mine){if(confirm('Encerrar a live?'))lvLeave(true,'Live encerrada.')}else lvLeave(true)}
   else if(a==='lvsend')lvSend();
