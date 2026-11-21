@@ -411,6 +411,15 @@ function msgDelDo(all){const ms=selMsgs();if(!ms.length)return;const ids=ms.map(
 function msgEdit(){const ms=selMsgs();if(ms.length!==1)return;const m=ms[0];if(m.from!==me||m.k||!m.text)return;
   modal(`<h3 style="margin:0 0 10px">Editar mensagem</h3><input class="sr" id="mei" maxlength="500" value="${esc(m.text)}" autocomplete="off" style="width:100%;margin:0 0 10px"><button class="btn" data-a="mesave" data-id="${esc(String(m.id))}">Salvar</button>`);
   const i=$('#mei');i.addEventListener('keydown',e=>{if(e.key==='Enter')msgSave(m.id)});setTimeout(()=>{i.focus();i.setSelectionRange(i.value.length,i.value.length)},50)}
+function postMenu(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
+  modal(`<h3 style="margin:0 0 12px">Opções da publicação</h3><div style="display:grid;gap:8px"><button class="btn" data-a="pedit" data-id="${esc(id)}">Editar legenda</button><button class="btn g" style="color:#ed4956" data-a="pdelask" data-id="${esc(id)}">Excluir</button></div>`)}
+function postEdit(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
+  modal(`<h3 style="margin:0 0 10px">Editar publicação</h3><textarea class="sr" id="pei" maxlength="2200" rows="4" placeholder="Escreva uma legenda…" style="width:100%;margin:0 0 10px;resize:vertical;font:inherit">${esc(p.cap||'')}</textarea><button class="btn" data-a="pesave" data-id="${esc(id)}">Salvar</button>`);
+  setTimeout(()=>{const e=$('#pei');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},50)}
+function postSave(id){const p=POSTS.find(x=>x.id===id),t=(($('#pei')||{}).value||'').trim();if(!p||p.uid!==me)return;
+  if(t===(p.cap||'')){closeM();return}
+  const d=Object.assign({},p);delete d.id;d.cap=t;d.ed=1;p.cap=t;p.ed=1;closeM();render();w(db.doc('posts/'+id).set(d));toast('Publicação editada')}
+function postDelAsk(id){modal(`<h3 style="margin:0 0 6px">Excluir publicação?</h3><p class="mut" style="margin:0 0 14px">Isso não pode ser desfeito.</p><div style="display:grid;gap:8px"><button class="btn" style="background:#ed4956" data-a="pdelok" data-id="${esc(id)}">Excluir</button><button class="btn g" data-a="close">Cancelar</button></div>`)}
 function msgSave(id){const m=MS.find(x=>String(x.id)===String(id)),t=(($('#mei')||{}).value||'').trim();if(!m||!t){toast('Escreva a mensagem.');return}
   if(t===m.text){closeM();return}
   const d=Object.assign({},m);delete d.id;d.text=t;d.ed=1;m.text=t;m.ed=1;SELM.clear();closeM();fillChat();w(db.doc('messages/'+id).set(d))}
@@ -446,10 +455,10 @@ function small(f,max=640){return new Promise((ok,no)=>{const i=new Image();i.onl
 function card(p){
   const m=p.type==='video'?`<video src="${esc(p.url)}" controls loop playsinline preload="metadata"></video>`:`<img src="${esc(p.url)}" alt="">`;
   const n=ncm(p.id),sv=SV.some(s=>s.pid===p.id&&s.uid===me);
-  return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="del" data-id="${p.id}">${I('trash',20)}</button>`:''}</div>
+  return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="pmenu" data-id="${p.id}" aria-label="Opções">${I('more',20)}</button>`:''}</div>
   <div class="md" data-a="dbl" data-id="${p.id}">${m}</div>
   <div class="ac"><button class="ic ${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',26)}</button><button class="ic" data-a="open" data-id="${p.id}">${I('comment',26)}</button><button class="ic" data-a="share" data-id="${p.id}">${I('share',26)}</button><button class="ic r ${sv?'sv':''}" data-a="save" data-id="${p.id}">${I('bookmark',26)}</button></div>
-  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${esc(p.cap)}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
+  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${esc(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
 }
 const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img src="${esc(p.url)}" alt="">`}</a>`;
 
@@ -628,6 +637,11 @@ document.addEventListener('click',e=>{
   else if(a==='mdno')closeM();
   else if(a==='msgedit')msgEdit();
   else if(a==='mesave')msgSave(id);
+  else if(a==='pmenu')postMenu(id);
+  else if(a==='pedit')postEdit(id);
+  else if(a==='pesave')postSave(id);
+  else if(a==='pdelask')postDelAsk(id);
+  else if(a==='pdelok'){closeM();w(db.doc('posts/'+id).delete());toast('Publicação excluída')}
   else if(a==='msgcopy')msgCopy();
   else if(a==='gedit')gEdit(id);
   else if(a==='gedok')gEdSave(id);
