@@ -94,6 +94,28 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 .lbar i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,var(--ac),#f5c518);animation:lb 1.1s ease-in-out infinite}
 @keyframes lb{0%{transform:translateX(-100%)}100%{transform:translateX(450%)}}
 @keyframes spl{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.tpr{display:flex;justify-content:flex-start;margin:3px 0;animation:tpin .25s ease-out}
+.tpr small{display:block;margin:0 8px 2px;font-weight:700;opacity:.7}
+.tp{display:inline-flex;align-items:center;gap:5px;padding:13px 16px;border-radius:20px}
+.tp i{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.45;animation:tpd 1.2s infinite ease-in-out}
+.tp i:nth-child(2){animation-delay:.18s}.tp i:nth-child(3){animation-delay:.36s}
+@keyframes tpd{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}
+@keyframes tpin{from{opacity:0;transform:translateY(8px) scale(.85)}to{opacity:1;transform:none}}
+.csh{text-align:center;padding:4px 0 10px}.csh b{display:block;font-size:20px;margin-top:8px}
+.csq{display:flex;justify-content:center;gap:26px;padding:6px 0 14px}
+.csq button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:600;min-width:64px}
+.csq button span.o{width:46px;height:46px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center}
+.csl{border-top:1px solid var(--bd)}
+.csl button{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 4px;font-size:16px;font-weight:600;border-bottom:1px solid var(--bd)}
+.csl button small{display:block;font-weight:400;font-size:13px;color:var(--mut);margin-top:1px}
+.csl button i{margin-left:auto;font-style:normal;color:var(--mut);font-size:22px;line-height:1}
+.cnr{display:flex;align-items:center;gap:10px;padding:8px 0}.cnr input{flex:1;margin:0}
+.csr button{display:block;width:100%;text-align:left;padding:10px 6px;border-bottom:1px solid var(--bd)}
+.csr small{display:block;color:var(--mut)}
+.cftmp{text-align:center;color:var(--mut);font-size:12px;padding:0 20px 8px}
+.mrow.flash>div{animation:mfl 1.4s ease-out}@keyframes mfl{0%,60%{outline:2px solid var(--ac);outline-offset:2px}100%{outline:2px solid transparent}}
+.tmo{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 4px;border-bottom:1px solid var(--bd);font-size:16px;font-weight:600}
+.tmo i{margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--mut)}.tmo.on i{border:6px solid var(--ac)}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -382,6 +404,7 @@ function ctSet(id){if(!cu||!CTH.some(x=>x.id===id))return;const k=ctKey(cu),d={t
   CT=CT.filter(x=>x.id!==k).concat([Object.assign({id:k},d)]);
   closeM();ctApply();fillChat();toast('Tema da conversa alterado');
   Promise.resolve(db.doc('chatthemes/'+k).set(d)).then(()=>{if(RL.chatthemes)RL.chatthemes()}).catch(e=>console.warn('chatthemes não sincronizou',e))}
+PA.clock='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
 PA.edit='<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>';
 PA.copy='<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>';
 const SELM=new Set();let SELH='',mlT=0,mlX=0,mlY=0,mlF=false;
@@ -425,13 +448,55 @@ function msgSave(id){const m=MS.find(x=>String(x.id)===String(id)),t=(($('#mei')
   const d=Object.assign({},m);delete d.id;d.text=t;d.ed=1;m.text=t;m.ed=1;SELM.clear();closeM();fillChat();w(db.doc('messages/'+id).set(d))}
 function msgCopy(){const t=selMsgs().map(m=>m.text).join('\n');SELM.clear();selUI();
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado')).catch(()=>toast('Não foi possível copiar.'))}
+/* ===== CONFIGURAÇÕES DA CONVERSA ===== */
+let CS=[],CLN=new Set();
+const csGet=u=>{const r=CS.find(x=>x.id===ctKey(u));return r||{}};
+const cnm=u=>((csGet(cu).nicks||{})[u])||nm(u);
+const TMO=[[0,'Desativado'],[864e5,'24 horas'],[6048e5,'7 dias']];
+const tmoLbl=u=>(TMO.find(x=>x[0]===(csGet(u).tmp||0))||TMO[0])[1];
+function csSet(patch){if(!cu)return;const k=ctKey(cu),d=Object.assign({},csGet(cu));delete d.id;Object.assign(d,patch,{ts:Date.now(),by:me});
+  CS=CS.filter(x=>x.id!==k).concat([Object.assign({id:k},d)]);
+  Promise.resolve(db.doc('chatsettings/'+k).set(d)).then(()=>{if(RL.chatsettings)RL.chatsettings()}).catch(e=>{console.warn(e);toast('Não foi possível salvar.')})}
+function csOpen(){if(!cu)return;const g=isG(cu),ct=CTH.find(x=>x.id===ctGet(cu))||CTH[0];
+  modal(`<div class="csh">${av(cu,'l')}<b>${esc(cnm(cu))}${vb(cu)}</b></div>
+  <div class="csq"><button data-a="${g?'ginfo':'prof'}" data-id="${esc(cu)}"><span class="o">${I(g?'users':'user',22)}</span>${g?'Membros':'Perfil'}</button><button data-a="cssearch"><span class="o">${I('search',22)}</span>Pesquisar</button></div>
+  <div class="csl"><button data-a="ctpick">${I('palette',24)}<span>Tema<small>${ct.n}</small></span><i>›</i></button>
+  <button data-a="csnick">${I('edit',24)}<span>Apelidos</span><i>›</i></button>
+  <button data-a="cstmp">${I('clock',24)}<span>Mensagens temporárias<small>${tmoLbl(cu)}</small></span><i>›</i></button>
+  <button data-a="csgnew">${I('userplus',24)}<span>Criar conversa em grupo</span><i>›</i></button></div>`)}
+function csTmp(){const c=csGet(cu).tmp||0;
+  modal(`<h3 style="margin:0 0 4px">Mensagens temporárias</h3><p class="mut" style="margin:0 0 8px">As mensagens enviadas depois que você ativar somem sozinhas depois do tempo escolhido. Vale para as duas pessoas.</p>${TMO.map(x=>`<button class="tmo ${x[0]===c?'on':''}" data-a="cstmpset" data-id="${x[0]}">${x[1]}<i></i></button>`).join('')}`)}
+function csTmpSet(v){v=+v||0;csSet({tmp:v,tmpAt:v?Date.now():0});closeM();fillChat();toast(v?'Mensagens temporárias ativadas':'Mensagens temporárias desativadas')}
+function csNick(){const us=isG(cu)?((gOf(cu)||{}).members||[]):[me,cu],nk=csGet(cu).nicks||{};
+  modal(`<h3 style="margin:0 0 4px">Apelidos</h3><p class="mut" style="margin:0 0 8px">Todos na conversa veem os apelidos.</p>${us.map(u=>`<div class="cnr">${av(u,'s')}<input class="sr" data-u="${esc(u)}" maxlength="30" placeholder="${esc(nm(u))}" value="${esc(nk[u]||'')}" autocomplete="off"></div>`).join('')}<button class="btn" style="margin-top:10px" data-a="csnicksave">Salvar</button>`)}
+function csNickSave(){const nk={};document.querySelectorAll('#mbody .cnr input').forEach(i=>{const v=i.value.trim();if(v)nk[i.dataset.u]=v});csSet({nicks:nk});closeM();fillChat();render();toast('Apelidos salvos')}
+function csSearch(){modal(`<h3 style="margin:0 0 10px">Pesquisar na conversa</h3><input class="sr" id="csq" placeholder="Pesquisar…" autocomplete="off" style="width:100%;margin:0 0 8px"><div class="csr" id="csr"></div>`);setTimeout(()=>{const e=$('#csq');if(e)e.focus()},50)}
+function csFind(q){const el=$('#csr');if(!el)return;q=q.trim().toLowerCase();if(!q){el.innerHTML='';return}
+  const r=convVis(cu).filter(m=>m.text&&m.text.toLowerCase().includes(q)).slice(-30).reverse();
+  el.innerHTML=r.length?r.map(m=>`<button data-a="csgo" data-id="${esc(String(m.id))}"><small>${esc(m.from===me?'Você':cnm(m.from))} · ${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</small>${esc(m.text)}</button>`).join(''):'<p class="mut" style="text-align:center">Nada encontrado.</p>'}
+function csGo(id){closeM();setTimeout(()=>{const r=[...document.querySelectorAll('.mrow')].find(x=>x.dataset.mid===String(id));if(r){r.scrollIntoView({block:'center',behavior:'smooth'});r.classList.add('flash');setTimeout(()=>r.classList.remove('flash'),1600)}},80)}
+function convVis(u){const t=csGet(u).tmp||0,a=csGet(u).tmpAt||0,n=Date.now();return conv(u).filter(m=>!(t&&m.ts>=a&&n-m.ts>=t))}
+function csClean(u){const t=csGet(u).tmp||0,a=csGet(u).tmpAt||0,n=Date.now();if(!t)return;conv(u).forEach(m=>{if(m.from===me&&m.ts>=a&&n-m.ts>=t&&!CLN.has(String(m.id))){CLN.add(String(m.id));w(db.doc('messages/'+m.id).delete())}})}
+let TYP={},TCH=null,TKEY='',TRDY=false,TLAST=0,TCNT=-1;
+function typSub(){if(!cu||typeof sb==='undefined')return;const k=ctKey(cu);if(k===TKEY&&TCH)return;
+  try{if(TCH)sb.removeChannel(TCH)}catch(e){}
+  TKEY=k;TRDY=false;TYP={};TCNT=-1;
+  try{TCH=sb.channel('typing-'+k,{config:{broadcast:{self:false}}}).on('broadcast',{event:'t'},m=>{const u=m&&m.payload&&m.payload.uid;if(!u||u===me)return;TYP[u]=Date.now();typShow();setTimeout(typShow,4200)}).subscribe(st=>{TRDY=st==='SUBSCRIBED'})}catch(e){TCH=null}}
+function typSend(){const i=$('#cmi');if(!i||!TCH||!TRDY||!i.value.trim())return;const n=Date.now();if(n-TLAST<2000)return;TLAST=n;try{TCH.send({type:'broadcast',event:'t',payload:{uid:me}})}catch(e){}}
+function typShow(){const el=$('#cmsgs');if(!el)return;const old=$('#typ');if(old)old.remove();const n=Date.now();
+  const us=Object.keys(TYP).filter(u=>n-TYP[u]<4000&&u!==me);if(!us.length)return;
+  const near=el.scrollHeight-el.scrollTop-el.clientHeight<120;
+  const d=document.createElement('div');d.id='typ';d.className='tpr';
+  d.innerHTML=`<div>${isG(cu)?`<small class="mut">${us.map(u=>esc(cnm(u))).join(', ')} digitando…</small>`:''}<div class="cmo tp" aria-label="Digitando"><i></i><i></i><i></i></div></div>`;
+  el.appendChild(d);if(near)el.scrollTop=el.scrollHeight}
+function typSeen(ms){if(ms.length!==TCNT){if(TCNT>=0&&ms.length>TCNT){const l=ms[ms.length-1];if(l&&l.from!==me)delete TYP[l.from]}TCNT=ms.length}}
 function fillChat(){
-  const ms=conv(cu),el=$('#cmsgs');if(!el)return;ctApply();
-  let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(nm(cu))}</b><div class="mut">${isG(cu)?((gOf(cu)||{}).members||[]).length+' membros':esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}">${isG(cu)?'Ver membros':'Ver perfil'}</button></div>`,pv=0;
+  csClean(cu);const ms=convVis(cu),el=$('#cmsgs');if(!el)return;ctApply();
+  let h=`<div style="text-align:center;padding:18px 0">${av(cu,'l')}<br><b>${esc(cnm(cu))}</b><div class="mut">${isG(cu)?((gOf(cu)||{}).members||[]).length+' membros':esc((P[cu]&&P[cu].bio)||'')}</div><button class="chip" style="margin-top:8px" data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}">${isG(cu)?'Ver membros':'Ver perfil'}</button></div>${csGet(cu).tmp?`<div class="cftmp">${I('clock',14)} Mensagens temporárias ativadas: somem em ${tmoLbl(cu)}</div>`:''}`,pv=0;
   ms.forEach(m=>{const mine=m.from===me;if(!pv||m.ts-pv>36e5){h+=`<div class="mut" style="text-align:center;font-size:12px;margin:10px 0">${new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`}pv=m.ts;
-    const row=x=>`<div class="mrow${SELM.has(String(m.id))?' sel':''}" data-mid="${esc(String(m.id))}" style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px -12px;padding:2px 12px">${!mine&&isG(cu)?`<div><small class="mut" style="display:block;margin:0 8px 1px;font-weight:700">${esc(nm(m.from))}${vb(m.from)}</small>${x}</div>`:x}</div>`;
+    const row=x=>`<div class="mrow${SELM.has(String(m.id))?' sel':''}" data-mid="${esc(String(m.id))}" style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:3px -12px;padding:2px 12px">${!mine&&isG(cu)?`<div><small class="mut" style="display:block;margin:0 8px 1px;font-weight:700">${esc(cnm(m.from))}${vb(m.from)}</small>${x}</div>`:x}</div>`;
     h+=m.k==='i'?row(`<img class="cimg" data-a="cimg" data-url="${esc(m.url)}" src="${esc(m.url)}" alt="Foto" loading="lazy">`):m.k==='c'?row(`<div class="aud ${mine?'me':''}" style="min-width:0;gap:8px">${I(m.v?'vid':'phone',18)}<span>${m.v?'Chamada de vídeo':'Chamada de voz'}</span></div>`):m.k==='a'?row(`<div class="aud ${mine?'me':''}"><button class="aplay" data-a="aplay" data-id="${esc(m.id||m.ts)}" data-url="${esc(m.url)}" aria-label="Tocar">${I('play',20)}</button><span class="awf">${(m.w||[]).map(v=>`<i style="height:${Math.max(12,+v||12)}%"></i>`).join('')}</span><small>${fmtD(m.d||0)}</small></div>`):row(`<div class="${mine?'cmy':'cmo'}" style="max-width:78%;padding:9px 14px;border-radius:20px;overflow-wrap:anywhere">${esc(m.text)}${m.ed?'<small style="opacity:.65;margin-left:6px;font-size:11px">editada</small>':''}</div>`)});
-  el.innerHTML=h;
+  el.innerHTML=h;typSub();typSeen(ms);typShow();
   SELM.forEach(id=>{if(!ms.some(m=>String(m.id)===id))SELM.delete(id)});selUI();
   try{localStorage.setItem('seen_'+cu,String(Math.max(Date.now(),...ms.map(m=>m.ts))))}catch(e){}
   if(ms.length!==lastN){lastN=ms.length;scrollTo(0,1e9)}
@@ -482,7 +547,7 @@ function render(){
   }else if(tab==='dm'){
     h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">‹</button><b style="font-size:20px">Mensagens</b><button class="ic" style="margin-left:auto" data-a="gnew" aria-label="Novo grupo">${I('plus',24)}</button></div><input class="sr" id="dq" placeholder="Pesquisar" value="${esc(dq)}" autocomplete="off"><div class="dmn" id="dmn"></div><div class="dmt" id="dmt"></div><div id="dml"></div>`;
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(nm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="ctpick" aria-label="Tema da conversa">${I('palette',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="ctpick" aria-label="Tema da conversa">${I('palette',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(cnm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
     h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
@@ -628,7 +693,7 @@ document.addEventListener('click',e=>{
   else if(a==='gnext'){if(GS.step===1&&GS.name.trim().length<2)return;GS.step++;gStep()}
   else if(a==='gsel'){GS.sel.has(id)?GS.sel.delete(id):GS.sel.add(id);const k=t.querySelector('.gck');if(k)k.classList.toggle('on',GS.sel.has(id));if(GS.add){gChips();gList()}}
   else if(a==='gcreate')gCreate();
-  else if(a==='ginfo')gInfo(id);
+  else if(a==='ginfo'){closeM();gInfo(id)}
   else if(a==='gx')gClose();
   else if(a==='selx'){SELM.clear();selUI()}
   else if(a==='msgdel')msgDel();
@@ -675,7 +740,15 @@ document.addEventListener('click',e=>{
   else if(a==='pushoff')pushOff().then(pushUI);
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
-  else if(a==='ctpick')ctPick();
+  else if(a==='ctpick'){closeM();ctPick()}
+  else if(a==='csopen')csOpen();
+  else if(a==='csnick')csNick();
+  else if(a==='csnicksave')csNickSave();
+  else if(a==='cstmp')csTmp();
+  else if(a==='cstmpset')csTmpSet(id);
+  else if(a==='cssearch')csSearch();
+  else if(a==='csgo')csGo(id);
+  else if(a==='csgnew'){closeM();gNew()}
   else if(a==='ctset')ctSet(id);
   else if(a==='palm'){lset('palm',t.checked?'1':'0');applyTheme()}
   else if(a==='bw'){lset('bw',t.checked?'1':'0');applyTheme()}
@@ -701,7 +774,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v.matches&&v.matches('.rs video'))v.style.objectFit=v.videoHeight>=v.videoWidth?'cover':'contain'},true);
 document.addEventListener('keydown',e=>{if(e.target.id==='cmi'&&e.key==='Enter')sendm()});
-document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
+document.addEventListener('input',e=>{if(e.target.id==='cmi')typSend();if(e.target.id==='csq')csFind(e.target.value);if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const RL={};
@@ -1075,7 +1148,7 @@ function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();{const sg=Object.keys(P).filter(u=>P[u].priv).sort().join();if(sg!==psig){psig=sg;RL.posts&&RL.posts()}}if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   initCalls();sub('posts',a=>{RAW.p=a;vis()});
-  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('chatthemes',a=>CT=a);sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
+  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('chatthemes',a=>CT=a);sub('chatsettings',a=>{CS=a;if(tab==='chat'&&$('#cmsgs'))fillChat()});sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
