@@ -1003,7 +1003,7 @@ function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data
 <div class="cmmd"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
 function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=(CAM.ct&&CAM.vr)?CAM.vr:camR(),W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
 function camStop(){const c=CAM;if(!c)return;if(c.rec){c.discard=1;try{c.rec.stop()}catch(e){}}clearInterval(c.iv);if(c.ms)c.ms.getTracks().forEach(t=>t.stop());c.ms=null}
-async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=r>=1?Math.round(q*r):q,h=r>=1?q:Math.round(q/r);
+async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=c.ct?Math.round(q*16/9):(r>=1?Math.round(q*r):q),h=c.ct?q:(r>=1?q:Math.round(q/r));
   try{if(!navigator.mediaDevices)throw 0;c.ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:c.fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}},audio:c.m==='reel'})}
   catch(e){c.ms=null;const s=$('#cmst');if(s)s.innerHTML=`<div class="cmfb"><p>Não consegui abrir a câmera aqui. Use a câmera do celular:</p><label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label><label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label></div>`;return}
   const v=$('#cmv');if(!v)return;v.srcObject=c.ms;v.style.transform=c.fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{});
