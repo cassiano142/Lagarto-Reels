@@ -134,6 +134,10 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #gcall .gcp{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;max-width:340px;margin-top:16px}
 #gcall .gcp div{width:64px;font-size:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #gcall .gcp .av{width:52px;height:52px;font-size:26px;margin:0 auto 4px}
+.mn{color:var(--ac);font-weight:600}
+#mnbox{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:4px 0 8px;overflow:hidden;box-shadow:0 6px 18px #0004}
+#mnbox button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 12px;font-weight:600}
+#mnbox button+button{border-top:1px solid var(--bd)}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -341,7 +345,8 @@ function notifs(){
   const mine=new Set(POSTS.filter(p=>p.uid===me).map(p=>p.id)),n=[];
   CM.forEach(c=>{if(c.uid!==me&&mine.has(c.pid))n.push({k:'c',u:c.uid,p:c.pid,ts:c.ts,t:c.text,id:'c'+c.id})});
   LK.forEach(l=>{if(l.uid!==me&&mine.has(l.pid))n.push({k:'l',u:l.uid,p:l.pid,ts:l.ts,id:'l'+l.id})});
-  POSTS.forEach(p=>{if(p.uid!==me)n.push({k:'p',u:p.uid,p:p.id,ts:p.ts,id:'p'+p.id})});
+  CM.forEach(c=>{if(c.uid!==me&&!mine.has(c.pid)&&mentionsMe(c.text))n.push({k:'m',u:c.uid,p:c.pid,ts:c.ts,t:c.text,id:'m'+c.id,cm:1})});
+  POSTS.forEach(p=>{if(p.uid!==me){if(mentionsMe(p.cap))n.push({k:'m',u:p.uid,p:p.id,ts:p.edts||p.ts,id:'m'+p.id+(p.edts?'e'+p.edts:'')});else n.push({k:'p',u:p.uid,p:p.id,ts:p.ts,id:'p'+p.id})}});
   return n.sort((a,b)=>b.ts-a.ts).slice(0,60);
 }
 const EM=['🦎','🐊','🐸','🐢','🦖','🐍','🌴','🔥','😎','🌈','🍉','⚡'];
@@ -370,7 +375,7 @@ function badge(){
   const sn=nseen(),c=ns.filter(n=>n.ts>sn).length+reqs().length,nb=$('#ntb');
   if(nb)nb.innerHTML=I('bell')+(c?`<em class="cnt">${c>9?'9+':c}</em>`:'');
   const fr=ns.filter(n=>n.ts>loadTs&&!knownN.has(n.id));ns.forEach(n=>knownN.add(n.id));
-  if(fr.length&&tab!=='notif'){const n=fr[0],tx=nm(n.u)+(n.k==='c'?' comentou na sua publicação':n.k==='l'?' curtiu sua publicação':' postou algo novo');toast('🔔 '+tx+(fr.length>1?' (+'+(fr.length-1)+')':''));if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Lagarto Reels',{body:tx,icon:'icon-192.png'})}catch(e){}}
+  if(fr.length&&tab!=='notif'){const n=fr[0],tx=nm(n.u)+(n.k==='c'?' comentou na sua publicação':n.k==='l'?' curtiu sua publicação':n.k==='m'?' mencionou você':' postou algo novo');toast('🔔 '+tx+(fr.length>1?' (+'+(fr.length-1)+')':''));if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Lagarto Reels',{body:tx,icon:'icon-192.png'})}catch(e){}}
 }
 function fillDm(){
   const n=$('#dmn'),t=$('#dmt'),l=$('#dml');if(!n||!t||!l)return;
@@ -459,7 +464,7 @@ function postEdit(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
   setTimeout(()=>{const e=$('#pei');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},50)}
 function postSave(id){const p=POSTS.find(x=>x.id===id),t=(($('#pei')||{}).value||'').trim();if(!p||p.uid!==me)return;
   if(t===(p.cap||'')){closeM();return}
-  const d=Object.assign({},p);delete d.id;d.cap=t;d.ed=1;p.cap=t;p.ed=1;closeM();render();w(db.doc('posts/'+id).set(d));toast('Publicação editada')}
+  const d=Object.assign({},p);delete d.id;d.cap=t;d.ed=1;d.edts=Date.now();p.cap=t;p.ed=1;p.edts=d.edts;closeM();render();w(db.doc('posts/'+id).set(d));toast('Publicação editada')}
 function postDelAsk(id){modal(`<h3 style="margin:0 0 6px">Excluir publicação?</h3><p class="mut" style="margin:0 0 14px">Isso não pode ser desfeito.</p><div style="display:grid;gap:8px"><button class="btn" style="background:#ed4956" data-a="pdelok" data-id="${esc(id)}">Excluir</button><button class="btn g" data-a="close">Cancelar</button></div>`)}
 function msgSave(id){const m=MS.find(x=>String(x.id)===String(id)),t=(($('#mei')||{}).value||'').trim();if(!m||!t){toast('Escreva a mensagem.');return}
   if(t===m.text){closeM();return}
@@ -544,6 +549,29 @@ function gcUI(){let o=$('#gcall');const c=GC;if(!c){if(o)o.remove();return}
   const on=[me].concat(Object.keys(c.peers).filter(gcOn));
   o.innerHTML=`${avt}<h2>${esc(gn)}</h2><p id="gcst">${fmtD(c.sec||0)} · ${on.length} na chamada</p><div class="gcp">${on.map(u=>`<div>${av(u)}${u===me?'Você':esc(nm(u))}</div>`).join('')}</div><div class="cbt"><button class="cbn ${c.mute?'wh':''}" data-a="gcmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="gcend" aria-label="Desligar">${I('phone',28)}</button></div>`}
 window.addEventListener('pagehide',()=>{if(GC)gcLeave(true)});
+/* ===== MENÇÕES (@) ===== */
+let MNR=null,MNK='';
+const escRe=t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function mnRe(){const k=Object.keys(P).length+':'+Object.keys(P).map(u=>P[u].name).join('|').length;if(MNR&&k===MNK)return MNR;MNK=k;
+  const ns=Object.keys(P).map(u=>P[u].name).filter(Boolean).sort((a,b)=>b.length-a.length);
+  MNR=ns.length?new RegExp('@('+ns.map(escRe).join('|')+')(?![\\w\\u00C0-\\u017F])','gi'):null;return MNR}
+const uidByName=n=>Object.keys(P).find(u=>(P[u].name||'').toLowerCase()===String(n).toLowerCase());
+function mnText(t){t=String(t||'');const re=mnRe();if(!re)return esc(t);
+  let out='',i=0;re.lastIndex=0;let m;
+  while((m=re.exec(t))){const u=uidByName(m[1]);out+=esc(t.slice(i,m.index));out+=u?`<a class="mn" data-a="prof" data-id="${esc(u)}">@${esc(m[1])}</a>`:esc(m[0]);i=m.index+m[0].length}
+  return out+esc(t.slice(i))}
+function mnMentions(t){const re=mnRe(),r=new Set();if(!re||!t)return r;re.lastIndex=0;let m;while((m=re.exec(String(t)))){const u=uidByName(m[1]);if(u)r.add(u)}return r}
+const mentionsMe=t=>me&&mnMentions(t).has(me);
+function mnSuggest(el){const box=$('#mnbox');if(box)box.remove();if(!el||!me)return;
+  const pos=el.selectionStart,pre=el.value.slice(0,pos),m=pre.match(/(?:^|\s)@([^\s@]{0,20})$/);if(!m)return;
+  const f=m[1].toLowerCase(),us=Object.keys(P).filter(u=>P[u].name&&u!==me&&!P[u].oculto&&P[u].name.toLowerCase().includes(f)).sort((a,b)=>{const x=P[a].name.toLowerCase().startsWith(f),y=P[b].name.toLowerCase().startsWith(f);return x===y?P[a].name.localeCompare(P[b].name):x?-1:1}).slice(0,5);
+  if(!us.length)return;
+  const b=document.createElement('div');b.id='mnbox';b.dataset.for=el.id;
+  b.innerHTML=us.map(u=>`<button type="button" data-a="mnpick" data-id="${esc(u)}">${av(u,'s')}<span>${esc(P[u].name)}</span></button>`).join('');
+  (el.id==='ci'?el.parentElement:el).insertAdjacentElement('afterend',b)}
+function mnPick(u){const b=$('#mnbox'),el=b&&document.getElementById(b.dataset.for);if(!el||!P[u])return;
+  const pos=el.selectionStart,pre=el.value.slice(0,pos),post=el.value.slice(pos),np=pre.replace(/@([^\s@]{0,20})$/,'@'+P[u].name+' ');
+  el.value=np+post;b.remove();el.focus();try{el.setSelectionRange(np.length,np.length)}catch(e){}}
 /* ===== CONFIGURAÇÕES DA CONVERSA ===== */
 let CS=[],CLN=new Set();
 const csGet=u=>{const r=CS.find(x=>x.id===ctKey(u));return r||{}};
@@ -619,7 +647,7 @@ function card(p){
   return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="pmenu" data-id="${p.id}" aria-label="Opções">${I('more',20)}</button>`:''}</div>
   <div class="md" data-a="dbl" data-id="${p.id}">${m}</div>
   <div class="ac"><button class="ic ${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',26)}</button><button class="ic" data-a="open" data-id="${p.id}">${I('comment',26)}</button><button class="ic" data-a="share" data-id="${p.id}">${I('share',26)}</button><button class="ic r ${sv?'sv':''}" data-a="save" data-id="${p.id}">${I('bookmark',26)}</button></div>
-  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${esc(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
+  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${mnText(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
 }
 const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img src="${esc(p.url)}" alt="">`}</a>`;
 
@@ -639,14 +667,14 @@ function render(){
     h=`<input class="sr" id="sq" placeholder="Buscar no Lagarto Reels…" value="${esc(q)}"><div id="exr"></div>`;
   }else if(tab==='notif'){
     const ns=notifs();
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='m'?(n.cm?`mencionou você em um comentário: “${esc(n.t)}”`:'mencionou você em uma publicação'):n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'||n.k==='m'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
   }else if(tab==='dm'){
     h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">‹</button><b style="font-size:20px">Mensagens</b><button class="ic" style="margin-left:auto" data-a="gnew" aria-label="Novo grupo">${I('plus',24)}</button></div><input class="sr" id="dq" placeholder="Pesquisar" value="${esc(dq)}" autocomplete="off"><div class="dmn" id="dmn"></div><div class="dmt" id="dmt"></div><div id="dml"></div>`;
   }else if(tab==='chat'){
     h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(cnm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="gcall" aria-label="Chamada em grupo">${I('phone',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
-    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
+    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${mnText(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
   }else{
     const u=vu||me;
     if(!u||!P[u]){h=`<div class="empty">${me?'Crie seu perfil para aparecer aqui.':'Entre na sua conta para criar seu perfil.'}<br><br>${me?'<button class="btn" data-a="editprof">Criar perfil</button>':''}</div>`}
@@ -702,7 +730,7 @@ function openPost(id){openP=id;modal(`<div id="mcard"></div><div id="cl"></div><
 function fillPost(){
   const p=POSTS.find(x=>x.id===openP);if(!p||$('#mo').hidden){if(!p)closeM();return}
   $('#mcard').innerHTML=card(p);
-  $('#cl').innerHTML=CM.filter(c=>c.pid===openP).sort((a,b)=>a.ts-b.ts).map(c=>`<div class="cm"><a data-a="prof" data-id="${esc(c.uid)}">${av(c.uid,'s')}</a><div><b>${esc(nm(c.uid))}${vb(c.uid)}</b> ${esc(c.text)}<div class="mut">${ago(c.ts)}${c.uid===me?` · <a data-a="delc" data-id="${c.id}">excluir</a>`:''}</div></div></div>`).join('')||'<p class="mut">Nenhum comentário ainda. Seja o primeiro!</p>';
+  $('#cl').innerHTML=CM.filter(c=>c.pid===openP).sort((a,b)=>a.ts-b.ts).map(c=>`<div class="cm"><a data-a="prof" data-id="${esc(c.uid)}">${av(c.uid,'s')}</a><div><b>${esc(nm(c.uid))}${vb(c.uid)}</b> ${mnText(c.text)}<div class="mut">${ago(c.ts)}${c.uid===me?` · <a data-a="delc" data-id="${c.id}">excluir</a>`:''}</div></div></div>`).join('')||'<p class="mut">Nenhum comentário ainda. Seja o primeiro!</p>';
 }
 function send(){const i=$('#ci'),t=i.value.trim();if(!t||!need())return;i.value='';w(db.collection('comments').add({pid:openP,uid:me,text:t,ts:Date.now()}))}
 function newPost(rl){if(!need())return;pfile=null;
@@ -822,7 +850,7 @@ document.addEventListener('click',e=>{
   else if(a==='cend')callEnd(true,'');
   else if(a==='cmute'){if(CALL){CALL.mute=!CALL.mute;CALL.ms.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);callUI()}}
   else if(a==='sendm')sendm();
-  else if(a==='more'){const p=POSTS.find(x=>x.id===id);t.dataset.a=p&&p.uid===me?'del':'save';t.click()}
+  else if(a==='more'){const p=POSTS.find(x=>x.id===id);if(p&&p.uid===me){postMenu(id);return}t.dataset.a='save';t.click()}
   else if(a==='like')toggleLike(id);
   else if(a==='open')openPost(id);
   else if(a==='close')closeM();
@@ -836,6 +864,7 @@ document.addEventListener('click',e=>{
   else if(a==='pushoff')pushOff().then(pushUI);
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
+  else if(a==='mnpick')mnPick(id);
   else if(a==='gcall')gcStart();
   else if(a==='gcacc')gcAcc();
   else if(a==='gcdecl')gcDecline();
@@ -879,7 +908,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v.matches&&v.matches('.rs video'))v.style.objectFit=v.videoHeight>=v.videoWidth?'cover':'contain'},true);
 document.addEventListener('keydown',e=>{if(e.target.id==='cmi'&&e.key==='Enter')sendm()});
-document.addEventListener('input',e=>{if(e.target.id==='cmi')typSend();if(e.target.id==='csq')csFind(e.target.value);if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
+document.addEventListener('input',e=>{if(e.target.id==='cmi')typSend();if(e.target.id==='pc'||e.target.id==='pei'||e.target.id==='ci')mnSuggest(e.target);if(e.target.id==='csq')csFind(e.target.value);if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const RL={};
