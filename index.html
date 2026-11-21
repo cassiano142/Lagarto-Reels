@@ -122,6 +122,18 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #cbanner button{width:38px;height:38px;border-radius:50%;background:#e5383b;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 #cbanner button svg{transform:rotate(135deg)}
 .cmin{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;width:40px;height:40px;border-radius:50%;background:#ffffff26;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;z-index:2}
+.avb{padding:0;border-radius:50%;display:block;flex:none}
+#avv{position:fixed;inset:0;z-index:150;background:#000e;display:flex;align-items:center;justify-content:center;animation:tpin .2s ease-out}
+#avv img{max-width:92vw;max-height:80dvh;border-radius:16px;object-fit:contain;box-shadow:0 10px 40px #000a}
+#avv .big{font-size:min(60vw,260px);line-height:1}
+#avv .vx{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:44px;height:44px;border-radius:50%;background:#ffffff2e;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center}
+#avv b{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;color:#fff;font-size:18px}
+#gcall{position:fixed;inset:0;z-index:85;background:linear-gradient(160deg,#0f2a1a,#123d2a 60%,#0b1f33);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px}
+#gcall .av{width:128px;height:128px;font-size:64px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff1f;margin-bottom:10px}
+#gcall h2{margin:0;font-size:26px}#gcall p{margin:0;opacity:.8}
+#gcall .gcp{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;max-width:340px;margin-top:16px}
+#gcall .gcp div{width:64px;font-size:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gcall .gcp .av{width:52px;height:52px;font-size:26px;margin:0 auto 4px}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -454,6 +466,84 @@ function msgSave(id){const m=MS.find(x=>String(x.id)===String(id)),t=(($('#mei')
   const d=Object.assign({},m);delete d.id;d.text=t;d.ed=1;m.text=t;m.ed=1;SELM.clear();closeM();fillChat();w(db.doc('messages/'+id).set(d))}
 function msgCopy(){const t=selMsgs().map(m=>m.text).join('\n');SELM.clear();selUI();
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado')).catch(()=>toast('Não foi possível copiar.'))}
+function avView(u){const g=isG(u),a=g?((gOf(u)||{}).av||'👥'):((P[u]&&P[u].av)||'🦎'),img=/^(https?:|\/_blob|data:)/.test(a);
+  const old=$('#avv');if(old)old.remove();const o=document.createElement('div');o.id='avv';o.dataset.a='avclose';
+  o.innerHTML=`<button class="vx" data-a="avclose" aria-label="Fechar">✕</button>${img?`<img src="${esc(a)}" alt="">`:`<span class="big">${esc(a)}</span>`}<b>${esc(nm(u))}</b>`;
+  document.body.append(o)}
+const avClose=()=>{const o=$('#avv');if(o)o.remove()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')avClose()});
+/* ===== CHAMADA EM GRUPO (voz, vários participantes) ===== */
+let GC=null;
+const gcMembers=()=>GC?(((gOf('g_'+GC.gid)||{}).members)||[]).filter(u=>u!==me):[];
+const gcOn=x=>GC&&GC.peers[x]&&GC.peers[x].pc&&GC.peers[x].pc.connectionState==='connected';
+async function gcStart(){
+  if(!cu||!isG(cu)||!need())return;if(CALL||GC){toast('Você já está em uma chamada.');return}
+  if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta chamadas.');return}
+  const g=gOf(cu);if(!g)return;
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false})}catch(e){toast('Permita o microfone para ligar.');return}
+  GC={gid:g.id,cid:'gc|'+g.id+'|'+Date.now(),st:'on',ms,peers:{},starter:true,t0:Date.now(),sec:0,mute:false};
+  gcRun();
+  gcMembers().forEach(m=>{try{sb.functions.invoke('dynamic-handler',{body:{type:'call',to:m,video:false}}).catch(()=>{})}catch(e){}});
+}
+function gcRun(){const c=GC;gcUI();gcPing();
+  c.tk=setInterval(()=>{if(GC!==c)return;c.sec=Math.floor((Date.now()-c.t0)/1e3);const e=$('#gcst');if(e)e.textContent=fmtD(c.sec)+' · '+(1+Object.keys(c.peers).filter(gcOn).length)+' na chamada';
+    gcPing();
+    if(c.starter&&!c.everPeer&&Date.now()-c.t0>60000)gcLeave(true,'Ninguém entrou na chamada.')},3000)}
+function gcPing(){const c=GC;if(!c||c.st!=='on')return;
+  gcMembers().forEach(m=>{if(!gcOn(m))sig(m,'gcjoin',{r:0},c.cid);const e=c.peers[m];if(e&&e.pc&&me<m&&e.pc.signalingState==='have-local-offer'&&e.off){sig(m,'gcoffer',e.off,c.cid);(e.sent||[]).forEach(x=>sig(m,'gcice',x,c.cid))}})}
+function gcPc(x){const c=GC;let e=c.peers[x];if(e&&e.pc)return e;e=c.peers[x]=e||{ice:[],sent:[]};
+  const pc=e.pc=new RTCPeerConnection(ICE);c.ms.getTracks().forEach(t=>pc.addTrack(t,c.ms));
+  pc.onicecandidate=ev=>{if(ev.candidate){e.sent.push(ev.candidate);sig(x,'gcice',ev.candidate,c.cid)}};
+  pc.ontrack=ev=>{let a=document.getElementById('gca-'+x);if(!a){a=document.createElement('audio');a.id='gca-'+x;a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=ev.streams[0];a.play().catch(()=>{})};
+  pc.onconnectionstatechange=()=>{if(GC!==c)return;const s2=pc.connectionState;if(s2==='connected')c.everPeer=true;
+    if(s2==='failed'||s2==='closed'){try{pc.close()}catch(_){}const a=document.getElementById('gca-'+x);if(a)a.remove();delete c.peers[x]}
+    gcUI()};
+  return e}
+async function gcSig(p){
+  const t=p.type,c=GC,g=gOf(p.cid.split('|')[0]==='gc'?'g_'+p.cid.split('|')[1]:'');
+  if(!g||!(g.members||[]).includes(me)||!(g.members||[]).includes(p.from))return;
+  if(t==='gcjoin'){
+    if(!c){if(ENDED.has(p.cid)||CALL)return;
+      GC={gid:g.id,cid:p.cid,st:'in',peers:{},ring:Date.now(),from:p.from};gcUI();
+      if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
+      GC.rw=setInterval(()=>{if(GC&&GC.st==='in'&&Date.now()-GC.ring>9000){const x=GC;gcClose(x);ENDED.add(x.cid)}},2000);return}
+    if(c.cid!==p.cid){return}
+    if(c.st==='in'){c.ring=Date.now();return}
+    const had=!!(c.peers[p.from]&&c.peers[p.from].pc);
+    if(!had&&me<p.from){const e=gcPc(p.from);if(!e.off){const o=await e.pc.createOffer();await e.pc.setLocalDescription(o);e.off=o;sig(p.from,'gcoffer',o,c.cid)}}
+    else if(!had){gcPc(p.from)}
+    if(!(p.d&&p.d.r))sig(p.from,'gcjoin',{r:1},c.cid);
+    return}
+  if(!c||c.cid!==p.cid||c.st!=='on')return;
+  if(t==='gcoffer'){
+    let e=c.peers[p.from];if(e&&e.pc&&e.pc.signalingState!=='stable'&&me<p.from)return;
+    if(e&&e.pc&&e.pc.signalingState==='stable'&&e.pc.connectionState==='connected')return;
+    e=gcPc(p.from);try{await e.pc.setRemoteDescription(p.d);for(const x of e.ice)e.pc.addIceCandidate(x).catch(()=>{});e.ice=[];
+      const a=await e.pc.createAnswer();await e.pc.setLocalDescription(a);sig(p.from,'gcanswer',a,c.cid)}catch(err){console.warn(err)}}
+  else if(t==='gcanswer'){const e=c.peers[p.from];if(e&&e.pc&&e.pc.signalingState==='have-local-offer'){try{await e.pc.setRemoteDescription(p.d);for(const x of e.ice)e.pc.addIceCandidate(x).catch(()=>{});e.ice=[]}catch(err){console.warn(err)}}}
+  else if(t==='gcice'){const e=gcPc(p.from);if(e.pc.remoteDescription)e.pc.addIceCandidate(p.d).catch(()=>{});else e.ice.push(p.d)}
+  else if(t==='gcleave'){const e=c.peers[p.from];if(e){try{if(e.pc)e.pc.close()}catch(_){}delete c.peers[p.from];const a=document.getElementById('gca-'+p.from);if(a)a.remove();gcUI()}}
+}
+async function gcAcc(){const c=GC;if(!c||c.st!=='in')return;
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false})}catch(e){toast('Permita o microfone para atender.');gcDecline();return}
+  if(navigator.vibrate)navigator.vibrate(0);clearInterval(c.rw);
+  c.ms=ms;c.st='on';c.t0=Date.now();c.sec=0;c.mute=false;gcRun();
+  gcMembers().forEach(m=>sig(m,'gcjoin',{r:0},c.cid))}
+function gcDecline(){const c=GC;if(!c)return;ENDED.add(c.cid);gcClose(c)}
+function gcClose(c){clearInterval(c.rw);clearInterval(c.tk);if(GC===c)GC=null;
+  Object.keys(c.peers||{}).forEach(x=>{try{if(c.peers[x].pc)c.peers[x].pc.close()}catch(_){}const a=document.getElementById('gca-'+x);if(a)a.remove()});
+  if(c.ms)c.ms.getTracks().forEach(t=>t.stop());if(navigator.vibrate)navigator.vibrate(0);gcUI()}
+function gcLeave(notify,note){const c=GC;if(!c)return;ENDED.add(c.cid);
+  if(notify&&c.st==='on')((((gOf('g_'+c.gid)||{}).members)||[]).filter(u=>u!==me)).forEach(m=>sig(m,'gcleave',null,c.cid));
+  gcClose(c);if(note)toast(note)}
+function gcMute(){const c=GC;if(!c||!c.ms)return;c.mute=!c.mute;c.ms.getAudioTracks().forEach(t=>t.enabled=!c.mute);gcUI()}
+function gcUI(){let o=$('#gcall');const c=GC;if(!c){if(o)o.remove();return}
+  if(!o){o=document.createElement('div');o.id='gcall';document.body.append(o)}
+  const g=gOf('g_'+c.gid)||{},gn=g.name||'Grupo',avt=av('g_'+c.gid);
+  if(c.st==='in'){o.innerHTML=`${avt}<h2>${esc(gn)}</h2><p>Chamada de voz em grupo · ${esc(nm(c.from))} está ligando</p><div class="cbt"><button class="cbn rd" data-a="gcdecl" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="gcacc" aria-label="Atender">${I('phone',28)}</button></div>`;return}
+  const on=[me].concat(Object.keys(c.peers).filter(gcOn));
+  o.innerHTML=`${avt}<h2>${esc(gn)}</h2><p id="gcst">${fmtD(c.sec||0)} · ${on.length} na chamada</p><div class="gcp">${on.map(u=>`<div>${av(u)}${u===me?'Você':esc(nm(u))}</div>`).join('')}</div><div class="cbt"><button class="cbn ${c.mute?'wh':''}" data-a="gcmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="gcend" aria-label="Desligar">${I('phone',28)}</button></div>`}
+window.addEventListener('pagehide',()=>{if(GC)gcLeave(true)});
 /* ===== CONFIGURAÇÕES DA CONVERSA ===== */
 let CS=[],CLN=new Set();
 const csGet=u=>{const r=CS.find(x=>x.id===ctKey(u));return r||{}};
@@ -553,7 +643,7 @@ function render(){
   }else if(tab==='dm'){
     h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">‹</button><b style="font-size:20px">Mensagens</b><button class="ic" style="margin-left:auto" data-a="gnew" aria-label="Novo grupo">${I('plus',24)}</button></div><input class="sr" id="dq" placeholder="Pesquisar" value="${esc(dq)}" autocomplete="off"><div class="dmn" id="dmn"></div><div class="dmt" id="dmt"></div><div id="dml"></div>`;
   }else if(tab==='chat'){
-    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(cnm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
+    h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(cnm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="gcall" aria-label="Chamada em grupo">${I('phone',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
     h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${esc(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
@@ -563,7 +653,7 @@ function render(){
     else{
       const mine=u===me,ps=POSTS.filter(p=>p.uid===u),sv=POSTS.filter(p=>SV.some(s=>s.pid===p.id&&s.uid===me));
       const list=pt==='saved'&&mine?sv:pt==='reels'?ps.filter(p=>p.type==='video'):ps.filter(p=>p.type!=='video');
-      h=`<div class="pr"><div class="row">${av(u,'l')}<div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
+      h=`<div class="pr"><div class="row"><button class="avb" data-a="avview" data-id="${esc(u)}" aria-label="Ver foto de perfil">${av(u,'l')}</button><div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
       <p><b>${esc(P[u].name)}${vb(u)}${isPriv(u)?' '+I('lock',14):''}</b><br>${esc(P[u].bio||'')}</p>
       ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${fst(u)!=='none'?'g':''}" data-a="follow" data-id="${esc(u)}">${{ok:'Seguindo',pending:'Solicitado',none:'Seguir'}[fst(u)]}</button>${fst(u)==='ok'?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
       <div class="tabs2"><button class="${pt==='posts'?'on':''}" data-a="pt" data-id="posts">${I('grid',17)} Posts</button><button class="${pt==='reels'?'on':''}" data-a="pt" data-id="reels">${I('reels',17)} Reels</button>${mine?`<button class="${pt==='saved'?'on':''}" data-a="pt" data-id="saved">${I('bookmark',17)} Salvos</button>`:''}</div></div>
@@ -746,6 +836,13 @@ document.addEventListener('click',e=>{
   else if(a==='pushoff')pushOff().then(pushUI);
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
+  else if(a==='gcall')gcStart();
+  else if(a==='gcacc')gcAcc();
+  else if(a==='gcdecl')gcDecline();
+  else if(a==='gcend')gcLeave(true);
+  else if(a==='gcmute')gcMute();
+  else if(a==='avview')avView(id);
+  else if(a==='avclose'){if(e.target.tagName!=='IMG')avClose()}
   else if(a==='cmin'){if(CALL){CALL.min=true;callUI()}}
   else if(a==='cmax'){if(CALL){CALL.min=false;callUI()}}
   else if(a==='ctpick'){closeM();ctPick()}
@@ -1023,10 +1120,12 @@ async function startCall(peer,video){
   c.to=setTimeout(()=>{if(CALL===c&&c.st==='out')callEnd(true,'Ninguém atendeu.')},45000);
 }
 async function onSig(p){
-  if(!p||p.to!==me)return;const c=CALL;
+  if(!p||p.to!==me)return;
+  if(typeof p.cid==='string'&&p.cid.startsWith('gc|')){gcSig(p);return}
+  const c=CALL;
   if(p.type==='offer'){
     if(ENDED.has(p.cid)||(c&&c.cid===p.cid))return;
-    if(c){sig(p.from,'busy',null,p.cid);return}
+    if(c||GC){sig(p.from,'busy',null,p.cid);return}
     CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false,video:!!p.v,fm:'user'};callUI();
     if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
     if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png',tag:'call',requireInteraction:true,renotify:true})}catch(e){}
