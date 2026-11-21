@@ -140,7 +140,7 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #mnbox button+button{border-top:1px solid var(--bd)}
 .mnl{font-size:13px;margin-top:3px;color:var(--mut)}
 #live{position:fixed;inset:0;z-index:88;background:#000;color:#fff;overflow:hidden}
-#live video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+#live video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 #live .lvw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:30px;background:#000a}
 #live .lvtop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 30px;background:linear-gradient(#000a,transparent)}
 #live .lvtop .av{width:36px;height:36px;font-size:18px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff26}
@@ -184,6 +184,22 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #live.lvmin #lvmsgs,#live.lvmin .lvin{display:none}
 #live .lvhint{position:absolute;left:0;right:0;top:calc(70px + env(safe-area-inset-top,0px));text-align:center;font-size:13px;opacity:.9;pointer-events:none;animation:lvhide 4s forwards}
 @keyframes lvhide{0%,70%{opacity:.9}100%{opacity:0}}
+#lvbig{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#lvbig span{position:absolute;font-size:120px;line-height:1;animation:lvbig 2.2s ease-out forwards;filter:drop-shadow(0 6px 18px #000a)}
+#lvbig span.xl{font-size:170px}
+@keyframes lvbig{0%{transform:scale(.2) rotate(-12deg);opacity:0}18%{transform:scale(1.25) rotate(6deg);opacity:1}30%{transform:scale(1) rotate(0)}80%{opacity:1}100%{transform:translateY(-22dvh) scale(1.1);opacity:0}}
+#lvbn{position:absolute;left:10px;top:calc(96px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.lvbn{display:flex;align-items:center;gap:6px;background:linear-gradient(90deg,#ff2d55cc,#ff950088);border-radius:99px;padding:5px 12px 5px 6px;font-size:14px;animation:lvbnin .3s ease-out;width:fit-content}
+.lvbn em{font-style:normal;font-size:26px;line-height:1}.lvbn i{font-style:normal;font-weight:900;font-size:18px;animation:lvpop .25s}
+@keyframes lvbnin{from{transform:translateX(-60%);opacity:0}to{transform:none;opacity:1}}
+@keyframes lvpop{from{transform:scale(1.8)}to{transform:scale(1)}}
+#live .lvemp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;background:#000a;border-radius:14px;padding:10px}
+#live .lvemp[hidden],#live .lvz[hidden]{display:none}
+#live .lvemp button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:30px;line-height:1.1;background:#ffffff14;border-radius:12px;padding:8px 0}
+#live .lvemp button small{font-size:11px;opacity:.85}
+#live .lvz{display:flex;align-items:center;gap:10px;margin-bottom:8px;background:#000a;border-radius:99px;padding:6px 14px}
+#live .lvz input{flex:1;margin:0;accent-color:#ff2d55}
+#live .lvin button.lvbtn{width:42px;height:42px;padding:0;background:#ffffff26;display:flex;align-items:center;justify-content:center}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -627,6 +643,7 @@ function mnPick(u){const b=$('#mnbox'),el=b&&document.getElementById(b.dataset.f
 /* ===== LIVE ===== */
 let LIVE=null,LVS={},LVP=null,LVSG='',LVT=0,LVET=0;
 const LVMAX=8,LVEM=['❤️','😂','🔥','👏','😮','🦎'];
+const EMOTES=[['🌹','Rosa'],['🍦','Sorvete'],['🦎','Lagarto'],['👑','Coroa'],['💎','Diamante'],['🚀','Foguete'],['🍕','Pizza'],['🎉','Festa']],EMXL=['👑','💎','🚀'];
 function lvDisc(){const hb=$('#lvb');if(hb&&!hb.innerHTML)hb.innerHTML=I('live',22);if(LVP||!me||typeof sb==='undefined')return;
   try{LVP=sb.channel('lagarto-lives',{config:{presence:{key:me}}});
     LVP.on('presence',{event:'sync'},()=>{const st=LVP.presenceState(),n={};Object.keys(st).forEach(k=>{const m=(st[k]||[]).find(x=>x&&x.live);if(m&&k!==me&&P[k])n[k]=m});
@@ -651,6 +668,7 @@ function lvChan(){const c=LIVE;
   const ch=c.ch=sb.channel('live-'+c.host,{config:{presence:{key:me},broadcast:{self:true}}});
   ch.on('broadcast',{event:'chat'},m=>{if(LIVE===c)lvMsg(m.payload)})
     .on('broadcast',{event:'emo'},m=>{if(LIVE===c)lvEmo(m.payload)})
+    .on('broadcast',{event:'emote'},m=>{if(LIVE===c)lvEmote(m.payload)})
     .on('broadcast',{event:'end'},()=>{if(LIVE===c&&!c.mine){const h=c.host;lvLeave(false,'A live acabou.');const nx=Object.keys(LVS).filter(x=>x!==h&&P[x])[0];if(nx)setTimeout(()=>lvWatch(nx),500)}})
     .on('presence',{event:'sync'},()=>{if(LIVE!==c)return;const st=ch.presenceState();c.viewers=Object.keys(st).filter(k=>k!==c.host).length;const n=$('#lvn');if(n)n.textContent=c.viewers})
     .subscribe(s2=>{if(s2==='SUBSCRIBED')try{ch.track({uid:me,t:Date.now()})}catch(e){}})}
@@ -658,9 +676,9 @@ function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
   if(o)return;o=document.createElement('div');o.id='live';
   o.innerHTML=`<video id="lvv" autoplay playsinline ${c.mine?'muted':''} style="${c.mine?'transform:scaleX(-1)':''}"></video>${c.mine?'':'<div class="lvw" id="lvw">Entrando na live…</div>'}
   <div class="lvtop">${av(c.host)}<b>${esc(nm(c.host))}${vb(c.host)}</b><span class="lvbadge">AO VIVO</span><span class="lvcnt">👁 <i id="lvn">0</i></span><button class="lvx" data-a="lvx" aria-label="Sair">✕</button></div>
-  <div id="lvfl"></div>
-  <div class="lvbot"><div id="lvmsgs"></div><div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}<button class="lvch" data-a="lvchat" aria-label="Minimizar ou mostrar o chat">${I('chatdots',22)}</button></div>
-  <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button>`:''}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
+  <div id="lvfl"></div><div id="lvbig"></div><div id="lvbn"></div>
+  <div class="lvbot"><div id="lvmsgs"></div><div class="lvemp" id="lvemp" hidden>${EMOTES.map(x=>`<button data-a="lvemote" data-id="${x[0]}">${x[0]}<small>${x[1]}</small></button>`).join('')}</div>${c.mine?`<div class="lvz" id="lvz" hidden><span>${I('search',18)}</span><input type="range" id="lvzr" min="1" max="1" step="0.1" value="1"></div>`:''}<div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}<button data-a="lvgift" aria-label="Emotes">🎁</button><button class="lvch" data-a="lvchat" aria-label="Minimizar ou mostrar o chat">${I('chatdots',22)}</button></div>
+  <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button><button class="lvmic lvbtn" data-a="lvzoom" aria-label="Zoom">${I('search',20)}</button><button class="lvmic lvbtn" data-a="lvflip" aria-label="Virar câmera">${I('flip',20)}</button>`:''}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
   if(!c.mine&&Object.keys(LVS).filter(x=>x!==c.host).length)o.insertAdjacentHTML('beforeend','<div class="lvhint">⇅ Deslize pra ver outras lives</div>');
   let ty=null;o.addEventListener('touchstart',e=>{ty=e.target.closest('.lvbot,.lvtop')?null:e.touches[0].clientY},{passive:true});
   o.addEventListener('touchend',e=>{if(ty==null||!LIVE||LIVE.mine)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70)lvSwitch(dy<0?1:-1)},{passive:true});
@@ -680,6 +698,27 @@ function lvEmo(m){const f=$('#lvfl');if(!f||!m||!LVEM.includes(m.e))return;const
 function lvSend(){const i=$('#lvi'),c=LIVE;if(!i||!c||!c.ch)return;const t=i.value.trim();if(!t)return;if(Date.now()-(c.ls||0)<700)return;c.ls=Date.now();
   try{c.ch.send({type:'broadcast',event:'chat',payload:{uid:me,text:t}})}catch(e){}i.value=''}
 function lvEmoSend(e){const c=LIVE;if(!c||!c.ch||!LVEM.includes(e)||Date.now()-(c.le||0)<250)return;c.le=Date.now();try{c.ch.send({type:'broadcast',event:'emo',payload:{e}})}catch(x){}}
+function lvEmote(m){const c=LIVE;if(!c||!m||!EMOTES.some(x=>x[0]===m.e))return;const n=Math.min(+m.n||1,999);
+  const big=$('#lvbig');if(big){const e=document.createElement('span');e.textContent=m.e;if(EMXL.includes(m.e))e.className='xl';e.style.left=(30+Math.random()*30)+'%';e.style.top=(35+Math.random()*15)+'%';big.append(e);setTimeout(()=>e.remove(),2300)}
+  const bn=$('#lvbn');if(!bn)return;const k=m.uid+m.e;let el=[...bn.children].find(x=>x.dataset.k===k);
+  const h=`${av(m.uid,'s')}<span><b>${esc(nm(m.uid))}</b> enviou</span><em>${m.e}</em><i>×${n}</i>`;
+  if(el){el.innerHTML=h;clearTimeout(el._t)}else{el=document.createElement('div');el.className='lvbn';el.dataset.k=k;el.innerHTML=h;bn.append(el);while(bn.children.length>4)bn.firstChild.remove()}
+  el._t=setTimeout(()=>el.remove(),3200)}
+function lvEmoteSend(e){const c=LIVE;if(!c||!c.ch||!EMOTES.some(x=>x[0]===e))return;const n=Date.now();if(n-(c.lx||0)<150)return;c.lx=n;
+  const cb=c.combo;c.combo=cb&&cb.e===e&&n-cb.t<3500?{e,n:cb.n+1,t:n}:{e,n:1,t:n};
+  try{c.ch.send({type:'broadcast',event:'emote',payload:{uid:me,e,n:c.combo.n}})}catch(x){}}
+function lvGift(){const p=$('#lvemp');if(p)p.hidden=!p.hidden}
+function lvZoomInit(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0],z=$('#lvz'),r=$('#lvzr');if(!t||!r)return;
+  let caps={};try{caps=t.getCapabilities?t.getCapabilities():{}}catch(e){}
+  c.zoomOk=!!caps.zoom;if(c.zoomOk){r.min=caps.zoom.min;r.max=caps.zoom.max;r.step=caps.zoom.step||0.1;let v=1;try{v=t.getSettings().zoom||caps.zoom.min}catch(e){}r.value=v}}
+function lvZoomTog(){const c=LIVE;if(!c||!c.mine)return;lvZoomInit();if(!c.zoomOk){toast('Essa câmera não permite ajustar o zoom. Tente a câmera de trás.');return}const z=$('#lvz');if(z)z.hidden=!z.hidden}
+function lvZoom(v){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(t)t.applyConstraints({advanced:[{zoom:+v}]}).catch(()=>{})}
+async function lvFlip(){const c=LIVE;if(!c||!c.mine)return;const fm=c.fm==='environment'?'user':'environment';
+  try{const n=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:fm},width:{ideal:720},height:{ideal:1280}}}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];
+    Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
+    c.ms.removeTrack(old);old.stop();c.ms.addTrack(t);c.fm=fm;const v=$('#lvv');if(v){v.srcObject=c.ms;v.style.transform=fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{})}
+    const z=$('#lvz');if(z)z.hidden=true;lvZoomInit()}
+  catch(e){toast('Não foi possível virar a câmera.')}}
 function lvMic(){const c=LIVE;if(!c||!c.mine)return;c.mute=!c.mute;c.ms.getAudioTracks().forEach(t=>t.enabled=!c.mute);const b=$('#live .lvmic');if(b)b.classList.toggle('off',c.mute)}
 function lvLeave(notify,note){const c=LIVE;if(!c)return;LIVE=null;clearInterval(c.jt);clearInterval(LVT);
   if(c.mine){try{c.ch.send({type:'broadcast',event:'end',payload:{}})}catch(e){}try{if(LVP)LVP.untrack()}catch(e){}}
@@ -1010,6 +1049,10 @@ document.addEventListener('click',e=>{
   else if(a==='lvstart2'){closeM();lvStart()}
   else if(a==='lvopen')lvOpen();
   else if(a==='lvchat')lvChatTog();
+  else if(a==='lvgift')lvGift();
+  else if(a==='lvemote')lvEmoteSend(id);
+  else if(a==='lvzoom')lvZoomTog();
+  else if(a==='lvflip')lvFlip();
   else if(a==='lvwatch')lvWatch(id);
   else if(a==='lvx'){if(LIVE&&LIVE.mine){if(confirm('Encerrar a live?'))lvLeave(true,'Live encerrada.')}else lvLeave(true)}
   else if(a==='lvsend')lvSend();
@@ -1059,7 +1102,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v.matches&&v.matches('.rs video'))v.style.objectFit=v.videoHeight>=v.videoWidth?'cover':'contain'},true);
 document.addEventListener('keydown',e=>{if(e.target.id==='cmi'&&e.key==='Enter')sendm()});
-document.addEventListener('input',e=>{if(e.target.id==='cmi')typSend();if(e.target.id==='pc'||e.target.id==='pei'||e.target.id==='ci')mnSuggest(e.target);if(e.target.id==='csq')csFind(e.target.value);if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
+document.addEventListener('input',e=>{if(e.target.id==='cmi')typSend();if(e.target.id==='pc'||e.target.id==='pei'||e.target.id==='ci')mnSuggest(e.target);if(e.target.id==='csq')csFind(e.target.value);if(e.target.id==='lvzr')lvZoom(e.target.value);if(e.target.id==='sq'){q=e.target.value;fillEx()}if(e.target.id==='dq'){dq=e.target.value;fillDm()}});
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const RL={};
