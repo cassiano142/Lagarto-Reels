@@ -138,6 +138,34 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #mnbox{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:4px 0 8px;overflow:hidden;box-shadow:0 6px 18px #0004}
 #mnbox button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 12px;font-weight:600}
 #mnbox button+button{border-top:1px solid var(--bd)}
+.mnl{font-size:13px;margin-top:3px;color:var(--mut)}
+#live{position:fixed;inset:0;z-index:88;background:#000;color:#fff;overflow:hidden}
+#live video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+#live .lvw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:30px;background:#000a}
+#live .lvtop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 30px;background:linear-gradient(#000a,transparent)}
+#live .lvtop .av{width:36px;height:36px;font-size:18px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff26}
+#live .lvtop b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.lvbadge{background:#e5383b;border-radius:6px;font-size:12px;font-weight:800;padding:3px 7px;letter-spacing:.5px}
+.lvcnt{background:#0008;border-radius:6px;font-size:13px;padding:3px 8px;font-weight:700}
+#live .lvx{margin-left:auto;width:40px;height:40px;border-radius:50%;background:#ffffff2e;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center}
+#live .lvbot{position:absolute;left:0;right:0;bottom:0;padding:30px 12px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,#000b)}
+#lvmsgs{max-height:34dvh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;margin-bottom:8px;max-width:82%}
+#lvmsgs div{background:#0008;border-radius:12px;padding:5px 10px;font-size:14px;width:fit-content;max-width:100%;word-break:break-word}
+#lvmsgs b{opacity:.85;margin-right:5px}
+#live .lvem{display:flex;gap:6px;margin-bottom:8px}
+#live .lvem button{font-size:24px;width:42px;height:42px;border-radius:50%;background:#ffffff1f;display:flex;align-items:center;justify-content:center}
+#live .lvin{display:flex;gap:8px;align-items:center}
+#live .lvin input{flex:1;margin:0;background:#ffffff26;border:1px solid #fff3;color:#fff;border-radius:99px;padding:10px 14px}
+#live .lvin input::placeholder{color:#fffa}
+#live .lvin button{background:var(--ac);color:#fff;font-weight:700;border-radius:99px;padding:10px 16px}
+#live .lvin button.lvmic{width:42px;height:42px;padding:0;background:#ffffff26;display:flex;align-items:center;justify-content:center}
+#live .lvin button.lvmic.off{background:#fff;color:#111}
+#lvfl{position:absolute;right:10px;bottom:150px;width:70px;height:55dvh;pointer-events:none;overflow:hidden}
+#lvfl span{position:absolute;bottom:0;font-size:30px;animation:lvup 2.6s ease-out forwards}
+@keyframes lvup{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-48dvh) scale(1.2);opacity:0}}
+.st.lvl .ring{background:linear-gradient(135deg,#ff2d55,#ff9500);padding:3px}
+.st.lvl small{color:#ff3b5c;font-weight:800}
+.lvtag{position:absolute;margin-top:-10px;background:#e5383b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:1px 5px}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -482,7 +510,7 @@ let GC=null;
 const gcMembers=()=>GC?(((gOf('g_'+GC.gid)||{}).members)||[]).filter(u=>u!==me):[];
 const gcOn=x=>GC&&GC.peers[x]&&GC.peers[x].pc&&GC.peers[x].pc.connectionState==='connected';
 async function gcStart(){
-  if(!cu||!isG(cu)||!need())return;if(CALL||GC){toast('Você já está em uma chamada.');return}
+  if(!cu||!isG(cu)||!need())return;if(CALL||GC||LIVE){toast('Você já está em uma chamada.');return}
   if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta chamadas.');return}
   const g=gOf(cu);if(!g)return;
   let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false})}catch(e){toast('Permita o microfone para ligar.');return}
@@ -508,7 +536,7 @@ async function gcSig(p){
   const t=p.type,c=GC,g=gOf(p.cid.split('|')[0]==='gc'?'g_'+p.cid.split('|')[1]:'');
   if(!g||!(g.members||[]).includes(me)||!(g.members||[]).includes(p.from))return;
   if(t==='gcjoin'){
-    if(!c){if(ENDED.has(p.cid)||CALL)return;
+    if(!c){if(ENDED.has(p.cid)||CALL||LIVE)return;
       GC={gid:g.id,cid:p.cid,st:'in',peers:{},ring:Date.now(),from:p.from};gcUI();
       if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
       GC.rw=setInterval(()=>{if(GC&&GC.st==='in'&&Date.now()-GC.ring>9000){const x=GC;gcClose(x);ENDED.add(x.cid)}},2000);return}
@@ -562,6 +590,10 @@ function mnText(t){t=String(t||'');const re=mnRe();if(!re)return esc(t);
   return out+esc(t.slice(i))}
 function mnMentions(t){const re=mnRe(),r=new Set();if(!re||!t)return r;re.lastIndex=0;let m;while((m=re.exec(String(t)))){const u=uidByName(m[1]);if(u)r.add(u)}return r}
 const mentionsMe=t=>me&&mnMentions(t).has(me);
+function mnLine(t){const us=[...mnMentions(t)];if(!us.length)return '';
+  const l=us.map(u=>`<a class="mn" data-a="prof" data-id="${esc(u)}">@${esc(P[u].name)}</a>`);
+  const j=l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l[0];
+  return `<div class="mnl">${j} ${us.length>1?'foram mencionados':'foi mencionado'}</div>`}
 function mnSuggest(el){const box=$('#mnbox');if(box)box.remove();if(!el||!me)return;
   const pos=el.selectionStart,pre=el.value.slice(0,pos),m=pre.match(/(?:^|\s)@([^\s@]{0,20})$/);if(!m)return;
   const f=m[1].toLowerCase(),us=Object.keys(P).filter(u=>P[u].name&&u!==me&&!P[u].oculto&&P[u].name.toLowerCase().includes(f)).sort((a,b)=>{const x=P[a].name.toLowerCase().startsWith(f),y=P[b].name.toLowerCase().startsWith(f);return x===y?P[a].name.localeCompare(P[b].name):x?-1:1}).slice(0,5);
@@ -572,6 +604,83 @@ function mnSuggest(el){const box=$('#mnbox');if(box)box.remove();if(!el||!me)ret
 function mnPick(u){const b=$('#mnbox'),el=b&&document.getElementById(b.dataset.for);if(!el||!P[u])return;
   const pos=el.selectionStart,pre=el.value.slice(0,pos),post=el.value.slice(pos),np=pre.replace(/@([^\s@]{0,20})$/,'@'+P[u].name+' ');
   el.value=np+post;b.remove();el.focus();try{el.setSelectionRange(np.length,np.length)}catch(e){}}
+/* ===== LIVE ===== */
+let LIVE=null,LVS={},LVP=null,LVSG='',LVT=0,LVET=0;
+const LVMAX=8,LVEM=['❤️','😂','🔥','👏','😮','🦎'];
+function lvDisc(){if(LVP||!me||typeof sb==='undefined')return;
+  try{LVP=sb.channel('lagarto-lives',{config:{presence:{key:me}}});
+    LVP.on('presence',{event:'sync'},()=>{const st=LVP.presenceState(),n={};Object.keys(st).forEach(k=>{const m=(st[k]||[]).find(x=>x&&x.live);if(m&&k!==me&&P[k])n[k]=m});
+      LVS=n;const sg=Object.keys(n).sort().join();if(sg!==LVSG){LVSG=sg;if(tab==='home'&&!LIVE)render()}})
+    .subscribe(s2=>{if(s2==='SUBSCRIBED'&&LIVE&&LIVE.mine)lvTrack()})}catch(e){LVP=null}}
+function lvTrack(){try{if(LVP&&LIVE&&LIVE.mine)LVP.track({live:1,uid:me,cid:LIVE.cid,ts:LIVE.t0})}catch(e){}}
+async function lvStart(){
+  if(!need())return;if(LIVE||CALL||GC){toast('Termine a chamada atual antes.');return}
+  if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta live.');return}
+  let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:{facingMode:'user',width:{ideal:720},height:{ideal:1280}}})}catch(e){toast('Permita a câmera e o microfone para fazer live.');return}
+  lvDisc();LIVE={host:me,mine:true,cid:'lv|'+me+'|'+Date.now(),ms,peers:{},viewers:0,msgs:[],t0:Date.now(),mute:false};
+  lvChan();lvUI();lvTrack();LVT=setInterval(lvTrack,15000)}
+function lvWatch(h){
+  if(!need())return;if(LIVE||CALL||GC){toast('Termine a chamada atual antes.');return}
+  const l=LVS[h];if(!l){toast('Essa live já acabou.');return}
+  LIVE={host:h,mine:false,cid:l.cid,peers:{},viewers:0,msgs:[],ice:[],t0:Date.now()};
+  lvChan();lvUI();const c=LIVE;
+  c.jt=setInterval(()=>{if(LIVE!==c)return;if(c.on){clearInterval(c.jt);return}
+    if(Date.now()-c.t0>40000){lvLeave(true,'Não foi possível conectar na live.');return}sig(h,'lvjoin',null,c.cid)},3000);
+  sig(h,'lvjoin',null,c.cid)}
+function lvChan(){const c=LIVE;
+  const ch=c.ch=sb.channel('live-'+c.host,{config:{presence:{key:me},broadcast:{self:true}}});
+  ch.on('broadcast',{event:'chat'},m=>{if(LIVE===c)lvMsg(m.payload)})
+    .on('broadcast',{event:'emo'},m=>{if(LIVE===c)lvEmo(m.payload)})
+    .on('broadcast',{event:'end'},()=>{if(LIVE===c&&!c.mine)lvLeave(false,'A live acabou.')})
+    .on('presence',{event:'sync'},()=>{if(LIVE!==c)return;const st=ch.presenceState();c.viewers=Object.keys(st).filter(k=>k!==c.host).length;const n=$('#lvn');if(n)n.textContent=c.viewers})
+    .subscribe(s2=>{if(s2==='SUBSCRIBED')try{ch.track({uid:me,t:Date.now()})}catch(e){}})}
+function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
+  if(o)return;o=document.createElement('div');o.id='live';
+  o.innerHTML=`<video id="lvv" autoplay playsinline ${c.mine?'muted':''} style="${c.mine?'transform:scaleX(-1)':''}"></video>${c.mine?'':'<div class="lvw" id="lvw">Entrando na live…</div>'}
+  <div class="lvtop">${av(c.host)}<b>${esc(nm(c.host))}${vb(c.host)}</b><span class="lvbadge">AO VIVO</span><span class="lvcnt">👁 <i id="lvn">0</i></span><button class="lvx" data-a="lvx" aria-label="Sair">✕</button></div>
+  <div id="lvfl"></div>
+  <div class="lvbot"><div id="lvmsgs"></div><div class="lvem">${LVEM.map(e=>`<button data-a="lvemo" data-id="${e}">${e}</button>`).join('')}</div>
+  <div class="lvin">${c.mine?`<button class="lvmic" data-a="lvmic" aria-label="Microfone">${I('mic',20)}</button>`:''}<input id="lvi" placeholder="Escreva no chat…" maxlength="150" autocomplete="off"><button data-a="lvsend">Enviar</button></div></div>`;
+  document.body.append(o);const v=$('#lvv');if(c.mine){v.srcObject=c.ms;v.play().catch(()=>{})}c.vel=v}
+function lvMsg(m){const c=LIVE;if(!c||!m||!m.text)return;c.msgs.push({uid:m.uid,text:String(m.text).slice(0,150)});if(c.msgs.length>40)c.msgs.shift();
+  const el=$('#lvmsgs');if(el)el.innerHTML=c.msgs.slice(-7).map(x=>`<div><b>${esc(nm(x.uid))}${vb(x.uid)}</b>${esc(x.text)}</div>`).join('')}
+function lvEmo(m){const f=$('#lvfl');if(!f||!m||!LVEM.includes(m.e))return;const e=document.createElement('span');e.textContent=m.e;e.style.right=Math.floor(Math.random()*36)+'px';f.append(e);setTimeout(()=>e.remove(),2700)}
+function lvSend(){const i=$('#lvi'),c=LIVE;if(!i||!c||!c.ch)return;const t=i.value.trim();if(!t)return;if(Date.now()-(c.ls||0)<700)return;c.ls=Date.now();
+  try{c.ch.send({type:'broadcast',event:'chat',payload:{uid:me,text:t}})}catch(e){}i.value=''}
+function lvEmoSend(e){const c=LIVE;if(!c||!c.ch||!LVEM.includes(e)||Date.now()-(c.le||0)<250)return;c.le=Date.now();try{c.ch.send({type:'broadcast',event:'emo',payload:{e}})}catch(x){}}
+function lvMic(){const c=LIVE;if(!c||!c.mine)return;c.mute=!c.mute;c.ms.getAudioTracks().forEach(t=>t.enabled=!c.mute);const b=$('#live .lvmic');if(b)b.classList.toggle('off',c.mute)}
+function lvLeave(notify,note){const c=LIVE;if(!c)return;LIVE=null;clearInterval(c.jt);clearInterval(LVT);
+  if(c.mine){try{c.ch.send({type:'broadcast',event:'end',payload:{}})}catch(e){}try{if(LVP)LVP.untrack()}catch(e){}}
+  else if(notify)sig(c.host,'lvleave',null,c.cid);
+  Object.keys(c.peers||{}).forEach(x=>{try{c.peers[x].pc.close()}catch(e){}});try{if(c.pc)c.pc.close()}catch(e){}
+  if(c.ms)c.ms.getTracks().forEach(t=>t.stop());
+  const ch=c.ch;setTimeout(()=>{try{sb.removeChannel(ch)}catch(e){}},400);
+  const o=$('#live');if(o)o.remove();if(note)toast(note);if(tab==='home')render()}
+async function lvSig(p){const c=LIVE,t=p.type;if(!c||c.cid!==p.cid)return;
+  if(c.mine){
+    if(t==='lvjoin'){let e=c.peers[p.from];
+      if(e&&e.pc){if(e.pc.connectionState==='connected')return;if(e.off)sig(p.from,'lvoffer',e.off,c.cid);(e.sent||[]).forEach(x=>sig(p.from,'lvice',x,c.cid));return}
+      if(Object.keys(c.peers).length>=LVMAX){sig(p.from,'lvfull',null,c.cid);return}
+      e=c.peers[p.from]={ice:[],sent:[]};const pc=e.pc=new RTCPeerConnection(ICE);c.ms.getTracks().forEach(tr=>pc.addTrack(tr,c.ms));
+      pc.onicecandidate=ev=>{if(ev.candidate){e.sent.push(ev.candidate);sig(p.from,'lvice',ev.candidate,c.cid)}};
+      pc.onconnectionstatechange=()=>{if(LIVE!==c)return;const s2=pc.connectionState;if(s2==='failed'||s2==='closed'||s2==='disconnected'){try{pc.close()}catch(_){}if(c.peers[p.from]&&c.peers[p.from].pc===pc)delete c.peers[p.from]}};
+      const o=await pc.createOffer();await pc.setLocalDescription(o);e.off=o;sig(p.from,'lvoffer',o,c.cid)}
+    else if(t==='lvanswer'){const e=c.peers[p.from];if(e&&e.pc&&e.pc.signalingState==='have-local-offer'){try{await e.pc.setRemoteDescription(p.d);for(const x of e.ice)e.pc.addIceCandidate(x).catch(()=>{});e.ice=[]}catch(err){console.warn(err)}}}
+    else if(t==='lvice'){const e=c.peers[p.from];if(!e)return;if(e.pc.remoteDescription)e.pc.addIceCandidate(p.d).catch(()=>{});else e.ice.push(p.d)}
+    else if(t==='lvleave'){const e=c.peers[p.from];if(e){try{e.pc.close()}catch(_){}delete c.peers[p.from]}}
+  }else{
+    if(p.from!==c.host)return;
+    if(t==='lvoffer'){
+      if(c.pc&&c.pc.remoteDescription){if(c.ans)sig(c.host,'lvanswer',c.ans,c.cid);return}
+      const pc=c.pc=new RTCPeerConnection(ICE);
+      pc.ontrack=ev=>{const v=$('#lvv');if(v){v.srcObject=ev.streams[0];v.play().catch(()=>{})}const w=$('#lvw');if(w)w.remove()};
+      pc.onicecandidate=ev=>{if(ev.candidate)sig(c.host,'lvice',ev.candidate,c.cid)};
+      pc.onconnectionstatechange=()=>{if(LIVE!==c)return;if(pc.connectionState==='connected'){c.on=true;const w=$('#lvw');if(w)w.remove()}else if(pc.connectionState==='failed')lvLeave(true,'A conexão com a live caiu.')};
+      try{await pc.setRemoteDescription(p.d);for(const x of c.ice)pc.addIceCandidate(x).catch(()=>{});c.ice=[];const a=await pc.createAnswer();await pc.setLocalDescription(a);c.ans=a;sig(c.host,'lvanswer',a,c.cid)}catch(err){console.warn(err)}}
+    else if(t==='lvice'){if(c.pc&&c.pc.remoteDescription)c.pc.addIceCandidate(p.d).catch(()=>{});else c.ice.push(p.d)}
+    else if(t==='lvfull')lvLeave(false,'A live está lotada.')}}
+window.addEventListener('pagehide',()=>{if(LIVE)lvLeave(true)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='lvi'){e.preventDefault();lvSend()}});
 /* ===== CONFIGURAÇÕES DA CONVERSA ===== */
 let CS=[],CLN=new Set();
 const csGet=u=>{const r=CS.find(x=>x.id===ctKey(u));return r||{}};
@@ -647,7 +756,7 @@ function card(p){
   return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="pmenu" data-id="${p.id}" aria-label="Opções">${I('more',20)}</button>`:''}</div>
   <div class="md" data-a="dbl" data-id="${p.id}">${m}</div>
   <div class="ac"><button class="ic ${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',26)}</button><button class="ic" data-a="open" data-id="${p.id}">${I('comment',26)}</button><button class="ic" data-a="share" data-id="${p.id}">${I('share',26)}</button><button class="ic r ${sv?'sv':''}" data-a="save" data-id="${p.id}">${I('bookmark',26)}</button></div>
-  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${mnText(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
+  <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${mnText(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>${mnLine(p.cap)}`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
 }
 const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img src="${esc(p.url)}" alt="">`}</a>`;
 
@@ -660,7 +769,7 @@ function render(){
   const keep=pv&&{s:pv.getAttribute('src'),t:pv.currentTime},rl0=a.querySelector('.rl'),st=rl0?rl0.scrollTop:0;
   let h='';
   if(tab==='home'){
-    const st=Object.keys(P).filter(u=>!hid(u)).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
+    const st=`<a class="st" data-a="lvstart"><span class="ring"><span class="av" style="font-size:26px">🔴</span></span><small>Ao vivo</small></a>`+Object.keys(LVS).filter(u=>!hid(u)).map(u=>`<a class="st lvl" data-a="lvwatch" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>🔴 ${esc(P[u].name)}</small></a>`).join('')+Object.keys(P).filter(u=>!hid(u)).map(u=>`<a class="st" data-a="prof" data-id="${esc(u)}"><span class="ring">${av(u)}</span><small>${esc(P[u].name)}</small></a>`).join('');
     const list=POSTS.filter(p=>p.type!=='video'&&(filt==='all'||p.uid===me||amF(p.uid)));
     h=`${st?`<div class="stories">${st}</div>`:''}<div class="chips"><button class="chip ${filt==='all'?'on':''}" data-a="chip" data-id="all">Todos</button><button class="chip ${filt==='fol'?'on':''}" data-a="chip" data-id="fol">Seguindo</button></div>`+(list.length?list.map(card).join(''):`<div class="empty">Nenhuma foto ainda.<br>Toque em ➕ e seja o primeiro lagarto a postar! 🦎<br><span class="mut">Os vídeos ficam na aba 🎬 Reels.</span></div>`);
   }else if(tab==='explore'){
@@ -674,7 +783,7 @@ function render(){
     h=`<div class="chh"><button class="ic" data-a="dm">‹</button><a data-a="${isG(cu)?'ginfo':'prof'}" data-id="${esc(cu)}" style="display:flex;align-items:center;gap:8px">${av(cu,'s')}<div><b>${esc(cnm(cu))}${vb(cu)}</b>${isG(cu)?`<div class="mut" style="font-size:12px;line-height:1">${((gOf(cu)||{}).members||[]).length} membros</div>`:''}</div></a>${isG(cu)?`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="gcall" aria-label="Chamada em grupo">${I('phone',22)}</button><button class="ic" data-a="ginfo" data-id="${esc(cu)}" aria-label="Info do grupo">👥</button></span>`:`<span style="margin-left:auto;display:flex"><button class="ic" data-a="csopen" aria-label="Configurações da conversa">${I('info',22)}</button><button class="ic" data-a="vcall" aria-label="Chamada de vídeo">${I('vid',24)}</button><button class="ic" data-a="call" aria-label="Ligar">${I('phone',22)}</button></span>`}</div><div id="cm" data-u="${esc(cu)}" style="padding:0 12px 90px"><div id="cmsgs"></div></div><div class="cin2"><div class="cpill" id="cpill"><label class="ccam" aria-label="Câmera">${I('camera',22)}<input type="file" id="cfc" accept="image/*" capture="environment" hidden></label><input id="cmi" placeholder="Mensagem…" maxlength="500" autocomplete="off" oninput="chTog()"><span id="cact"><button class="cb" data-a="cmic" aria-label="Gravar áudio">${I('mic',24)}</button><label class="cb" aria-label="Enviar imagem">${I('image',24)}<input type="file" id="cfg" accept="image/*" hidden></label></span><button class="csend" id="csend" data-a="sendm" style="display:none" aria-label="Enviar">${I('up',20,3)}</button></div><div class="cpill" id="crec" style="display:none"><button class="cb" data-a="crcancel" aria-label="Cancelar">${I('trash',22)}</button><span class="rdot"></span><b id="rtm">0:00</b><span class="mut" style="flex:1">Gravando…</span><button class="csend" data-a="crsend" style="display:flex;background:#3797f0;color:#fff" aria-label="Enviar áudio">${I('up',20,3)}</button></div></div>`;
   }else if(tab==='reels'){
     const vs=POSTS.filter(p=>p.type==='video');
-    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${mnText(p.cap||'')}</div><div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
+    h=vs.length?`<div class="rt"><b>Reels</b><span><button class="ic" id="mb" data-a="rmute">${I(rmute?'mute':'vol',22)}</button><button class="ic" data-a="newreel">${I('camera',22)}</button></span></div><div class="rl">${vs.map(p=>`<section class="rs"><video src="${esc(p.url)}" data-a="rtap" data-id="${p.id}" loop playsinline ${rmute?'muted':''} preload="metadata"></video><div class="ov"><div class="bl"><div style="display:flex;align-items:center;gap:8px;pointer-events:auto"><a data-a="prof" data-id="${esc(p.uid)}" style="display:flex;align-items:center;gap:8px">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a>${p.uid!==me&&!amF(p.uid)?`<button class="fb" data-a="follow" data-id="${esc(p.uid)}">Seguir</button>`:''}</div><div>${mnText(p.cap||'')}</div>${mnLine(p.cap)}<div class="au">🎵 ${esc(nm(p.uid))} · Áudio original</div></div><div class="sd"><button class="${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',28)}<small>${likes(p.id)}</small></button><button data-a="open" data-id="${p.id}">${I('comment',28)}<small>${ncm(p.id)}</small></button><button data-a="share" data-id="${p.id}">${I('share',28)}</button><button data-a="more" data-id="${p.id}">${I('more',28)}</button><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'sq')}</a></div></div></section>`).join('')}</div>`:`<div class="empty">Ainda não há reels.<br><br><button class="btn" data-a="newreel">${I('camera',18)} Postar um reel</button></div>`;
   }else{
     const u=vu||me;
     if(!u||!P[u]){h=`<div class="empty">${me?'Crie seu perfil para aparecer aqui.':'Entre na sua conta para criar seu perfil.'}<br><br>${me?'<button class="btn" data-a="editprof">Criar perfil</button>':''}</div>`}
@@ -864,6 +973,12 @@ document.addEventListener('click',e=>{
   else if(a==='pushoff')pushOff().then(pushUI);
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
+  else if(a==='lvstart')lvStart();
+  else if(a==='lvwatch')lvWatch(id);
+  else if(a==='lvx'){if(LIVE&&LIVE.mine){if(confirm('Encerrar a live?'))lvLeave(true,'Live encerrada.')}else lvLeave(true)}
+  else if(a==='lvsend')lvSend();
+  else if(a==='lvemo')lvEmoSend(id);
+  else if(a==='lvmic')lvMic();
   else if(a==='mnpick')mnPick(id);
   else if(a==='gcall')gcStart();
   else if(a==='gcacc')gcAcc();
@@ -1151,10 +1266,11 @@ async function startCall(peer,video){
 async function onSig(p){
   if(!p||p.to!==me)return;
   if(typeof p.cid==='string'&&p.cid.startsWith('gc|')){gcSig(p);return}
+  if(typeof p.cid==='string'&&p.cid.startsWith('lv|')){lvSig(p);return}
   const c=CALL;
   if(p.type==='offer'){
     if(ENDED.has(p.cid)||(c&&c.cid===p.cid))return;
-    if(c||GC){sig(p.from,'busy',null,p.cid);return}
+    if(c||GC||LIVE){sig(p.from,'busy',null,p.cid);return}
     CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false,video:!!p.v,fm:'user'};callUI();
     if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
     if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png',tag:'call',requireInteraction:true,renotify:true})}catch(e){}
@@ -1294,7 +1410,7 @@ function start(){
   if(window.Notification&&Notification.permission==='granted')pushSub(false);
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();{const sg=Object.keys(P).filter(u=>P[u].priv).sort().join();if(sg!==psig){psig=sg;RL.posts&&RL.posts()}}if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
-  initCalls();sub('posts',a=>{RAW.p=a;vis()});
+  initCalls();lvDisc();sub('posts',a=>{RAW.p=a;vis()});
   sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('chatthemes',a=>CT=a);sub('chatsettings',a=>{CS=a;if(tab==='chat'&&$('#cmsgs'))fillChat()});sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
