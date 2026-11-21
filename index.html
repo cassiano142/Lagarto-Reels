@@ -135,6 +135,7 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 #gcall .gcp div{width:64px;font-size:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #gcall .gcp .av{width:52px;height:52px;font-size:26px;margin:0 auto 4px}
 .mn{color:var(--ac);font-weight:600}
+.mn .av.mi{width:18px;height:18px;min-width:18px;font-size:11px;vertical-align:-4px;margin-right:3px;display:inline-flex;border-radius:50%;object-fit:cover}
 #mnbox{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:4px 0 8px;overflow:hidden;box-shadow:0 6px 18px #0004}
 #mnbox button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 12px;font-weight:600}
 #mnbox button+button{border-top:1px solid var(--bd)}
@@ -630,12 +631,12 @@ function mnRe(){const k=Object.keys(P).length+':'+Object.keys(P).map(u=>P[u].nam
 const uidByName=n=>Object.keys(P).find(u=>(P[u].name||'').toLowerCase()===String(n).toLowerCase());
 function mnText(t){t=String(t||'');const re=mnRe();if(!re)return esc(t);
   let out='',i=0;re.lastIndex=0;let m;
-  while((m=re.exec(t))){const u=uidByName(m[1]);out+=esc(t.slice(i,m.index));out+=u?`<a class="mn" data-a="prof" data-id="${esc(u)}">@${esc(m[1])}</a>`:esc(m[0]);i=m.index+m[0].length}
+  while((m=re.exec(t))){const u=uidByName(m[1]);out+=esc(t.slice(i,m.index));out+=u?`<a class="mn" data-a="prof" data-id="${esc(u)}">${av(u,'mi')}@${esc(m[1])}</a>`:esc(m[0]);i=m.index+m[0].length}
   return out+esc(t.slice(i))}
 function mnMentions(t){const re=mnRe(),r=new Set();if(!re||!t)return r;re.lastIndex=0;let m;while((m=re.exec(String(t)))){const u=uidByName(m[1]);if(u)r.add(u)}return r}
 const mentionsMe=t=>me&&mnMentions(t).has(me);
 function mnLine(t){const us=[...mnMentions(t)];if(!us.length)return '';
-  const l=us.map(u=>`<a class="mn" data-a="prof" data-id="${esc(u)}">@${esc(P[u].name)}</a>`);
+  const l=us.map(u=>`<a class="mn" data-a="prof" data-id="${esc(u)}">${av(u,'mi')}@${esc(P[u].name)}</a>`);
   const j=l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l[0];
   return `<div class="mnl">${j} ${us.length>1?'foram mencionados':'foi mencionado'}</div>`}
 function mnSuggest(el){const box=$('#mnbox');if(box)box.remove();if(!el||!me)return;
