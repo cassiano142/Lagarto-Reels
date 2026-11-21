@@ -738,7 +738,7 @@ function lvUI(){let o=$('#live');const c=LIVE;if(!c){if(o)o.remove();return}
   if(!c.mine&&Object.keys(LVS).filter(x=>x!==c.host).length)o.insertAdjacentHTML('beforeend','<div class="lvhint">⇅ Deslize pra ver outras lives</div>');
   let ty=null;o.addEventListener('touchstart',e=>{ty=e.target.closest('.lvbot,.lvtop')?null:e.touches[0].clientY},{passive:true});
   o.addEventListener('touchend',e=>{if(ty==null||!LIVE||LIVE.mine)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70)lvSwitch(dy<0?1:-1)},{passive:true});
-  document.body.append(o);const v=$('#lvv');if(c.mine){v.srcObject=c.ms;v.play().catch(()=>{})}c.vel=v}
+  document.body.append(o);const v=$('#lvv');if(c.mine){c.vr=0;v.srcObject=c.ms;v.style.objectFit=c.ct?'contain':'cover';v.onloadedmetadata=()=>{c.vr=v.videoWidth/v.videoHeight;camFit()};v.play().catch(()=>{})}c.vel=v}
 const lvList=()=>Object.keys(LVS).filter(u=>P[u]&&!hid(u)).sort((a,b)=>(LVS[b].ts||0)-(LVS[a].ts||0));
 function lvSwitch(dir){const c=LIVE;if(!c||c.mine)return;const l=lvList(),i=l.indexOf(c.host);
   const ni=i<0?(dir>0?0:l.length-1):i+dir;if(ni<0||ni>=l.length){toast(l.length>1||i<0?'Não há mais lives.':'Só tem uma live agora.');return}
@@ -771,7 +771,7 @@ function lvZoomInit(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTr
 function lvZoomTog(){const c=LIVE;if(!c||!c.mine)return;lvZoomInit();if(!c.zoomOk){toast('Essa câmera não permite ajustar o zoom. Tente a câmera de trás.');return}const z=$('#lvz');if(z)z.hidden=!z.hidden}
 function lvZoom(v){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(t)t.applyConstraints({advanced:[{zoom:+v}]}).catch(()=>{})}
 const LVR={'9:16':9/16,'3:4':3/4,'1:1':1,'4:3':4/3,'16:9':16/9},LVQ={'480p':480,'720p':720,'1080p':1080};
-function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}}}
+function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h}}}
 async function lvRecam(fm){const c=LIVE;if(!c||!c.mine)return false;
   try{const n=await navigator.mediaDevices.getUserMedia({video:lvCons(fm,c)}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];
     Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
@@ -990,18 +990,18 @@ function camR(){const c=CAM,r=CMR[c.rt];return c.m==='post'&&innerWidth>innerHei
 function camLand(){return innerWidth>innerHeight}
 function newPost(rl){if(!need())return;camOpen(rl)}
 function camOpen(rl){let o=$('#cam');if(!o){o=document.createElement('div');o.id='cam';document.body.appendChild(o);o.onclick=camClick;o.onchange=camChange;addEventListener('resize',()=>{if(!CAM||$('#cam').hidden)return;camFit();if(CAM.m==='post'&&CAM.lo!==camLand()&&!CAM.rec){CAM.lo=camLand();camStart()}})}
-  CAM={m:rl?'reel':'post',fm:'user',rt:rl?'9:16':'16:9',lo:camLand(),q:'720p',tm:0,gr:0,fl:0,dur:60};o.hidden=false;camUI();camStart()}
+  CAM={m:rl?'reel':'post',fm:'user',rt:rl?'9:16':'16:9',lo:camLand(),ct:1,q:'720p',tm:0,gr:0,fl:0,dur:60};o.hidden=false;camUI();camStart()}
 function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data-v="${v}" class="${t}">`;
   o.className=c.rec?'rec':'';
   o.innerHTML=`<div class="cmt"><button class="cmb" data-c="x">${I('back',22)}</button><button class="cmnc" data-c="nat">${I('camera',18)} Câmera do celular</button><button class="cmb ${c.fl?'on':''}" data-c="fl">${I('bolt',22)}</button><button class="cmb" data-c="pn">${I('gear',22)}</button></div>
 <div class="cmst" id="cmst"><div class="cmfr" id="cmfr"><video id="cmv" autoplay playsinline muted></video>${c.gr?'<div class="cmgr"></div>':''}<div id="cmcd"></div></div>
 <div class="cmsd"><button class="cmb" data-c="flip">${I('flip',22)}</button><button class="cmb ${c.tm?'on':''}" data-c="tm">${c.tm?c.tm+'s':I('clock',22)}</button><button class="cmb ${c.gr?'on':''}" data-c="gr">${I('grid',22)}</button></div>
-<div class="cmpn" id="cmpn" hidden><div><b>Proporção</b>${Object.keys(CMR).map(k=>`<button data-c="rt" data-v="${k}" class="${c.rt===k?'on':''}">${k}</button>`).join('')}</div><div><b>Qualidade</b>${Object.keys(LVQ).map(k=>`<button data-c="q" data-v="${k}" class="${c.q===k?'on':''}">${k}</button>`).join('')}</div></div>
+<div class="cmpn" id="cmpn" hidden><div><b>Proporção</b>${Object.keys(CMR).map(k=>`<button data-c="rt" data-v="${k}" class="${c.rt===k?'on':''}">${k}</button>`).join('')}</div><div><b>Qualidade</b>${Object.keys(LVQ).map(k=>`<button data-c="q" data-v="${k}" class="${c.q===k?'on':''}">${k}</button>`).join('')}</div><div><b>Tela</b><button data-c="ct" data-v="1" class="${c.ct?'on':''}">Inteira</button><button data-c="ct" data-v="0" class="${c.ct?'':'on'}">Preencher</button></div></div>
 <div class="cmnat" id="cmnat" hidden><b>Câmera do celular</b>${c.m==='reel'?'':`<label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label>`}<label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label><button data-c="nat">Cancelar</button></div><div class="cmzm" id="cmzm" hidden><input type="range" id="cmz" data-c="zm"></div></div>
 <div class="cmbt">${c.m==='reel'?`<div class="cmdu">${[15,30,60,90].map(s=>`<button data-c="dur" data-v="${s}" class="${c.dur===s?'on':''}">${s}s</button>`).join('')}</div>`:''}
 <div class="cmsh"><label class="cmgl">${I('image',22)}<input type="file" id="cmg" accept="${c.m==='reel'?'video/*':'image/*,video/*'}" hidden></label><button class="cmsb" data-c="go"><i></i></button><button class="cmb" data-c="flip">${I('flip',22)}</button></div>
 <div class="cmmd"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
-function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=camR(),W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
+function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=(CAM.ct&&CAM.vr)?CAM.vr:camR(),W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
 function camStop(){const c=CAM;if(!c)return;if(c.rec){c.discard=1;try{c.rec.stop()}catch(e){}}clearInterval(c.iv);if(c.ms)c.ms.getTracks().forEach(t=>t.stop());c.ms=null}
 async function camStart(){const c=CAM;camStop();c.discard=0;const r=camR(),q=LVQ[c.q],w=r>=1?Math.round(q*r):q,h=r>=1?q:Math.round(q/r);
   try{if(!navigator.mediaDevices)throw 0;c.ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:c.fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}},audio:c.m==='reel'})}
@@ -1018,6 +1018,7 @@ function camClick(e){const t=e.target.closest('[data-c]');if(!t||!CAM)return;con
   else if(a==='fl'){if(!c.tc){toast('Essa câmera não tem lanterna.');return}c.fl=!c.fl;const k=c.ms.getVideoTracks()[0];k.applyConstraints({advanced:[{torch:!!c.fl}]}).catch(()=>{});t.classList.toggle('on',!!c.fl)}
   else if(a==='tm'){c.tm=c.tm===0?3:c.tm===3?10:0;t.classList.toggle('on',!!c.tm);t.innerHTML=c.tm?c.tm+'s':I('clock',22)}
   else if(a==='gr'){c.gr=c.gr?0:1;const f=$('#cmfr'),g=f.querySelector('.cmgr');if(c.gr&&!g)f.insertAdjacentHTML('beforeend','<div class="cmgr"></div>');else if(g)g.remove();t.classList.toggle('on',!!c.gr)}
+  else if(a==='ct'){c.ct=+v;camUI();camStart()}
   else if(a==='rt'||a==='q'){if(c.rec)return;c[a]=v;camUI();camStart()}
   else if(a==='dur'){c.dur=+v;t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t))}
   else if(a==='mode'){if(c.rec||c.m===v)return;c.m=v;c.rt=v==='reel'?'9:16':'16:9';camUI();camStart()}
@@ -1027,7 +1028,7 @@ function camChange(e){const i=e.target;if(i.id==='cmz'){const k=CAM.ms&&CAM.ms.g
 function camGo(){const c=CAM;if(c.cdn)return;if(c.rec){c.rec.stop();return}if(!c.ms)return;
   if(!c.tm){camDo();return}let n=c.tm;c.cdn=1;const d=$('#cmcd'),tick=()=>{if(!CAM||CAM!==c){return}if(n<=0){d.innerHTML='';c.cdn=0;camDo();return}d.innerHTML=`<div class="cmcd">${n--}</div>`;setTimeout(tick,1000)};tick()}
 function camDo(){CAM.m==='reel'?camRec():camShot()}
-function camShot(){const v=$('#cmv'),c=CAM;if(!v||!v.videoWidth)return;const r=camR(),sw=v.videoWidth,sh=v.videoHeight;let cw=sw,ch=sw/r;if(ch>sh){ch=sh;cw=sh*r}
+function camShot(){const v=$('#cmv'),c=CAM;if(!v||!v.videoWidth)return;const r=c.ct?v.videoWidth/v.videoHeight:camR(),sw=v.videoWidth,sh=v.videoHeight;let cw=sw,ch=sw/r;if(ch>sh){ch=sh;cw=sh*r}
   const cv=document.createElement('canvas');cv.width=Math.round(cw);cv.height=Math.round(ch);cv.getContext('2d').drawImage(v,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,cv.width,cv.height);
   cv.toBlob(b=>camReview(new File([b],'foto.jpg',{type:'image/jpeg'})),'image/jpeg',.92)}
 function camRec(){const c=CAM,mt=['video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
@@ -1037,7 +1038,7 @@ function camRec(){const c=CAM,mt=['video/mp4','video/webm;codecs=vp9,opus','vide
   rc.start(500);c.rec=rc;c.t0=Date.now();$('#cam').classList.add('rec');$('#cmfr').insertAdjacentHTML('beforeend','<div class="cmrc" id="cmrc">● 0:00</div>');
   c.iv=setInterval(()=>{const s=Math.floor((Date.now()-c.t0)/1000),e=$('#cmrc');if(e)e.textContent='● '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s>=c.dur)rc.stop()},250)}
 function camEnd(){camStop();const o=$('#cam');if(o)o.hidden=true;const r=$('#cmr');if(r)r.remove();if(CAM&&CAM.u)URL.revokeObjectURL(CAM.u);CAM=null}
-function camReview(f){const c=CAM,er=c.ms?camR():0;camStop();$('#cam').hidden=true;c.f=f;c.cover=null;c.er=er;c.u=URL.createObjectURL(f);const V=f.type.startsWith('video/');
+function camReview(f){const c=CAM,er=c.ms?((c.ct&&c.vr)?c.vr:camR()):0;camStop();$('#cam').hidden=true;c.f=f;c.cover=null;c.er=er;c.u=URL.createObjectURL(f);const V=f.type.startsWith('video/');
   let o=$('#cmr');if(o)o.remove();o=document.createElement('div');o.id='cmr';document.body.appendChild(o);
   o.innerHTML=`<div class="cmh"><button class="ic" data-r="back" aria-label="Voltar">${I('back',24)}</button><b>${V?'Novo reel':'Nova publicação'}</b></div>
 <div class="cmpv" id="cmpv" style="${c.er?`aspect-ratio:${c.er};width:${c.er>1?'min(300px,80%)':'150px'}`:''}">${V?`<video src="${c.u}#t=0.1" muted playsinline preload="metadata"></video>`:`<img src="${c.u}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button>${V?'<button data-r="cover" style="bottom:10px">Editar capa</button>':''}</div>
