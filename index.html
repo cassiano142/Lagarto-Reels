@@ -86,6 +86,13 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 .lnk{color:var(--ac);font-weight:700}
 #pv img,#pv video{max-width:100%;max-height:40vh;border-radius:10px}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:99px;z-index:60;max-width:90%;text-align:center}
+.splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.splash img{width:110px;height:auto;animation:spl 1.6s ease-in-out infinite}
+.splash b{font-size:26px;font-weight:800;background:linear-gradient(90deg,var(--ac),#f5c518);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lbar{width:180px;height:6px;border-radius:99px;background:var(--card);overflow:hidden}
+.lbar i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,var(--ac),#f5c518);animation:lb 1.1s ease-in-out infinite}
+@keyframes lb{0%{transform:translateX(-100%)}100%{transform:translateX(450%)}}
+@keyframes spl{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -264,7 +271,7 @@ body.ct .chh,body.ct .cin2{background:var(--cbg)}
 <body>
 <div class="wrap">
 <header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="ntb" data-a="notif" aria-label="Notificações"></button><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="stb" data-a="settings" aria-label="Configurações"></button></span></header>
-<main id="app"><div class="empty">Carregando…</div></main>
+<main id="app"><div class="splash"><img src="logo.png" alt=""><b>Lagarto Reels</b><div class="lbar"><i></i></div></div></main>
 </div>
 <nav class="bar"></nav>
 <div id="auth" style="display:none"></div>
