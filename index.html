@@ -383,45 +383,49 @@ body.ct .chh,body.ct .cin2{background:var(--cbg)}
 .mrow img{-webkit-touch-callout:none;-webkit-user-drag:none}
 #cam,#cmr{position:fixed;inset:0;z-index:89;display:flex;flex-direction:column}
 #cam{background:#000;color:#fff}#cam[hidden]{display:none}
-#cam .t{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px}
-#cam .b{width:42px;height:42px;border-radius:50%;background:#ffffff26;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none}
-#cam .nc{display:flex;align-items:center;gap:6px;background:#ffffff26;color:#fff;border-radius:99px;padding:0 12px;height:42px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
-#cam .b.on{background:#fff;color:#111}
-#cam .st{flex:1;position:relative;min-height:0}
-#cam .fr{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;border-radius:14px;background:#111}
+#cam .cmt{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px}
+#cam .cmb{width:42px;height:42px;border-radius:50%;background:#ffffff26;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none}
+#cam .cmnc{display:flex;align-items:center;gap:6px;background:#ffffff26;color:#fff;border-radius:99px;padding:0 12px;height:42px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+#cam .cmnat{position:absolute;left:50%;top:14px;transform:translateX(-50%);width:min(280px,90%);background:#000d;border:1px solid #ffffff33;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;z-index:4;text-align:center}
+#cam .cmnat[hidden]{display:none}
+#cam .cmnat label{background:var(--ac);color:#fff;padding:11px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+#cam .cmnat button{background:#ffffff26;color:#fff;border-radius:12px;padding:9px;font-weight:700}
+#cam .cmb.on{background:#fff;color:#111}
+#cam .cmst{flex:1;position:relative;min-height:0}
+#cam .cmfr{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;border-radius:14px;background:#111}
 #cam video{width:100%;height:100%;object-fit:cover;display:block}
-#cam .gr{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#fff6,#fff6) 33.3% 0/1px 100% no-repeat,linear-gradient(#fff6,#fff6) 66.6% 0/1px 100% no-repeat,linear-gradient(#fff6,#fff6) 0 33.3%/100% 1px no-repeat,linear-gradient(#fff6,#fff6) 0 66.6%/100% 1px no-repeat}
-#cam .sd{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:10px;z-index:2}
-#cam .sd .b{background:#0008}#cam .sd .b.on{background:#fff}
-#cam .pn{position:absolute;left:62px;top:10px;background:#000a;border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
-#cam .pn[hidden]{display:none}#cam .pn div{display:flex;gap:6px;align-items:center}
-#cam .pn button,#cam .du button{background:#ffffff26;color:#fff;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
-#cam .pn button.on,#cam .du button.on{background:#fff;color:#111}
-#cam .zm{position:absolute;right:8px;top:20%;bottom:20%;display:flex;align-items:center;z-index:2}
-#cam .zm input{writing-mode:vertical-lr;direction:rtl;height:100%;accent-color:#fff}
-#cam .cd{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:96px;font-weight:800;text-shadow:0 2px 12px #000;pointer-events:none}
-#cam .rc{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#e5383b;border-radius:99px;padding:3px 10px;font-weight:800;font-size:13px;z-index:2}
-#cam .du{display:flex;justify-content:center;gap:8px;padding:8px}
-#cam .bt{padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px))}
-#cam .sh{display:flex;align-items:center;justify-content:space-around;padding:8px 0}
-#cam .sb{width:78px;height:78px;border-radius:50%;border:4px solid #fff;display:flex;align-items:center;justify-content:center}
-#cam .sb i{width:60px;height:60px;border-radius:50%;background:#fff;transition:.15s}
-#cam.rec .sb{border-color:#e5383b}#cam.rec .sb i{background:#e5383b;width:30px;height:30px;border-radius:8px}
-#cam .gl{width:46px;height:46px;border-radius:12px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
-#cam .md{display:flex;justify-content:center;gap:26px;font-weight:700;font-size:13px;letter-spacing:1px}
-#cam .md button{color:#fff8}#cam .md button.on{color:#fff}
-#cam .fb{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;padding:20px;text-align:center}
-#cam .fb label{background:var(--ac);padding:10px 18px;border-radius:12px;font-weight:700;width:min(260px,100%)}
+#cam .cmgr{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#fff6,#fff6) 33.3% 0/1px 100% no-repeat,linear-gradient(#fff6,#fff6) 66.6% 0/1px 100% no-repeat,linear-gradient(#fff6,#fff6) 0 33.3%/100% 1px no-repeat,linear-gradient(#fff6,#fff6) 0 66.6%/100% 1px no-repeat}
+#cam .cmsd{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:10px;z-index:2}
+#cam .cmsd .cmb{background:#0008}#cam .cmsd .cmb.on{background:#fff}
+#cam .cmpn{position:absolute;left:62px;top:10px;background:#000a;border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
+#cam .cmpn[hidden]{display:none}#cam .cmpn div{display:flex;gap:6px;align-items:center}
+#cam .cmpn button,#cam .cmdu button{background:#ffffff26;color:#fff;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+#cam .cmpn button.on,#cam .cmdu button.on{background:#fff;color:#111}
+#cam .cmzm{position:absolute;right:8px;top:20%;bottom:20%;display:flex;align-items:center;z-index:2}
+#cam .cmzm input{writing-mode:vertical-lr;direction:rtl;height:100%;accent-color:#fff}
+#cam .cmcd{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:96px;font-weight:800;text-shadow:0 2px 12px #000;pointer-events:none}
+#cam .cmrc{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#e5383b;border-radius:99px;padding:3px 10px;font-weight:800;font-size:13px;z-index:2}
+#cam .cmdu{display:flex;justify-content:center;gap:8px;padding:8px}
+#cam .cmbt{padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px))}
+#cam .cmsh{display:flex;align-items:center;justify-content:space-around;padding:8px 0}
+#cam .cmsb{width:78px;height:78px;border-radius:50%;border:4px solid #fff;display:flex;align-items:center;justify-content:center}
+#cam .cmsb i{width:60px;height:60px;border-radius:50%;background:#fff;transition:.15s}
+#cam.rec .cmsb{border-color:#e5383b}#cam.rec .cmsb i{background:#e5383b;width:30px;height:30px;border-radius:8px}
+#cam .cmgl{width:46px;height:46px;border-radius:12px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
+#cam .cmmd{display:flex;justify-content:center;gap:26px;font-weight:700;font-size:13px;letter-spacing:1px}
+#cam .cmmd button{color:#fff8}#cam .cmmd button.on{color:#fff}
+#cam .cmfb{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;padding:20px;text-align:center}
+#cam .cmfb label{background:var(--ac);padding:10px 18px;border-radius:12px;font-weight:700;width:min(260px,100%)}
 #cmr{background:var(--bg);color:var(--fg);overflow-y:auto;z-index:90}
-#cmr .h{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg);z-index:3}
-#cmr .h b{flex:1;text-align:center;margin-right:34px}
-#cmr .pv{position:relative;width:150px;aspect-ratio:9/16;margin:14px auto;border-radius:16px;overflow:hidden;background:#000}
-#cmr .pv video,#cmr .pv img{width:100%;height:100%;object-fit:cover}
-#cmr .pv button{position:absolute;left:50%;transform:translateX(-50%);background:#000a;color:#fff;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:700;white-space:nowrap}
-#cmr textarea,#cmr .au{width:calc(100% - 28px);margin:0 14px 8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;color:var(--fg);font:inherit;box-sizing:border-box}
-#cmr .rw{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-top:1px solid var(--bd);font-weight:600;text-align:left}
-#cmr .ft{display:flex;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));position:sticky;bottom:0;background:var(--bg);margin-top:auto}
-#cmr .ft .btn{flex:1}
+#cmr .cmh{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg);z-index:3}
+#cmr .cmh b{flex:1;text-align:center;margin-right:34px}
+#cmr .cmpv{position:relative;width:150px;aspect-ratio:9/16;margin:14px auto;border-radius:16px;overflow:hidden;background:#000}
+#cmr .cmpv video,#cmr .cmpv img{width:100%;height:100%;object-fit:cover}
+#cmr .cmpv button{position:absolute;left:50%;transform:translateX(-50%);background:#000a;color:#fff;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+#cmr textarea,#cmr .cmau{width:calc(100% - 28px);margin:0 14px 8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;color:var(--fg);font:inherit;box-sizing:border-box}
+#cmr .cmrw{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-top:1px solid var(--bd);font-weight:600;text-align:left}
+#cmr .cmft{display:flex;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));position:sticky;bottom:0;background:var(--bg);margin-top:auto}
+#cmr .cmft .btn{flex:1}
 #cmo{position:fixed;inset:0;z-index:95;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
 #cmo video,#cmo img{max-width:100%;max-height:78vh;border-radius:12px}#cmo input{width:80%}
 </style>
@@ -987,30 +991,31 @@ function camOpen(rl){let o=$('#cam');if(!o){o=document.createElement('div');o.id
   CAM={m:rl?'reel':'post',fm:'user',rt:'9:16',q:'720p',tm:0,gr:0,fl:0,dur:60};o.hidden=false;camUI();camStart()}
 function camUI(){const c=CAM,o=$('#cam'),bt=(a,v,t)=>`<button data-c="${a}" data-v="${v}" class="${t}">`;
   o.className=c.rec?'rec':'';
-  o.innerHTML=`<div class="t"><button class="b" data-c="x">${I('back',22)}</button><label class="nc">${I('camera',18)} Câmera do celular<input type="file" accept="${c.m==='reel'?'video/*':'image/*'}" capture="environment" hidden></label><button class="b ${c.fl?'on':''}" data-c="fl">${I('bolt',22)}</button><button class="b" data-c="pn">${I('gear',22)}</button></div>
-<div class="st" id="cmst"><div class="fr" id="cmfr"><video id="cmv" autoplay playsinline muted></video>${c.gr?'<div class="gr"></div>':''}<div id="cmcd"></div></div>
-<div class="sd"><button class="b" data-c="flip">${I('flip',22)}</button><button class="b ${c.tm?'on':''}" data-c="tm">${c.tm?c.tm+'s':I('clock',22)}</button><button class="b ${c.gr?'on':''}" data-c="gr">${I('grid',22)}</button></div>
-<div class="pn" id="cmpn" hidden><div><b>Proporção</b>${Object.keys(CMR).map(k=>`<button data-c="rt" data-v="${k}" class="${c.rt===k?'on':''}">${k}</button>`).join('')}</div><div><b>Qualidade</b>${Object.keys(LVQ).map(k=>`<button data-c="q" data-v="${k}" class="${c.q===k?'on':''}">${k}</button>`).join('')}</div></div>
-<div class="zm" id="cmzm" hidden><input type="range" id="cmz" data-c="zm"></div></div>
-<div class="bt">${c.m==='reel'?`<div class="du">${[15,30,60,90].map(s=>`<button data-c="dur" data-v="${s}" class="${c.dur===s?'on':''}">${s}s</button>`).join('')}</div>`:''}
-<div class="sh"><label class="gl">${I('image',22)}<input type="file" id="cmg" accept="${c.m==='reel'?'video/*':'image/*,video/*'}" hidden></label><button class="sb" data-c="go"><i></i></button><button class="b" data-c="flip">${I('flip',22)}</button></div>
-<div class="md"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
+  o.innerHTML=`<div class="cmt"><button class="cmb" data-c="x">${I('back',22)}</button><button class="cmnc" data-c="nat">${I('camera',18)} Câmera do celular</button><button class="cmb ${c.fl?'on':''}" data-c="fl">${I('bolt',22)}</button><button class="cmb" data-c="pn">${I('gear',22)}</button></div>
+<div class="cmst" id="cmst"><div class="cmfr" id="cmfr"><video id="cmv" autoplay playsinline muted></video>${c.gr?'<div class="cmgr"></div>':''}<div id="cmcd"></div></div>
+<div class="cmsd"><button class="cmb" data-c="flip">${I('flip',22)}</button><button class="cmb ${c.tm?'on':''}" data-c="tm">${c.tm?c.tm+'s':I('clock',22)}</button><button class="cmb ${c.gr?'on':''}" data-c="gr">${I('grid',22)}</button></div>
+<div class="cmpn" id="cmpn" hidden><div><b>Proporção</b>${Object.keys(CMR).map(k=>`<button data-c="rt" data-v="${k}" class="${c.rt===k?'on':''}">${k}</button>`).join('')}</div><div><b>Qualidade</b>${Object.keys(LVQ).map(k=>`<button data-c="q" data-v="${k}" class="${c.q===k?'on':''}">${k}</button>`).join('')}</div></div>
+<div class="cmnat" id="cmnat" hidden><b>Câmera do celular</b>${c.m==='reel'?'':`<label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label>`}<label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label><button data-c="nat">Cancelar</button></div><div class="cmzm" id="cmzm" hidden><input type="range" id="cmz" data-c="zm"></div></div>
+<div class="cmbt">${c.m==='reel'?`<div class="cmdu">${[15,30,60,90].map(s=>`<button data-c="dur" data-v="${s}" class="${c.dur===s?'on':''}">${s}s</button>`).join('')}</div>`:''}
+<div class="cmsh"><label class="cmgl">${I('image',22)}<input type="file" id="cmg" accept="${c.m==='reel'?'video/*':'image/*,video/*'}" hidden></label><button class="cmsb" data-c="go"><i></i></button><button class="cmb" data-c="flip">${I('flip',22)}</button></div>
+<div class="cmmd"><button data-c="mode" data-v="post" class="${c.m==='post'?'on':''}">PUBLICAR</button><button data-c="mode" data-v="reel" class="${c.m==='reel'?'on':''}">REELS</button></div></div>`;camFit()}
 function camFit(){const s=$('#cmst'),f=$('#cmfr');if(!s||!f||!CAM)return;const r=CMR[CAM.rt],W=s.clientWidth,H=s.clientHeight;let w=W,h=W/r;if(h>H){h=H;w=H*r}f.style.width=w+'px';f.style.height=h+'px'}
 function camStop(){const c=CAM;if(!c)return;if(c.rec){c.discard=1;try{c.rec.stop()}catch(e){}}clearInterval(c.iv);if(c.ms)c.ms.getTracks().forEach(t=>t.stop());c.ms=null}
 async function camStart(){const c=CAM;camStop();c.discard=0;const r=CMR[c.rt],q=LVQ[c.q];
   try{if(!navigator.mediaDevices)throw 0;c.ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:c.fm},width:{ideal:q},height:{ideal:Math.round(q/r)},aspectRatio:{ideal:r}},audio:c.m==='reel'})}
-  catch(e){c.ms=null;const s=$('#cmst');if(s)s.innerHTML=`<div class="fb"><p>Não consegui abrir a câmera aqui. Use a câmera do celular:</p><label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label><label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label></div>`;return}
+  catch(e){c.ms=null;const s=$('#cmst');if(s)s.innerHTML=`<div class="cmfb"><p>Não consegui abrir a câmera aqui. Use a câmera do celular:</p><label>${I('camera',20)} Tirar foto<input type="file" accept="image/*" capture="environment" hidden></label><label>${I('reels',20)} Gravar vídeo<input type="file" accept="video/*" capture="environment" hidden></label></div>`;return}
   const v=$('#cmv');if(!v)return;v.srcObject=c.ms;v.style.transform=c.fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{});
   const t=c.ms.getVideoTracks()[0];let k={};try{k=t.getCapabilities?t.getCapabilities():{}}catch(e){}
   c.tc=!!k.torch;const z=$('#cmz');if(k.zoom&&z){z.min=k.zoom.min;z.max=k.zoom.max;z.step=k.zoom.step||.1;z.value=k.zoom.min;$('#cmzm').hidden=false}
   if(c.fl&&c.tc)t.applyConstraints({advanced:[{torch:true}]}).catch(()=>{})}
 function camClick(e){const t=e.target.closest('[data-c]');if(!t||!CAM)return;const c=CAM,a=t.dataset.c,v=t.dataset.v;
   if(a==='x'){camEnd()}
+  else if(a==='nat'){const n=$('#cmnat');n.hidden=!n.hidden}
   else if(a==='pn'){const p=$('#cmpn');p.hidden=!p.hidden}
   else if(a==='flip'){c.fm=c.fm==='user'?'environment':'user';camStart()}
   else if(a==='fl'){if(!c.tc){toast('Essa câmera não tem lanterna.');return}c.fl=!c.fl;const k=c.ms.getVideoTracks()[0];k.applyConstraints({advanced:[{torch:!!c.fl}]}).catch(()=>{});t.classList.toggle('on',!!c.fl)}
   else if(a==='tm'){c.tm=c.tm===0?3:c.tm===3?10:0;t.classList.toggle('on',!!c.tm);t.innerHTML=c.tm?c.tm+'s':I('clock',22)}
-  else if(a==='gr'){c.gr=c.gr?0:1;const f=$('#cmfr'),g=f.querySelector('.gr');if(c.gr&&!g)f.insertAdjacentHTML('beforeend','<div class="gr"></div>');else if(g)g.remove();t.classList.toggle('on',!!c.gr)}
+  else if(a==='gr'){c.gr=c.gr?0:1;const f=$('#cmfr'),g=f.querySelector('.cmgr');if(c.gr&&!g)f.insertAdjacentHTML('beforeend','<div class="cmgr"></div>');else if(g)g.remove();t.classList.toggle('on',!!c.gr)}
   else if(a==='rt'||a==='q'){if(c.rec)return;c[a]=v;camUI();camStart()}
   else if(a==='dur'){c.dur=+v;t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t))}
   else if(a==='mode'){if(c.rec||c.m===v)return;c.m=v;camUI();camStart()}
@@ -1018,7 +1023,7 @@ function camClick(e){const t=e.target.closest('[data-c]');if(!t||!CAM)return;con
 function camChange(e){const i=e.target;if(i.id==='cmz'){const k=CAM.ms&&CAM.ms.getVideoTracks()[0];if(k)k.applyConstraints({advanced:[{zoom:+i.value}]}).catch(()=>{});return}
   const f=i.files&&i.files[0];if(f){i.value='';camReview(f)}}
 function camGo(){const c=CAM;if(c.cdn)return;if(c.rec){c.rec.stop();return}if(!c.ms)return;
-  if(!c.tm){camDo();return}let n=c.tm;c.cdn=1;const d=$('#cmcd'),tick=()=>{if(!CAM||CAM!==c){return}if(n<=0){d.innerHTML='';c.cdn=0;camDo();return}d.innerHTML=`<div class="cd">${n--}</div>`;setTimeout(tick,1000)};tick()}
+  if(!c.tm){camDo();return}let n=c.tm;c.cdn=1;const d=$('#cmcd'),tick=()=>{if(!CAM||CAM!==c){return}if(n<=0){d.innerHTML='';c.cdn=0;camDo();return}d.innerHTML=`<div class="cmcd">${n--}</div>`;setTimeout(tick,1000)};tick()}
 function camDo(){CAM.m==='reel'?camRec():camShot()}
 function camShot(){const v=$('#cmv'),c=CAM;if(!v||!v.videoWidth)return;const r=CMR[c.rt],sw=v.videoWidth,sh=v.videoHeight;let cw=sw,ch=sw/r;if(ch>sh){ch=sh;cw=sh*r}
   const cv=document.createElement('canvas');cv.width=Math.round(cw);cv.height=Math.round(ch);cv.getContext('2d').drawImage(v,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,cv.width,cv.height);
@@ -1027,18 +1032,18 @@ function camRec(){const c=CAM,mt=['video/mp4','video/webm;codecs=vp9,opus','vide
   if(!mt){toast('Este navegador não grava vídeo. Use a galeria.');return}
   c.ch=[];const rc=new MediaRecorder(c.ms,{mimeType:mt});rc.ondataavailable=e=>{if(e.data.size)c.ch.push(e.data)};
   rc.onstop=()=>{clearInterval(c.iv);c.rec=null;if(c.discard||CAM!==c)return;const b=new Blob(c.ch,{type:mt.split(';')[0]});camReview(new File([b],'reel.'+(mt.includes('mp4')?'mp4':'webm'),{type:b.type}))};
-  rc.start(500);c.rec=rc;c.t0=Date.now();$('#cam').classList.add('rec');$('#cmfr').insertAdjacentHTML('beforeend','<div class="rc" id="cmrc">● 0:00</div>');
+  rc.start(500);c.rec=rc;c.t0=Date.now();$('#cam').classList.add('rec');$('#cmfr').insertAdjacentHTML('beforeend','<div class="cmrc" id="cmrc">● 0:00</div>');
   c.iv=setInterval(()=>{const s=Math.floor((Date.now()-c.t0)/1000),e=$('#cmrc');if(e)e.textContent='● '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s>=c.dur)rc.stop()},250)}
 function camEnd(){camStop();const o=$('#cam');if(o)o.hidden=true;const r=$('#cmr');if(r)r.remove();if(CAM&&CAM.u)URL.revokeObjectURL(CAM.u);CAM=null}
 function camReview(f){const c=CAM;camStop();$('#cam').hidden=true;c.f=f;c.cover=null;c.u=URL.createObjectURL(f);const V=f.type.startsWith('video/');
   let o=$('#cmr');if(o)o.remove();o=document.createElement('div');o.id='cmr';document.body.appendChild(o);
-  o.innerHTML=`<div class="h"><button class="ic" data-r="back" aria-label="Voltar">${I('back',24)}</button><b>${V?'Novo reel':'Nova publicação'}</b></div>
-<div class="pv" id="cmpv">${V?`<video src="${c.u}#t=0.1" muted playsinline preload="metadata"></video>`:`<img src="${c.u}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button>${V?'<button data-r="cover" style="bottom:10px">Editar capa</button>':''}</div>
+  o.innerHTML=`<div class="cmh"><button class="ic" data-r="back" aria-label="Voltar">${I('back',24)}</button><b>${V?'Novo reel':'Nova publicação'}</b></div>
+<div class="cmpv" id="cmpv">${V?`<video src="${c.u}#t=0.1" muted playsinline preload="metadata"></video>`:`<img src="${c.u}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button>${V?'<button data-r="cover" style="bottom:10px">Editar capa</button>':''}</div>
 <textarea id="pc" rows="3" maxlength="300" placeholder="Escreva uma legenda…"></textarea>
-<button class="rw" data-r="tag">${I('user',22)}<span style="flex:1">Marcar pessoas</span>›</button>
-${V?`<div class="rw" style="cursor:default">${I('mic',22)}<span>Renomear áudio</span></div><input class="au" id="cmau" maxlength="40" placeholder="Áudio original" autocomplete="off">`:''}
+<button class="cmrw" data-r="tag">${I('user',22)}<span style="flex:1">Marcar pessoas</span>›</button>
+${V?`<div class="cmrw" style="cursor:default">${I('mic',22)}<span>Renomear áudio</span></div><input class="cmau" id="cmau" maxlength="40" placeholder="Áudio original" autocomplete="off">`:''}
 <div id="cmps" class="mut" style="padding:6px 14px"></div>
-<div class="ft"><button class="btn g" data-r="drop">Descartar</button><button class="btn" id="cmpb" data-r="pub">Compartilhar</button></div>`;
+<div class="cmft"><button class="btn g" data-r="drop">Descartar</button><button class="btn" id="cmpb" data-r="pub">Compartilhar</button></div>`;
   o.onclick=e=>{const t=e.target.closest('[data-r]');if(!t)return;const a=t.dataset.r;
     if(a==='back'){o.remove();$('#cam').hidden=false;camUI();camStart()}
     else if(a==='drop')camEnd()
