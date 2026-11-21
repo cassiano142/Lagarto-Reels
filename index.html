@@ -116,6 +116,12 @@ nav.bar button{font-size:24px;padding:4px 18px;opacity:.55}nav.bar .on{opacity:1
 .mrow.flash>div{animation:mfl 1.4s ease-out}@keyframes mfl{0%,60%{outline:2px solid var(--ac);outline-offset:2px}100%{outline:2px solid transparent}}
 .tmo{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 4px;border-bottom:1px solid var(--bd);font-size:16px;font-weight:600}
 .tmo i{margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--mut)}.tmo.on i{border:6px solid var(--ac)}
+#cbanner{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;max-width:450px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border-radius:99px;background:linear-gradient(135deg,#1f9d55,#127a40);color:#fff;box-shadow:0 6px 20px #0006;cursor:pointer;animation:tpin .25s ease-out}
+#cbanner .av{width:34px;height:34px;font-size:17px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#ffffff2e;flex:none}
+#cbanner div{flex:1;min-width:0;line-height:1.2}#cbanner b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#cbanner small{opacity:.85}
+#cbanner button{width:38px;height:38px;border-radius:50%;background:#e5383b;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+#cbanner button svg{transform:rotate(135deg)}
+.cmin{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;width:40px;height:40px;border-radius:50%;background:#ffffff26;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;z-index:2}
 .empty{text-align:center;padding:50px 24px;color:var(--mut)}
 .sr{width:calc(100% - 28px);margin:10px 14px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px}
 
@@ -740,6 +746,8 @@ document.addEventListener('click',e=>{
   else if(a==='pushoff')pushOff().then(pushUI);
   else if(a==='theme'){lset('theme',id);applyTheme();settings('look')}
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
+  else if(a==='cmin'){if(CALL){CALL.min=true;callUI()}}
+  else if(a==='cmax'){if(CALL){CALL.min=false;callUI()}}
   else if(a==='ctpick'){closeM();ctPick()}
   else if(a==='csopen')csOpen();
   else if(a==='csnick')csNick();
@@ -936,7 +944,7 @@ PA.phone='<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-
 const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
 let CALL=null,SIG=null;const OUT={};
 let PUSHON=false;const ENDED=new Set();
-if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='call'){try{sb.realtime.connect()}catch(_){}}});
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='call'){try{sb.realtime.connect()}catch(_){}}if(e.data&&e.data.t==='decline'&&CALL&&CALL.st==='in')callEnd(true,'');});
 const b64u=x=>{const p='='.repeat((4-x.length%4)%4),r=atob((x+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
 async function pushSub(ask){
   if(!me||!('serviceWorker' in navigator)||!('PushManager' in window)||!window.Notification){if(ask)toast('Este navegador não suporta notificações push.');return false}
@@ -961,17 +969,28 @@ async function pushUI(){const st=$('#pst'),bt=$('#pbt');if(!st||!bt)return;
 function initCalls(){if(SIG||!me)return;SIG=sb.channel('call-'+me).on('broadcast',{event:'sig'},m=>onSig(m.payload)).subscribe()}
 function sig(to,type,d,cid,v){const k='call-'+to;let c=OUT[k];if(!c){c=OUT[k]=sb.channel(k);c.subscribe()}c.send({type:'broadcast',event:'sig',payload:{from:me,to,type,d,cid,v}})}
 function callUI(){
-  let o=$('#call');if(!CALL){if(o)o.remove();return}
+  let o=$('#call');if(!CALL){if(o)o.remove();callBanner();callNotiSync();return}
   if(!o){o=document.createElement('div');o.id='call';document.body.append(o)}
   const c=CALL,live=c.video&&(c.st==='conn'||c.st==='on');
   o.className=live?'vid':'';
   if(live){
-    o.innerHTML=`<button class="vend" data-a="cend" aria-label="Desligar">${I('phone',22)}</button><div class="vt ${c.rcam===false?'off':''}" id="rvw">${av(c.peer)}<b>${esc(nm(c.peer))}</b></div><div class="vt ${c.camoff?'off':''}" id="lvw">${av(me)}<b>Você</b></div><div class="vbar"><button class="cbn ${c.camoff?'wh':''}" data-a="ccam" aria-label="Câmera">${I(c.camoff?'vidx':'vid',24)}</button><button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',24)}</button><button class="cbn" data-a="cflip" aria-label="Virar câmera">${I('flip',24)}</button></div>`;
+    o.innerHTML=`<button class="cmin" data-a="cmin" aria-label="Minimizar">⌄</button><button class="vend" data-a="cend" aria-label="Desligar">${I('phone',22)}</button><div class="vt ${c.rcam===false?'off':''}" id="rvw">${av(c.peer)}<b>${esc(nm(c.peer))}</b></div><div class="vt ${c.camoff?'off':''}" id="lvw">${av(me)}<b>Você</b></div><div class="vbar"><button class="cbn ${c.camoff?'wh':''}" data-a="ccam" aria-label="Câmera">${I(c.camoff?'vidx':'vid',24)}</button><button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',24)}</button><button class="cbn" data-a="cflip" aria-label="Virar câmera">${I('flip',24)}</button></div>`;
     $('#rvw').prepend(RV);$('#lvw').prepend(LV);RV.play().catch(()=>{});LV.play().catch(()=>{});
     return}
   const st=c.st==='in'?(c.video?'Chamada de vídeo do Lagarto Reels':'Chamada de voz do Lagarto Reels'):c.st==='out'?'Chamando…':c.st==='conn'?'Conectando…':fmtD(c.sec||0);
-  o.innerHTML=`${av(c.peer)}<h2>${esc(nm(c.peer))}</h2><p id="cst">${st}</p><div class="cbt">`+(c.st==='in'?`<button class="cbn rd" data-a="cend" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="cacc" aria-label="Atender">${I(c.video?'vid':'phone',28)}</button>`:`<button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="cend" aria-label="Desligar">${I('phone',28)}</button>`)+`</div>`;
+  o.innerHTML=`${c.st==='in'?'':'<button class="cmin" data-a="cmin" aria-label="Minimizar">⌄</button>'}${av(c.peer)}<h2>${esc(nm(c.peer))}</h2><p id="cst">${st}</p><div class="cbt">`+(c.st==='in'?`<button class="cbn rd" data-a="cend" aria-label="Recusar">${I('phone',28)}</button><button class="cbn gr" data-a="cacc" aria-label="Atender">${I(c.video?'vid':'phone',28)}</button>`:`<button class="cbn ${c.mute?'wh':''}" data-a="cmute" aria-label="Silenciar">${I(c.mute?'micx':'mic',26)}</button><button class="cbn rd" data-a="cend" aria-label="Desligar">${I('phone',28)}</button>`)+`</div>`;
 }
+const _callUI=callUI;callUI=function(){_callUI();const o=$('#call'),c=CALL;if(o)o.style.display=(c&&c.min&&c.st!=='in')?'none':'';callBanner();callNotiSync()};
+function callBanner(){let b=$('#cbanner');const c=CALL;if(!c||!c.min||c.st==='in'){if(b)b.remove();return}
+  if(!b){b=document.createElement('div');b.id='cbanner';b.dataset.a='cmax';document.body.append(b)}
+  const st=c.st==='out'?'Chamando…':c.st==='conn'?'Conectando…':fmtD(c.sec||0);
+  b.innerHTML=`${av(c.peer)}<div><b>${esc(nm(c.peer))}</b><small id="cbt">${c.st==='on'?'Em chamada · ':''}${st}</small></div><button data-a="cend" aria-label="Desligar">${I('phone',20)}</button>`}
+async function callNotiSync(){try{if(!window.Notification||Notification.permission!=='granted'||!('serviceWorker' in navigator))return;
+  const reg=await navigator.serviceWorker.ready,c=CALL;
+  if(!c||!document.hidden){(await reg.getNotifications({tag:'call'})).forEach(n=>n.close());return}
+  if(c.st==='in')return;
+  reg.showNotification('Lagarto Reels',{body:(c.st==='on'?'Em chamada com ':'Chamando ')+nm(c.peer),tag:'call',requireInteraction:true,silent:true,icon:'icon-192.png',badge:'icon-192.png'})}catch(e){}}
+document.addEventListener('visibilitychange',callNotiSync);
 const RV=document.createElement('video'),LV=document.createElement('video');
 RV.autoplay=LV.autoplay=true;RV.playsInline=LV.playsInline=true;RV.muted=LV.muted=true;LV.style.transform='scaleX(-1)';
 PA.vid='<rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3z"/>';PA.vidx='<rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3zM4 4l16 16"/>';PA.flip='<path d="M4 8a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 16a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/>';
@@ -987,7 +1006,7 @@ function mkPc(){
   pc.onicecandidate=e=>{if(e.candidate){if(c.mine)(c.sent=c.sent||[]).push(e.candidate);sig(c.peer,'ice',e.candidate,c.cid)}};
   pc.ontrack=e=>{let a=$('#rau');if(!a){a=document.createElement('audio');a.id='rau';a.autoplay=true;a.setAttribute('playsinline','');document.body.append(a)}a.srcObject=e.streams[0];a.play().catch(()=>{});if(e.track.kind==='video')RV.srcObject=e.streams[0]};
   pc.onconnectionstatechange=()=>{if(CALL!==c)return;const s=pc.connectionState;
-    if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);const e=$('#cst');if(e)e.textContent=fmtD(c.sec)},1000);callUI()}
+    if(s==='connected'&&c.st!=='on'){c.st='on';c.t0=Date.now();c.sec=0;c.tk=setInterval(()=>{c.sec=Math.floor((Date.now()-c.t0)/1e3);const e=$('#cst');if(e)e.textContent=fmtD(c.sec);const bt=$('#cbt');if(bt)bt.textContent='Em chamada · '+fmtD(c.sec)},1000);callUI()}
     else if(s==='failed'||s==='closed')callEnd(true,'A chamada caiu.')};
 }
 async function startCall(peer,video){
@@ -1010,7 +1029,7 @@ async function onSig(p){
     if(c){sig(p.from,'busy',null,p.cid);return}
     CALL={peer:p.from,cid:p.cid,st:'in',offer:p.d,ice:[],mine:false,video:!!p.v,fm:'user'};callUI();
     if(navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
-    if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png'})}catch(e){}
+    if(document.hidden&&!PUSHON&&window.Notification&&Notification.permission==='granted')try{new Notification('Chamada de voz',{body:nm(p.from)+' está ligando',icon:'icon-192.png',tag:'call',requireInteraction:true,renotify:true})}catch(e){}
     return}
   if(!c||p.cid!==c.cid)return;
   if(p.type==='answer'&&c.pc){clearTimeout(c.to);c.st='conn';await c.pc.setRemoteDescription(p.d);for(const x of c.ice)c.pc.addIceCandidate(x).catch(()=>{});c.ice=[];callUI()}
