@@ -1996,7 +1996,7 @@ function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
   ms:MS.filter(function(m){return m.from===me}).length,lv:+ls('lvc_'+me,0),st:rkStreak()}}
-var RKX=[20,80,180,320,500,700,900];
+var RKX=[0,80,180,320,500,700,900];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
 ['po',1,'Fazer o 1º post',10,'Posts'],['po',10,'Publicar 10 posts',30,'Posts'],['po',25,'Publicar 25 posts',60,'Posts'],['po',50,'Publicar 50 posts',100,'Posts'],
