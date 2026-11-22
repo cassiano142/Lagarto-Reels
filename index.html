@@ -2002,7 +2002,7 @@ function rkLive(){try{localStorage.setItem('lvc_'+me,String((+ls('lvc_'+me,0))+1
 function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};mine.forEach(function(p){ids[p.id]=1});
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
-  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
+  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cq:(function(){var o={};CM.forEach(function(c){if(c.uid!==me&&ids[c.pid])o[c.uid]=1});return Object.keys(o).length})(),cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
 var RKX=[0,120,300,560,730,900,1300,1800];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
@@ -2012,7 +2012,7 @@ var RKM=[
 ['mn',1,'Marcar alguém com @',10,'Marcações',1],['mn',10,'Marcar alguém com @ 10 vezes',30,'Marcações',1],['mn',30,'Marcar alguém com @ 30 vezes',50,'Marcações',1],
 ['du',10,'Usar o app em 10 dias diferentes',15,'Dias de uso',1],['du',30,'Usar o app em 30 dias diferentes',40,'Dias de uso',1],['du',60,'Usar o app em 60 dias diferentes',70,'Dias de uso',1],['du',100,'Usar o app em 100 dias diferentes',100,'Dias de uso',1],
 ['gr',1,'Entrar ou criar 1 grupo',15,'Grupos',1],['gr',3,'Participar de 3 grupos',30,'Grupos',1],
-['bp',10,'Ter um post com 10 curtidas',20,'Post de sucesso',1],['bp',50,'Ter um post com 50 curtidas',50,'Post de sucesso',1],['bp',100,'Ter um post com 100 curtidas',80,'Post de sucesso',1],
+['bp',10,'Ter um post com 10 curtidas',20,'Post de sucesso',1],
 
 ['po',1,'Fazer o 1º post',10,'Posts'],['po',10,'Publicar 10 posts',30,'Posts'],['po',25,'Publicar 25 posts',60,'Posts'],['po',50,'Publicar 50 posts',100,'Posts'],['po',100,'Publicar 100 posts',150,'Posts'],
 ['rl',1,'Postar 1 reel',15,'Reels'],['rl',10,'Postar 10 reels',50,'Reels'],['rl',25,'Postar 25 reels',80,'Reels'],
@@ -2025,7 +2025,7 @@ var RKM=[
 ['lw',1,'Assistir 1 live',15,'Assistir lives'],['lw',5,'Assistir 5 lives',30,'Assistir lives'],['lw',15,'Assistir 15 lives',60,'Assistir lives'],['lw',40,'Assistir 40 lives',100,'Assistir lives'],
 ['lc',1,'Mandar 1 mensagem no chat de uma live',10,'Chat das lives'],['lc',10,'Mandar 10 mensagens no chat das lives',25,'Chat das lives'],['lc',50,'Mandar 50 mensagens no chat das lives',50,'Chat das lives'],['lc',150,'Mandar 150 mensagens no chat das lives',80,'Chat das lives'],
 ['le',5,'Mandar 5 reações em lives',10,'Reações nas lives'],['le',30,'Mandar 30 reações em lives',25,'Reações nas lives'],['le',100,'Mandar 100 reações em lives',45,'Reações nas lives'],['le',300,'Mandar 300 reações em lives',70,'Reações nas lives'],
-['lr',25,'Receber 25 curtidas',20,'Curtidas recebidas'],['lr',100,'Receber 100 curtidas',40,'Curtidas recebidas'],['lr',500,'Receber 500 curtidas',80,'Curtidas recebidas'],['lr',1000,'Receber 1000 curtidas',120,'Curtidas recebidas'],
+['cq',3,'3 pessoas diferentes comentarem nos seus posts',20,'Pessoas que comentaram'],['cq',6,'6 pessoas diferentes comentarem nos seus posts',40,'Pessoas que comentaram'],['cq',12,'12 pessoas diferentes comentarem nos seus posts',80,'Pessoas que comentaram'],['cq',20,'20 pessoas diferentes comentarem nos seus posts',120,'Pessoas que comentaram'],
 ['lv',1,'Fazer sua 1ª live',30,'Lives'],['lv',3,'Fazer 3 lives',50,'Lives'],['lv',10,'Fazer 10 lives',90,'Lives'],['lv',25,'Fazer 25 lives',150,'Lives'],
 ['st',3,'Entrar 3 dias seguidos',20,'Dias seguidos'],['st',7,'Entrar 7 dias seguidos',40,'Dias seguidos'],['st',15,'Entrar 15 dias seguidos',70,'Dias seguidos'],['st',30,'Entrar 30 dias seguidos',120,'Dias seguidos']
 ];
