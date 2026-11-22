@@ -511,6 +511,7 @@ header.top{position:sticky}
 .rkx{font-size:14px;margin-bottom:6px}.rkpb{height:10px;border-radius:99px;background:var(--card);overflow:hidden;margin-bottom:10px}.rkpb i{display:block;height:100%;border-radius:99px;transition:width .4s}
 .rkm{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkm.ok{opacity:.6}.rkm small{color:var(--mut);flex:none}
 .rkr2{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkr2.lk2 .rks{filter:grayscale(1);opacity:.55}.rks{width:38px;height:36px;flex:none}
+.rkln{display:inline-flex;align-items:center;margin:4px 0;font-size:14px;gap:6px}.rkln .rkt{margin:0}
 </style>
 </head>
 <body>
@@ -1091,7 +1092,7 @@ function render(){
       const mine=u===me,ps=POSTS.filter(p=>p.uid===u),sv=POSTS.filter(p=>SV.some(s=>s.pid===p.id&&s.uid===me));
       const list=pt==='saved'&&mine?sv:pt==='reels'?ps.filter(p=>p.type==='video'):ps.filter(p=>p.type!=='video');
       h=`<div class="pr"><div class="row"><button class="avb" data-a="avview" data-id="${esc(u)}" aria-label="Ver foto de perfil">${avF(u)}</button><div class="stat"><div><b>${ps.length}</b>posts</div><div><b>${folls('to',u)}</b>seguidores</div><div><b>${folls('from',u)}</b>seguindo</div></div></div>
-      <p><b class="${LVS[u]?'lvred':''}">${esc(P[u].name)}${vb(u)}${typeof rkIc==='function'?rkIc(u):''}${isPriv(u)?' '+I('lock',14):''}</b>${typeof rkTt==='function'?rkTt(u):''}<br>${esc(P[u].bio||'')}</p>
+      <p><b class="${LVS[u]?'lvred':''}">${esc(P[u].name)}${vb(u)}${isPriv(u)?' '+I('lock',14):''}</b>${typeof rkLine==='function'?rkLine(u):'<br>'}${esc(P[u].bio||'')}</p>
       ${mine?`<div style="display:flex;gap:8px"><button class="btn g" data-a="editprof">Editar perfil</button><button class="btn g" data-a="settings">${I('gear',18)} Configurações</button></div>`:`<div style="display:flex;gap:8px"><button class="btn ${fst(u)!=='none'?'g':''}" data-a="follow" data-id="${esc(u)}">${{ok:'Seguindo',pending:'Solicitado',none:'Seguir'}[fst(u)]}</button>${fst(u)==='ok'?`<button class="btn" data-a="chat" data-id="${esc(u)}">Mensagem</button>`:''}</div>`}
       ${LVS[u]&&!mine?lvBanner(u):''}
       <div class="tabs2"><button class="${pt==='posts'?'on':''}" data-a="pt" data-id="posts">${I('grid',17)} Posts</button><button class="${pt==='reels'?'on':''}" data-a="pt" data-id="reels">${I('reels',17)} Reels</button>${mine?`<button class="${pt==='saved'?'on':''}" data-a="pt" data-id="saved">${I('bookmark',17)} Salvos</button>`:''}</div></div>
@@ -1283,7 +1284,7 @@ async function saveProf(){
   if(Object.keys(P).some(u=>u!==me&&P[u].name.toLowerCase()===n.toLowerCase())){st.textContent='Esse nome já está em uso.';return}
   $('#sp').disabled=true;st.textContent='Salvando…';
   try{const f=$('#af').files[0];let a=pav||'🦎';if(f)a=await up(f);
-    await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,frame:pfr,rk:RKN(),ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].oculto?{oculto:true}:{},P[me]&&P[me].priv?{priv:true}:{}));closeM();toast('Perfil salvo!')}
+    await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,frame:pfr,rk:RKN(),rkh:(P[me]&&P[me].rkh)?1:0,ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].oculto?{oculto:true}:{},P[me]&&P[me].priv?{priv:true}:{}));closeM();toast('Perfil salvo!')}
   catch(e){console.error(e);st.textContent=(e&&e.message)||'Falha ao salvar.';$('#sp').disabled=false}
 }
 function pop(el){const s=document.createElement('div');s.className='pop';s.textContent='❤️';el.append(s);setTimeout(()=>s.remove(),700)}
@@ -1369,7 +1370,7 @@ document.addEventListener('click',e=>{
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
   else if(a==='lvstart')lvStart();
   else if(a==='lvstart2'){closeM();lvStart()}
-  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();
+  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();else if(a==='rkhide')rkHide();
   else if(a==='lvchat')lvChatTog();
   else if(a==='lvgift')lvGift();
   else if(a==='lvemote')lvEmoteSend(id);
@@ -1964,13 +1965,14 @@ function start(){
 })();
 /* ===== LAGARTO LEVELS ===== */
 var RK=[
-{n:'Bronze',t:'Filhote de Lagarto',c:'#b0652c',g:['#e8a46a','#8a4a1c'],rs:'8s',os:'14s',o:['◆','◆','◆','◆'],ic:['#e0a26a','#8a4a1c'],sym:1,rw:'Título + moldura Bronze com rebites'},
-{n:'Prata',t:'Lagartixa Esperta',c:'#7d8a96',g:['#ffffff','#8c99a6'],rs:'3s',os:'10s',o:['✦','·','✦','·','✦','·'],ic:['#e4eaf0','#7d8a96'],sym:2,rw:'Título + moldura Prata com brilhos'},
-{n:'Ouro',t:'Camaleão',c:'#c99a00',g:['#fff3a0','#e0a800'],rs:'4s',os:'9s',o:['⭐','✨','⭐','✨','⭐','✨'],ic:['#ffe27a','#b8860b'],sym:3,rw:'Título + moldura Ouro com estrelas'},
-{n:'Platina',t:'Jacaré do Pântano',c:'#1aa3b8',g:['#7ff3ff','#1aa3b8'],rs:'2.5s',os:'8s',o:['❄️','·','❄️','·','❄️','·','❄️','·'],ic:['#7ff3ff','#0e7490'],sym:4,rw:'Título + moldura Gelo com flocos'},
-{n:'Diamante',t:'Dragão de Komodo',c:'#3b6ef0',g:['#b9d2ff','#3b6ef0'],rs:'1.8s',os:'7s',o:['💎','✦','💎','✦','💎','✦','💎','✦'],ic:['#9cc0ff','#2447b8'],sym:5,rw:'Título + moldura Diamante com cristais'},
-{n:'Mestre',t:'Mestre Lagarto',c:'#8a2be2',g:['#ff4fd8','#2b0a5c'],rs:'1.2s',os:'6s',o:['🔥','✨','🔥','✨','🔥','✨','🔥','✨'],ic:['#c58bff','#5b17a8'],sym:6,rw:'Título + moldura Fogo roxo com chamas'},
-{n:'Legend',t:'Lenda Viva do Lagarto',c:'#e5383b',g:['#ff4d4d','#ffd23f','#3ddc97','#6a5cff','#ff4fd8'],rs:'1s',os:'5s',o:['⚡','✨','🌈','⭐','💫','🔥','⚡','✨','🌈','⭐'],ic:['#ffd23f','#b8860b'],sym:7,crown:1,rw:'Título dourado + moldura Arco-íris com coroa'}
+{id:'rk1',n:'Bronze',t:'Filhote de Lagarto',c:'#b0652c',g:['#e8a46a','#8a4a1c'],rs:'8s',os:'14s',o:['◆','◆','◆','◆'],ic:['#e0a26a','#8a4a1c'],sym:1,rw:'Título + moldura Bronze com rebites'},
+{id:'rk2',n:'Prata',t:'Lagartixa Esperta',c:'#7d8a96',g:['#ffffff','#8c99a6'],rs:'3s',os:'10s',o:['✦','·','✦','·','✦','·'],ic:['#e4eaf0','#7d8a96'],sym:2,rw:'Título + moldura Prata com brilhos'},
+{id:'rk3',n:'Ouro',t:'Camaleão',c:'#c99a00',g:['#fff3a0','#e0a800'],rs:'4s',os:'9s',o:['⭐','✨','⭐','✨','⭐','✨'],ic:['#ffe27a','#b8860b'],sym:3,rw:'Título + moldura Ouro com estrelas'},
+{id:'rk4',n:'Platina',t:'Jacaré do Pântano',c:'#1aa3b8',g:['#7ff3ff','#1aa3b8'],rs:'2.5s',os:'8s',o:['❄️','·','❄️','·','❄️','·','❄️','·'],ic:['#7ff3ff','#0e7490'],sym:4,rw:'Título + moldura Gelo com flocos'},
+{id:'rk8',n:'Esmeralda',t:'Lagarto Esmeralda',c:'#10b981',g:['#7dffc4','#0a8f5a'],rs:'2.2s',os:'7.5s',o:['✦'],ic:['#6ee7b7','#047857'],sym:8,rw:'Título + moldura Esmeralda com cristais verdes'},
+{id:'rk5',n:'Diamante',t:'Dragão de Komodo',c:'#3b6ef0',g:['#b9d2ff','#3b6ef0'],rs:'1.8s',os:'7s',o:['💎','✦','💎','✦','💎','✦','💎','✦'],ic:['#9cc0ff','#2447b8'],sym:5,rw:'Título + moldura Diamante com cristais'},
+{id:'rk6',n:'Mestre',t:'Mestre Lagarto',c:'#8a2be2',g:['#ff4fd8','#2b0a5c'],rs:'1.2s',os:'6s',o:['🔥','✨','🔥','✨','🔥','✨','🔥','✨'],ic:['#c58bff','#5b17a8'],sym:6,rw:'Título + moldura Fogo roxo com chamas'},
+{id:'rk7',n:'Legend',t:'Lenda Viva do Lagarto',c:'#e5383b',g:['#ff4d4d','#ffd23f','#3ddc97','#6a5cff','#ff4fd8'],rs:'1s',os:'5s',o:['⚡','✨','🌈','⭐','💫','🔥','⚡','✨','🌈','⭐'],ic:['#ffd23f','#b8860b'],sym:7,crown:1,rw:'Título dourado + moldura Arco-íris com coroa'}
 ];
 function rkIcon(r,id){
   var s=r.sym,g='rki'+id,b='',c1=r.ic[0],c2=r.ic[1];
@@ -1979,15 +1981,18 @@ function rkIcon(r,id){
   if(s==4)b='<polygon points="24,13 34,19 34,30 24,36 14,30 14,19" fill="#fff" fill-opacity=".92"/><polygon points="24,19 29,22 29,28 24,31 19,28 19,22" fill="'+c2+'"/>';
   if(s==5)b='<polygon points="14,20 20,13 28,13 34,20 24,36" fill="#fff" fill-opacity=".95"/><path d="M14 20H34M20 13L24 20L28 13M24 20V36" stroke="'+c2+'" stroke-width="1.4" fill="none"/>';
   if(s==6)b='<path d="M24 11C29 18 34 21 32 29C31 34 27 36 24 36C21 36 17 34 16 29C15 24 20 22 20 17C22 19 23 19 24 11Z" fill="#fff"/><path d="M24 22C26 26 28 27 27 31C26.5 33 25 34 24 34C23 34 21.5 33 21 31C20 28 23 27 24 22Z" fill="'+c2+'"/>';
+  if(s==8)b='<polygon points="16,14 32,14 37,19 37,31 32,36 16,36 11,31 11,19" fill="#fff" fill-opacity=".95"/><polygon points="18,18 30,18 33,21 33,29 30,32 18,32 15,29 15,21" fill="'+c2+'" fill-opacity=".85"/><path d="M18 18L24 25L30 18M24 25V32" stroke="#fff" stroke-opacity=".7" stroke-width="1.2" fill="none"/>';
   if(s==7)b='<path d="M12 33L14 17L20 24L24 14L28 24L34 17L36 33Z" fill="#fff"/><circle cx="24" cy="25" r="2.6" fill="#e5383b"/><circle cx="17" cy="28" r="1.6" fill="#ffb000"/><circle cx="31" cy="28" r="1.6" fill="#ffb000"/>';
   var f=s==7?'<linearGradient id="'+g+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4d4d"/><stop offset=".35" stop-color="#ffd23f"/><stop offset=".65" stop-color="#3ddc97"/><stop offset="1" stop-color="#6a5cff"/></linearGradient>':'<linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient>';
-  var w=s>=6?'<path d="M5 18Q-3 14 -1 6Q6 8 9 15Z M43 18Q51 14 49 6Q42 8 39 15Z" fill="'+(s==7?'#ffd23f':c1)+'" stroke="'+c2+'"/>':'';
+  var w=(s==6||s==7)?'<path d="M5 18Q-3 14 -1 6Q6 8 9 15Z M43 18Q51 14 49 6Q42 8 39 15Z" fill="'+(s==7?'#ffd23f':c1)+'" stroke="'+c2+'"/>':'';
   return '<svg viewBox="-4 0 56 50" style="width:100%;height:100%"><defs>'+f+'</defs>'+w+'<path d="M24 3L43 10V25C43 36 34 44 24 47C14 44 5 36 5 25V10Z" fill="url(#'+g+')" stroke="'+c2+'" stroke-width="2"/><path d="M24 7L39 12.5V25C39 33 32 40 24 43C16 40 9 33 9 25V12.5Z" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1.2"/>'+b+'</svg>';
 }
 function rkFr(r,i){
   var st=r.g.map(function(c,k){return '<stop offset="'+(k/(r.g.length-1)).toFixed(2)+'" stop-color="'+c+'"/>'}).join('')+'<stop offset="1" stop-color="'+r.g[0]+'"/>';
-  var gl=r.o.map(function(t,k){var a=k*2*Math.PI/r.o.length;return '<text class="rkc" x="'+(60+53*Math.sin(a)).toFixed(1)+'" y="'+(60-53*Math.cos(a)).toFixed(1)+'" font-size="12" text-anchor="middle" dominant-baseline="central">'+t+'</text>'}).join('');
-  return '<svg viewBox="0 0 120 120" style="--gc:'+r.c+';--os:'+r.os+';--rs:'+r.rs+'"><defs><linearGradient id="rkg'+i+'" x1="0" y1="0" x2="1" y2="1">'+st+'</linearGradient></defs><g class="qpu"><g class="rkr"><circle cx="60" cy="60" r="47" fill="none" stroke="url(#rkg'+i+')" stroke-width="5"/></g></g><circle cx="60" cy="60" r="43.5" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.2"/><g class="rko">'+gl+'</g>'+(r.crown?'<text class="rkb" x="60" y="8" font-size="22" text-anchor="middle">👑</text>':'')+'</svg>';
+  var sh=function(x,y,w){var h=w*.893;return rkIcon(r,'f'+i).replace('<svg viewBox="-4 0 56 50" style="width:100%;height:100%">','<svg x="'+(x-w/2).toFixed(1)+'" y="'+(y-h/2).toFixed(1)+'" width="'+w+'" height="'+h.toFixed(1)+'" viewBox="-4 0 56 50" overflow="visible">')};
+  var gl='';for(var k=0;k<8;k++){var a=k*Math.PI/4,x=60+53*Math.sin(a),y=60-53*Math.cos(a);
+    gl+=k%2?'<text class="rkc" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" font-size="12" fill="'+r.g[0]+'" text-anchor="middle" dominant-baseline="central">✦</text>':'<g class="rkc">'+sh(x,y,14)+'</g>'}
+  return '<svg viewBox="0 0 120 120" style="--gc:'+r.c+';--os:'+r.os+';--rs:'+r.rs+'"><defs><linearGradient id="rkg'+i+'" x1="0" y1="0" x2="1" y2="1">'+st+'</linearGradient></defs><g class="qpu"><g class="rkr"><circle cx="60" cy="60" r="47" fill="none" stroke="url(#rkg'+i+')" stroke-width="5"/></g></g><circle cx="60" cy="60" r="43.5" fill="none" stroke="'+r.g[0]+'" stroke-opacity=".55" stroke-width="1.2"/><g class="rko">'+gl+'</g>'+(r.crown?'<text class="rkb" x="60" y="8" font-size="22" text-anchor="middle">👑</text>':'')+'<g class="qpu">'+sh(60,106,40)+'</g></svg>';
 }
 function rkDay(){if(!me)return;try{var k='rkd_'+me,a=JSON.parse(ls(k,'[]')),d=new Date(),t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0){a.push(t);localStorage.setItem(k,JSON.stringify(a.slice(-400)))}}catch(e){}}
 function rkDays(){try{return JSON.parse(ls('rkd_'+me,'[]')).length}catch(e){return 0}}
@@ -1998,7 +2003,7 @@ function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
   ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
-var RKX=[0,120,300,560,900,1300,1800];
+var RKX=[0,120,300,560,730,900,1300,1800];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
 ['fo',5,'Postar 5 fotos',10,'Fotos',1],['fo',20,'Postar 20 fotos',30,'Fotos',1],['fo',50,'Postar 50 fotos',60,'Fotos',1],
@@ -2025,17 +2030,20 @@ var RKM=[
 ['st',3,'Entrar 3 dias seguidos',20,'Dias seguidos'],['st',7,'Entrar 7 dias seguidos',40,'Dias seguidos'],['st',15,'Entrar 15 dias seguidos',70,'Dias seguidos'],['st',30,'Entrar 30 dias seguidos',120,'Dias seguidos']
 ];
 function rkCalc(){var s=rkStats(),xp=0,n=0;RKM.forEach(function(m){if(s[m[0]]>=m[1])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
-  var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp}}
+  var mx=+ls('rkmax_'+me,0);if(ls('rkv_'+me,'')!=='2'){if(mx>=5)mx++;try{localStorage.setItem('rkv_'+me,'2');localStorage.setItem('rkmax_'+me,String(mx))}catch(e){}}if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp}}
 function RKN(){return me?rkCalc().n:0}
 function rkOf(u){return u===me?RKN():((P[u]&&+P[u].rk)||0)}
-function rkIc(u){var n=rkOf(u);return n?'<span class="rki">'+rkIcon(RK[n-1],'p'+n)+'</span>':''}
-function rkTt(u){var n=rkOf(u);return n?'<span class="rkt" style="--c:'+RK[n-1].c+'">'+RK[n-1].t+'</span>':''}
+function rkHid(u){return !!(P[u]&&P[u].rkh)}
+function rkIc(u){var n=rkOf(u);return n&&!rkHid(u)?'<span class="rki">'+rkIcon(RK[n-1],'p'+n)+'</span>':''}
+function rkTt(u){var n=rkOf(u);return n&&!rkHid(u)?'<span class="rkt" style="--c:'+RK[n-1].c+'">'+RK[n-1].t+'</span>':''}
+function rkLine(u){var n=rkOf(u);if(!n||rkHid(u))return '<br>';return '<br><span class="rkln"><span class="rki" style="margin:0 6px 0 0">'+rkIcon(RK[n-1],'p'+n)+'</span><b style="color:'+RK[n-1].c+'">'+RK[n-1].n+'</b> '+rkTt(u)+'</span><br>'}
 var rkLast=-1;
-function rkSync(){if(!me||!P[me]||!P[me].name||typeof db==='undefined'||!db)return;var n=RKN();if(n===rkLast||(+P[me].rk||0)===n){rkLast=n;return}rkLast=n;var p=P[me];
-  try{Promise.resolve(db.doc('profiles/'+me).set(Object.assign({name:p.name,bio:p.bio||'',av:p.av||'🦎',frame:p.frame||'',rk:n,ts:p.ts||Date.now()},p.oculto?{oculto:true}:{},p.priv?{priv:true}:{}))).catch(function(){rkLast=-1})}catch(e){rkLast=-1}}
+function rkSave(o){var p=P[me];return Promise.resolve(db.doc('profiles/'+me).set(Object.assign({name:p.name,bio:p.bio||'',av:p.av||'🦎',frame:p.frame||'',rk:RKN(),rkh:p.rkh?1:0,ts:p.ts||Date.now()},p.oculto?{oculto:true}:{},p.priv?{priv:true}:{},o||{})))}
+function rkSync(){if(!me||!P[me]||!P[me].name||typeof db==='undefined'||!db)return;var n=RKN();if(n===rkLast||(+P[me].rk||0)===n){rkLast=n;return}rkLast=n;try{rkSave().catch(function(){rkLast=-1})}catch(e){rkLast=-1}}
+function rkHide(){if(!me||!P[me])return;var v=P[me].rkh?0:1;P[me].rkh=v;try{rkSave({rkh:v}).catch(function(){toast('Não foi possível salvar.')})}catch(e){}}
 function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n],h='';
   var lo=n?RKX[n-1]:0,hi=nx?RKX[n]:xp,pr=nx?Math.max(0,Math.min(1,(xp-lo)/(hi-lo))):1,dv=pr<.34?'III':pr<.67?'II':'I';
-  h='<div class="rkh"><div class="rkbig '+(n==7?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?'<span class="rkt" style="--c:'+cur.c+'">'+cur.t+'</span>':'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
+  h='<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?'<span class="rkt" style="--c:'+cur.c+'">'+cur.t+'</span>':'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
   if(nx)h+='<div class="rkx">Próximo: <b>'+nx.n+'</b> · '+xp+' / '+hi+' pontos</div><div class="rkpb"><i style="width:'+Math.round(pr*100)+'%;background:'+nx.c+'"></i></div>';
   else h+='<p style="text-align:center;font-weight:700">Você chegou ao topo: Legend 👑</p>';
   var seen={},nxt=[],done=0;RKM.forEach(function(m){if(s[m[0]]>=m[1]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
@@ -2043,9 +2051,9 @@ function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n]
   h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.filter(function(m){return !m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Missões secundárias</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Pontos extras para quem prefere outro jeito de subir de rank. Dá para chegar ao Legend sem fazer nenhuma live.</div>'+nxt.filter(function(m){return m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Todos os ranks</b>'+RK.map(function(x,i){var on=n>=i+1;return '<div class="rkr2'+(on?'':' lk2')+'"><span class="rks">'+rkIcon(x,'l'+i)+'</span><span style="flex:1;min-width:0"><b>'+x.n+'</b> · '+x.t+' <small class="mut">('+RKX[i]+' pts)</small><br><small class="mut">'+x.rw+'</small></span><span>'+(on?'✅':'🔒')+'</span></div>'}).join('');
-  h+='<button class="btn" data-a="editprof" style="margin-top:12px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Lives e dias seguidos são contados neste aparelho. O rank não cai depois de conquistado.</p>';
+  h+='<label class="srow" style="margin-top:12px"><input type="checkbox" data-a="rkhide" '+(P[me]&&P[me].rkh?'':'checked')+'> Mostrar meu título e rank no perfil</label><button class="btn" data-a="editprof" style="margin-top:8px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Lives e dias seguidos são contados neste aparelho. O rank não cai depois de conquistado.</p>';
   modal('<h3>🦎 Lagarto Levels</h3>'+h)}
-FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:'rk'+(i+1),n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
+FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
 setInterval(function(){rkDay();rkSync()},20000);setTimeout(function(){rkDay();rkSync()},3000);
 </script>
 </body>
