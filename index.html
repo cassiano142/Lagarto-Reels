@@ -485,11 +485,26 @@ body.ct .chh,body.ct .cin2{background:var(--cbg)}
 .frw{position:relative;display:block;width:84px;height:84px}.frw .av{position:relative}
 .frl{position:absolute;left:-18px;top:-18px;width:120px;height:120px;pointer-events:none}.frl svg{position:absolute;inset:0;width:120px;height:120px;overflow:visible}
 .fpk{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}.fpk .ft{flex:none;width:78px;padding:6px 2px;border-radius:12px;border:2px solid transparent;background:var(--card);font-size:11px;color:inherit;text-align:center;cursor:pointer}.fpk .ft.on{border-color:var(--ac)}
+
+/* ===== MENU 3 RISCOS ===== */
+header.top{position:sticky}
+#mnb{flex:none}
+#mnb .bar3{display:flex;flex-direction:column;gap:4px;width:18px}
+#mnb .bar3 i{display:block;height:2.5px;border-radius:3px;background:currentColor}
+#mnb .mdot{position:absolute;top:5px;right:5px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg);box-sizing:content-box}
+#mnp{position:absolute;top:calc(100% + 6px);right:10px;z-index:60;min-width:210px;padding:6px;border-radius:18px;background:rgba(20,20,24,.62);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border:1px solid #ffffff2e;box-shadow:0 10px 30px #0006;color:#fff;animation:mnin .16s ease-out}
+#mnp[hidden]{display:none}
+@keyframes mnin{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:none}}
+#mnp .mit{display:flex;align-items:center;gap:10px;padding:4px 10px 4px 4px;border-radius:14px;cursor:pointer;font-weight:700;font-size:15px}
+#mnp .mit:active{background:#ffffff22}
+#mnp .mit .ic{margin-left:0;background:#ffffff1f;color:#fff;pointer-events:none}
+#mnp .mit .ic svg{pointer-events:none}
+#mnp #lvb.lvon{color:#ff6b86}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="lvb" data-a="lvopen" aria-label="Lives"></button><button class="ic" id="ntb" data-a="notif" aria-label="Notificações"></button><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="stb" data-a="settings" aria-label="Configurações"></button></span></header>
+<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="mnb" aria-label="Menu" aria-expanded="false"></button></span><div id="mnp" hidden><div class="mit" data-a="notif"><button class="ic" id="ntb" tabindex="-1" aria-label="Notificações"></button><span>Notificações</span></div><div class="mit" data-a="lvopen"><button class="ic" id="lvb" tabindex="-1" aria-label="Lives"></button><span>Lives</span></div><div class="mit" data-a="settings"><button class="ic" id="stb" tabindex="-1" aria-label="Configurações"></button><span>Configurações</span></div></div></header>
 <main id="app"><div class="splash"><img src="logo.png" alt=""><b>Lagarto Reels</b><div class="lbar"><i></i></div></div></main>
 </div>
 <nav class="bar"></nav>
@@ -837,8 +852,8 @@ async function lvStart(){
   if(!need())return;if(LIVE||CALL||GC){toast('Termine a chamada atual antes.');return}
   if(!navigator.mediaDevices||!window.RTCPeerConnection){toast('Seu navegador não suporta live.');return}
   let ms;try{ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:{facingMode:'user',width:{ideal:720},height:{ideal:1280},aspectRatio:{ideal:9/16}}})}catch(e){toast('Permita a câmera e o microfone para fazer live.');return}
-  lvPortrait(ms.getVideoTracks()[0]);lvDisc();LIVE={host:me,mine:true,cid:'lv|'+me+'|'+Date.now(),ms,peers:{},viewers:0,msgs:[],t0:Date.now(),mute:false};
-  lvChan();lvUI();lvTrack();LVT=setInterval(lvTrack,15000)}
+  lvDisc();LIVE={host:me,mine:true,rt:'9:16',cid:'lv|'+me+'|'+Date.now(),ms,peers:{},viewers:0,msgs:[],t0:Date.now(),mute:false};
+  lvChan();lvUI();lvTrack();LVT=setInterval(lvTrack,15000);lvFmtApply()}
 function lvWatch(h){
   if(!need())return;if(LIVE||CALL||GC){toast('Termine a chamada atual antes.');return}
   const l=LVS[h];if(!l){toast('Essa live já acabou.');return}
@@ -900,11 +915,17 @@ function lvZoom(v){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTrack
 const LVR={'9:16':9/16,'3:4':3/4,'1:1':1,'4:3':4/3,'16:9':16/9},LVQ={'480p':480,'720p':720,'1080p':1080};
 function lvCons(fm,c){const r=LVR[c.rt||'9:16'],q=LVQ[c.q||'720p'],w=r<=1?q:Math.round(q*r),h=r<=1?Math.round(q/r):q;return{facingMode:{ideal:fm},width:{ideal:w},height:{ideal:h},aspectRatio:{ideal:r}}}
 async function lvRecam(fm){const c=LIVE;if(!c||!c.mine)return false;
-  try{const n=await navigator.mediaDevices.getUserMedia({video:lvCons(fm,c)}),t=n.getVideoTracks()[0],old=c.ms.getVideoTracks()[0];
-    Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
-    c.ms.removeTrack(old);old.stop();c.ms.addTrack(t);c.fm=fm;const v=$('#lvv');if(v){v.srcObject=c.ms;v.style.transform=fm==='user'?'scaleX(-1)':'none';v.play().catch(()=>{})}
-    const z=$('#lvz');if(z)z.hidden=true;lvZoomInit();return true}
-  catch(e){toast('Não foi possível trocar a câmera.');return false}}
+  const md=navigator.mediaDevices,old=c.ms.getVideoTracks()[0],prev=c.fm||'user',base=lvCons(fm,c);
+  const tr=async(v,chk)=>{try{const st=await md.getUserMedia({video:v}),t=st.getVideoTracks()[0];if(chk){const f=t.getSettings().facingMode;if(f&&f!==fm){t.stop();return null}}return t}catch(e){return null}};
+  if(old)old.stop();
+  let t=await tr(Object.assign({},base,{facingMode:{exact:fm}}),1)||await tr(base,1);
+  if(!t){try{const ds=(await md.enumerateDevices()).filter(d=>d.kind==='videoinput'),bk=/back|rear|traseira|environment|tras|trás/i,pk=ds.find(d=>fm==='environment'?bk.test(d.label):!bk.test(d.label));if(pk)t=await tr({deviceId:{exact:pk.deviceId},width:base.width,height:base.height},0)}catch(e){}}
+  if(!t)t=await tr({facingMode:fm},1);
+  const ok=!!t;if(!t)t=await tr(lvCons(prev,c),0)||await tr({facingMode:prev},0);
+  if(!t){toast('Não foi possível trocar a câmera.');return false}
+  Object.keys(c.peers).forEach(x=>{const sn=c.peers[x].pc.getSenders().find(y=>y.track&&y.track.kind==='video');if(sn)sn.replaceTrack(t).catch(()=>{})});
+  if(old)c.ms.removeTrack(old);c.ms.addTrack(t);if(ok)c.fm=fm;const fx=c.fm||'user',v=$('#lvv');if(v){v.srcObject=c.ms;v.style.transform=fx==='user'?'scaleX(-1)':'none';v.play().catch(()=>{})}
+  const z=$('#lvz');if(z)z.hidden=true;lvZoomInit();if(!ok)toast('Não foi possível trocar a câmera.');return ok}
 async function lvFlip(){const c=LIVE;if(!c||!c.mine)return;await lvRecam(c.fm==='environment'?'user':'environment')}
 async function lvFmtApply(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0];if(!t)return;const r=LVR[c.rt||'9:16'],cs=lvCons(c.fm||'user',c);delete cs.facingMode;
   let ok=false;try{await t.applyConstraints(cs);const g=t.getSettings();ok=!!(g.width&&g.height)&&Math.abs(g.width/g.height-r)/r<.08}catch(e){}
@@ -1917,6 +1938,18 @@ function start(){
   const{data}=await sb.auth.getSession();
   if(!data.session){authView();$('#auth').style.display='flex';return}
   me=data.session.user.id;myEmail=data.session.user.email||'';try{rmute=localStorage.getItem('rsnd')==='0'}catch(e){}start();
+})();
+
+/* ===== MENU 3 RISCOS ===== */
+(function(){const b=document.getElementById('mnb'),m=document.getElementById('mnp');if(!b||!m)return;
+  b.innerHTML='<span class="bar3"><i></i><i></i><i></i></span>';
+  const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false')};
+  b.addEventListener('click',e=>{e.stopPropagation();m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));mnDot()});
+  m.addEventListener('click',()=>setTimeout(close,0));
+  document.addEventListener('click',e=>{if(!m.hidden&&!m.contains(e.target)&&e.target!==b&&!b.contains(e.target))close()},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  window.mnDot=function(){const on=!!(document.querySelector('#ntb .cnt')||document.querySelector('#lvb.lvon'));let d=b.querySelector('.mdot');if(on&&!d){d=document.createElement('em');d.className='mdot';b.appendChild(d)}else if(!on&&d)d.remove()};
+  setInterval(mnDot,1500);mnDot();
 })();
 </script>
 </body>
