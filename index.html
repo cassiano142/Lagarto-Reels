@@ -1989,23 +1989,32 @@ function rkFr(r,i){
   var gl=r.o.map(function(t,k){var a=k*2*Math.PI/r.o.length;return '<text class="rkc" x="'+(60+53*Math.sin(a)).toFixed(1)+'" y="'+(60-53*Math.cos(a)).toFixed(1)+'" font-size="12" text-anchor="middle" dominant-baseline="central">'+t+'</text>'}).join('');
   return '<svg viewBox="0 0 120 120" style="--gc:'+r.c+';--os:'+r.os+';--rs:'+r.rs+'"><defs><linearGradient id="rkg'+i+'" x1="0" y1="0" x2="1" y2="1">'+st+'</linearGradient></defs><g class="qpu"><g class="rkr"><circle cx="60" cy="60" r="47" fill="none" stroke="url(#rkg'+i+')" stroke-width="5"/></g></g><circle cx="60" cy="60" r="43.5" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.2"/><g class="rko">'+gl+'</g>'+(r.crown?'<text class="rkb" x="60" y="8" font-size="22" text-anchor="middle">👑</text>':'')+'</svg>';
 }
-function rkDay(){if(!me)return;try{var k='rkd_'+me,a=JSON.parse(ls(k,'[]')),d=new Date(),t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0){a.push(t);localStorage.setItem(k,JSON.stringify(a.slice(-60)))}}catch(e){}}
+function rkDay(){if(!me)return;try{var k='rkd_'+me,a=JSON.parse(ls(k,'[]')),d=new Date(),t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0){a.push(t);localStorage.setItem(k,JSON.stringify(a.slice(-400)))}}catch(e){}}
+function rkDays(){try{return JSON.parse(ls('rkd_'+me,'[]')).length}catch(e){return 0}}
 function rkStreak(){var a=[];try{a=JSON.parse(ls('rkd_'+me,'[]'))}catch(e){}var n=0,d=new Date();for(;;){var t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0)break;n++;d.setDate(d.getDate()-1)}return n}
 function rkCnt(k,id){if(!me)return;try{var kk='lvl'+k+'_'+me;if(id){var u='rku'+k+'_'+me,a=JSON.parse(ls(u,'[]'));if(a.indexOf(id)>=0)return;a.push(id);localStorage.setItem(u,JSON.stringify(a.slice(-300)))}else{var t=Date.now();if(t-(rkCnt['t'+k]||0)<600)return;rkCnt['t'+k]=t}localStorage.setItem(kk,String((+ls(kk,0))+1))}catch(e){}}
 function rkLive(){try{localStorage.setItem('lvc_'+me,String((+ls('lvc_'+me,0))+1))}catch(e){}}
 function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};mine.forEach(function(p){ids[p.id]=1});
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
-  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
-var RKX=[0,100,240,440,700,1000,1400];
+  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
+var RKX=[0,120,300,560,900,1300,1800];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
-['po',1,'Fazer o 1º post',10,'Posts'],['po',10,'Publicar 10 posts',30,'Posts'],['po',25,'Publicar 25 posts',60,'Posts'],['po',50,'Publicar 50 posts',100,'Posts'],
-['rl',1,'Postar 1 reel',15,'Reels'],['rl',10,'Postar 10 reels',50,'Reels'],
+['fo',5,'Postar 5 fotos',10,'Fotos',1],['fo',20,'Postar 20 fotos',30,'Fotos',1],['fo',50,'Postar 50 fotos',60,'Fotos',1],
+['sv',5,'Salvar 5 posts',10,'Posts salvos',1],['sv',25,'Salvar 25 posts',25,'Posts salvos',1],['sv',100,'Salvar 100 posts',50,'Posts salvos',1],
+['ht',3,'Usar # em 3 posts',10,'Hashtags',1],['ht',15,'Usar # em 15 posts',30,'Hashtags',1],['ht',40,'Usar # em 40 posts',60,'Hashtags',1],
+['mn',1,'Marcar alguém com @',10,'Marcações',1],['mn',10,'Marcar alguém com @ 10 vezes',30,'Marcações',1],['mn',30,'Marcar alguém com @ 30 vezes',50,'Marcações',1],
+['du',10,'Usar o app em 10 dias diferentes',15,'Dias de uso',1],['du',30,'Usar o app em 30 dias diferentes',40,'Dias de uso',1],['du',60,'Usar o app em 60 dias diferentes',70,'Dias de uso',1],['du',100,'Usar o app em 100 dias diferentes',100,'Dias de uso',1],
+['gr',1,'Entrar ou criar 1 grupo',15,'Grupos',1],['gr',3,'Participar de 3 grupos',30,'Grupos',1],
+['bp',10,'Ter um post com 10 curtidas',20,'Post de sucesso',1],['bp',50,'Ter um post com 50 curtidas',50,'Post de sucesso',1],['bp',100,'Ter um post com 100 curtidas',80,'Post de sucesso',1],
+
+['po',1,'Fazer o 1º post',10,'Posts'],['po',10,'Publicar 10 posts',30,'Posts'],['po',25,'Publicar 25 posts',60,'Posts'],['po',50,'Publicar 50 posts',100,'Posts'],['po',100,'Publicar 100 posts',150,'Posts'],
+['rl',1,'Postar 1 reel',15,'Reels'],['rl',10,'Postar 10 reels',50,'Reels'],['rl',25,'Postar 25 reels',80,'Reels'],
 ['mu',1,'Fazer 1 post com música',15,'Música'],['mu',10,'Fazer 10 posts com música',40,'Música'],
 ['lg',3,'Dar 3 curtidas',5,'Curtidas'],['lg',25,'Dar 25 curtidas',15,'Curtidas'],['lg',100,'Dar 100 curtidas',30,'Curtidas'],['lg',300,'Dar 300 curtidas',60,'Curtidas'],
 ['cm',3,'Fazer 3 comentários',8,'Comentários'],['cm',10,'Fazer 10 comentários',15,'Comentários'],['cm',30,'Fazer 30 comentários',30,'Comentários'],['cm',100,'Fazer 100 comentários',60,'Comentários'],
-['ms',5,'Mandar 5 mensagens',10,'Mensagens'],['ms',30,'Mandar 30 mensagens',25,'Mensagens'],
+['ms',5,'Mandar 5 mensagens',10,'Mensagens'],['ms',30,'Mandar 30 mensagens',25,'Mensagens'],['ms',100,'Mandar 100 mensagens',40,'Mensagens'],['ms',300,'Mandar 300 mensagens',70,'Mensagens'],
 ['cr',5,'Receber 5 comentários nos seus posts',15,'Comentários recebidos'],['cr',25,'Receber 25 comentários nos seus posts',35,'Comentários recebidos'],['cr',100,'Receber 100 comentários nos seus posts',70,'Comentários recebidos'],
 ['cd',5,'Comentar em 5 posts diferentes',15,'Comentar em posts variados'],['cd',20,'Comentar em 20 posts diferentes',35,'Comentar em posts variados'],['cd',50,'Comentar em 50 posts diferentes',60,'Comentar em posts variados'],
 ['lw',1,'Assistir 1 live',15,'Assistir lives'],['lw',5,'Assistir 5 lives',30,'Assistir lives'],['lw',15,'Assistir 15 lives',60,'Assistir lives'],['lw',40,'Assistir 40 lives',100,'Assistir lives'],
@@ -2030,7 +2039,9 @@ function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n]
   if(nx)h+='<div class="rkx">Próximo: <b>'+nx.n+'</b> · '+xp+' / '+hi+' pontos</div><div class="rkpb"><i style="width:'+Math.round(pr*100)+'%;background:'+nx.c+'"></i></div>';
   else h+='<p style="text-align:center;font-weight:700">Você chegou ao topo: Legend 👑</p>';
   var seen={},nxt=[],done=0;RKM.forEach(function(m){if(s[m[0]]>=m[1]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
-  h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.map(function(m){var c=Math.min(s[m[0]],m[1]);return '<div class="rkm"><span><small class="mut">'+m[4]+'</small><br>'+m[2]+'</span><span style="text-align:right;flex:none"><b style="color:var(--ac)">+'+m[3]+'</b><br><small>'+c+'/'+m[1]+'</small></span></div>'}).join('');
+  var rm=function(m){var c=Math.min(s[m[0]],m[1]);return '<div class="rkm"><span><small class="mut">'+m[4]+'</small><br>'+m[2]+'</span><span style="text-align:right;flex:none"><b style="color:var(--ac)">+'+m[3]+'</b><br><small>'+c+'/'+m[1]+'</small></span></div>'};
+  h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.filter(function(m){return !m[5]}).map(rm).join('');
+  h+='<b style="display:block;margin-top:14px">Missões secundárias</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Pontos extras para quem prefere outro jeito de subir de rank. Dá para chegar ao Legend sem fazer nenhuma live.</div>'+nxt.filter(function(m){return m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Todos os ranks</b>'+RK.map(function(x,i){var on=n>=i+1;return '<div class="rkr2'+(on?'':' lk2')+'"><span class="rks">'+rkIcon(x,'l'+i)+'</span><span style="flex:1;min-width:0"><b>'+x.n+'</b> · '+x.t+' <small class="mut">('+RKX[i]+' pts)</small><br><small class="mut">'+x.rw+'</small></span><span>'+(on?'✅':'🔒')+'</span></div>'}).join('');
   h+='<button class="btn" data-a="editprof" style="margin-top:12px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Lives e dias seguidos são contados neste aparelho. O rank não cai depois de conquistado.</p>';
   modal('<h3>🦎 Lagarto Levels</h3>'+h)}
