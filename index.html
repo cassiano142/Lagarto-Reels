@@ -868,7 +868,7 @@ async function lvStart(){
 function lvWatch(h){
   if(!need())return;if(LIVE||CALL||GC){toast('Termine a chamada atual antes.');return}
   const l=LVS[h];if(!l){toast('Essa live já acabou.');return}
-  LIVE={host:h,mine:false,cid:l.cid,peers:{},viewers:0,msgs:[],ice:[],t0:Date.now()};
+  LIVE={host:h,mine:false,cid:l.cid,peers:{},viewers:0,msgs:[],ice:[],t0:Date.now()};rkCnt('w',l.cid);
   lvChan();lvUI();const c=LIVE;
   c.jt=setInterval(()=>{if(LIVE!==c)return;if(c.on){clearInterval(c.jt);return}
     if(Date.now()-c.t0>40000){lvLeave(true,'Não foi possível conectar na live.');return}sig(h,'lvjoin',null,c.cid)},3000);
@@ -905,8 +905,8 @@ function lvMsg(m){const c=LIVE;if(!c||!m||!m.text)return;c.msgs.push({uid:m.uid,
   const lo=$('#live');if(lo&&lo.classList.contains('lvmin')){const lb=lo.querySelector('.lvch');if(lb)lb.classList.add('dot')}const el=$('#lvmsgs');if(el)el.innerHTML=c.msgs.slice(-7).map(x=>`<div><b>${esc(nm(x.uid))}${vb(x.uid)}</b>${esc(x.text)}</div>`).join('')}
 function lvEmo(m){const f=$('#lvfl');if(!f||!m||!LVEM.includes(m.e))return;const e=document.createElement('span');e.textContent=m.e;e.style.right=Math.floor(Math.random()*36)+'px';f.append(e);setTimeout(()=>e.remove(),2700)}
 function lvSend(){const i=$('#lvi'),c=LIVE;if(!i||!c||!c.ch)return;const t=i.value.trim();if(!t)return;if(Date.now()-(c.ls||0)<700)return;c.ls=Date.now();
-  try{c.ch.send({type:'broadcast',event:'chat',payload:{uid:me,text:t}})}catch(e){}i.value=''}
-function lvEmoSend(e){const c=LIVE;if(!c||!c.ch||!LVEM.includes(e)||Date.now()-(c.le||0)<250)return;c.le=Date.now();try{c.ch.send({type:'broadcast',event:'emo',payload:{e}})}catch(x){}}
+  try{c.ch.send({type:'broadcast',event:'chat',payload:{uid:me,text:t}})}catch(e){}if(!c.mine)rkCnt('c');i.value=''}
+function lvEmoSend(e){const c=LIVE;if(!c||!c.ch||!LVEM.includes(e)||Date.now()-(c.le||0)<250)return;c.le=Date.now();try{c.ch.send({type:'broadcast',event:'emo',payload:{e}})}catch(x){}if(!c.mine)rkCnt('e')}
 function lvEmote(m){const c=LIVE;if(!c||!m||!EMOTES.some(x=>x[0]===m.e))return;const n=Math.min(+m.n||1,999);
   const big=$('#lvbig');if(big){const e=document.createElement('span');e.textContent=m.e;if(EMXL.includes(m.e))e.className='xl';e.style.left=(30+Math.random()*30)+'%';e.style.top=(35+Math.random()*15)+'%';big.append(e);setTimeout(()=>e.remove(),2300)}
   const bn=$('#lvbn');if(!bn)return;const k=m.uid+m.e;let el=[...bn.children].find(x=>x.dataset.k===k);
@@ -915,7 +915,7 @@ function lvEmote(m){const c=LIVE;if(!c||!m||!EMOTES.some(x=>x[0]===m.e))return;c
   el._t=setTimeout(()=>el.remove(),3200)}
 function lvEmoteSend(e){const c=LIVE;if(!c||!c.ch||!EMOTES.some(x=>x[0]===e))return;const n=Date.now();if(n-(c.lx||0)<150)return;c.lx=n;
   const cb=c.combo;c.combo=cb&&cb.e===e&&n-cb.t<3500?{e,n:cb.n+1,t:n}:{e,n:1,t:n};
-  try{c.ch.send({type:'broadcast',event:'emote',payload:{uid:me,e,n:c.combo.n}})}catch(x){}}
+  try{c.ch.send({type:'broadcast',event:'emote',payload:{uid:me,e,n:c.combo.n}})}catch(x){}if(!c.mine)rkCnt('e')}
 function lvGift(){const p=$('#lvemp');if(p)p.hidden=!p.hidden}
 function lvPortrait(t){try{const g=t.getSettings();if(g.width&&g.height&&g.width>g.height)t.applyConstraints({width:{ideal:720},height:{ideal:1280},aspectRatio:{ideal:9/16}}).catch(()=>{})}catch(e){}}
 function lvZoomInit(){const c=LIVE;if(!c||!c.mine)return;const t=c.ms.getVideoTracks()[0],z=$('#lvz'),r=$('#lvzr');if(!t||!r)return;
@@ -1991,12 +1991,13 @@ function rkFr(r,i){
 }
 function rkDay(){if(!me)return;try{var k='rkd_'+me,a=JSON.parse(ls(k,'[]')),d=new Date(),t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0){a.push(t);localStorage.setItem(k,JSON.stringify(a.slice(-60)))}}catch(e){}}
 function rkStreak(){var a=[];try{a=JSON.parse(ls('rkd_'+me,'[]'))}catch(e){}var n=0,d=new Date();for(;;){var t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0)break;n++;d.setDate(d.getDate()-1)}return n}
+function rkCnt(k,id){if(!me)return;try{var kk='lvl'+k+'_'+me;if(id){var u='rku'+k+'_'+me,a=JSON.parse(ls(u,'[]'));if(a.indexOf(id)>=0)return;a.push(id);localStorage.setItem(u,JSON.stringify(a.slice(-300)))}else{var t=Date.now();if(t-(rkCnt['t'+k]||0)<600)return;rkCnt['t'+k]=t}localStorage.setItem(kk,String((+ls(kk,0))+1))}catch(e){}}
 function rkLive(){try{localStorage.setItem('lvc_'+me,String((+ls('lvc_'+me,0))+1))}catch(e){}}
 function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};mine.forEach(function(p){ids[p.id]=1});
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
-  ms:MS.filter(function(m){return m.from===me}).length,lv:+ls('lvc_'+me,0),st:rkStreak()}}
-var RKX=[0,80,180,320,500,700,900];
+  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
+var RKX=[0,100,240,440,700,1000,1400];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
 ['po',1,'Fazer o 1º post',10,'Posts'],['po',10,'Publicar 10 posts',30,'Posts'],['po',25,'Publicar 25 posts',60,'Posts'],['po',50,'Publicar 50 posts',100,'Posts'],
@@ -2005,6 +2006,11 @@ var RKM=[
 ['lg',3,'Dar 3 curtidas',5,'Curtidas'],['lg',25,'Dar 25 curtidas',15,'Curtidas'],['lg',100,'Dar 100 curtidas',30,'Curtidas'],['lg',300,'Dar 300 curtidas',60,'Curtidas'],
 ['cm',3,'Fazer 3 comentários',8,'Comentários'],['cm',10,'Fazer 10 comentários',15,'Comentários'],['cm',30,'Fazer 30 comentários',30,'Comentários'],['cm',100,'Fazer 100 comentários',60,'Comentários'],
 ['ms',5,'Mandar 5 mensagens',10,'Mensagens'],['ms',30,'Mandar 30 mensagens',25,'Mensagens'],
+['cr',5,'Receber 5 comentários nos seus posts',15,'Comentários recebidos'],['cr',25,'Receber 25 comentários nos seus posts',35,'Comentários recebidos'],['cr',100,'Receber 100 comentários nos seus posts',70,'Comentários recebidos'],
+['cd',5,'Comentar em 5 posts diferentes',15,'Comentar em posts variados'],['cd',20,'Comentar em 20 posts diferentes',35,'Comentar em posts variados'],['cd',50,'Comentar em 50 posts diferentes',60,'Comentar em posts variados'],
+['lw',1,'Assistir 1 live',15,'Assistir lives'],['lw',5,'Assistir 5 lives',30,'Assistir lives'],['lw',15,'Assistir 15 lives',60,'Assistir lives'],['lw',40,'Assistir 40 lives',100,'Assistir lives'],
+['lc',1,'Mandar 1 mensagem no chat de uma live',10,'Chat das lives'],['lc',10,'Mandar 10 mensagens no chat das lives',25,'Chat das lives'],['lc',50,'Mandar 50 mensagens no chat das lives',50,'Chat das lives'],['lc',150,'Mandar 150 mensagens no chat das lives',80,'Chat das lives'],
+['le',5,'Mandar 5 reações em lives',10,'Reações nas lives'],['le',30,'Mandar 30 reações em lives',25,'Reações nas lives'],['le',100,'Mandar 100 reações em lives',45,'Reações nas lives'],['le',300,'Mandar 300 reações em lives',70,'Reações nas lives'],
 ['lr',25,'Receber 25 curtidas',20,'Curtidas recebidas'],['lr',100,'Receber 100 curtidas',40,'Curtidas recebidas'],['lr',500,'Receber 500 curtidas',80,'Curtidas recebidas'],['lr',1000,'Receber 1000 curtidas',120,'Curtidas recebidas'],
 ['lv',1,'Fazer sua 1ª live',30,'Lives'],['lv',3,'Fazer 3 lives',50,'Lives'],['lv',10,'Fazer 10 lives',90,'Lives'],['lv',25,'Fazer 25 lives',150,'Lives'],
 ['st',3,'Entrar 3 dias seguidos',20,'Dias seguidos'],['st',7,'Entrar 7 dias seguidos',40,'Dias seguidos'],['st',15,'Entrar 15 dias seguidos',70,'Dias seguidos'],['st',30,'Entrar 30 dias seguidos',120,'Dias seguidos']
