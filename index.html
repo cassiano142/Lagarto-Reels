@@ -1941,7 +1941,7 @@ function start(){
   const sub=(c,f)=>db.collection(c).onSnapshot(s=>{f(s.docs.map(d=>Object.assign({id:d.id},dd(d))));sched()});
   sub('profiles',a=>{P={};a.forEach(x=>P[x.id]=x);vis();acctRef();{const sg=Object.keys(P).filter(u=>P[u].priv).sort().join();if(sg!==psig){psig=sg;RL.posts&&RL.posts()}}if(!ready){ready=true;clearTimeout(tmr);if(me&&!P[me])onboard()}});
   initCalls();lvDisc();sub('posts',a=>{RAW.p=a;vis()});
-  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('chatthemes',a=>CT=a);sub('chatsettings',a=>{CS=a;if(tab==='chat'&&$('#cmsgs'))fillChat()});sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
+  sub('likes',a=>{RAW.l=a;vis()});sub('comments',a=>{RAW.c=a;vis()});sub('follows',a=>{RAW.f=a;vis()});sub('saves',a=>SV=a);sub('levels',a=>{LVL={};a.forEach(x=>LVL[x.id]=x);rkPull()});sub('messages',a=>MS=a);sub('verified',a=>VF=a);sub('groups',a=>GR=a);sub('notes',a=>NT=a);sub('chatthemes',a=>CT=a);sub('chatsettings',a=>{CS=a;if(tab==='chat'&&$('#cmsgs'))fillChat()});sub('approvals',a=>{APR=a;vis();const sg=a.filter(x=>x.ok&&x.id.endsWith('_'+me)).map(x=>x.id).sort().join();if(sg!==asig){asig=sg;RL.posts&&RL.posts()}});
   tmr=setTimeout(()=>{if(!ready){ready=true;render()}},10000);
 }
 (async()=>{
@@ -1997,12 +1997,37 @@ function rkFr(r,i){
 function rkDay(){if(!me)return;try{var k='rkd_'+me,a=JSON.parse(ls(k,'[]')),d=new Date(),t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0){a.push(t);localStorage.setItem(k,JSON.stringify(a.slice(-400)))}}catch(e){}}
 function rkDays(){try{return JSON.parse(ls('rkd_'+me,'[]')).length}catch(e){return 0}}
 function rkStreak(){var a=[];try{a=JSON.parse(ls('rkd_'+me,'[]'))}catch(e){}var n=0,d=new Date();for(;;){var t=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(a.indexOf(t)<0)break;n++;d.setDate(d.getDate()-1)}return n}
-function rkCnt(k,id){if(!me)return;try{var kk='lvl'+k+'_'+me;if(id){var u='rku'+k+'_'+me,a=JSON.parse(ls(u,'[]'));if(a.indexOf(id)>=0)return;a.push(id);localStorage.setItem(u,JSON.stringify(a.slice(-300)))}else{var t=Date.now();if(t-(rkCnt['t'+k]||0)<600)return;rkCnt['t'+k]=t}localStorage.setItem(kk,String((+ls(kk,0))+1))}catch(e){}}
-function rkLive(){try{localStorage.setItem('lvc_'+me,String((+ls('lvc_'+me,0))+1))}catch(e){}}
+function rkCnt(k,id){if(!me)return;try{var kk='lvl'+k+'_'+me;if(id){var u='rku'+k+'_'+me,a=JSON.parse(ls(u,'[]'));if(a.indexOf(id)>=0)return;a.push(id);localStorage.setItem(u,JSON.stringify(a.slice(-300)))}else{var t=Date.now();if(t-(rkCnt['t'+k]||0)<600)return;rkCnt['t'+k]=t}localStorage.setItem(kk,String((+ls(kk,0))+1));rkPush()}catch(e){}}
+function rkLive(){try{localStorage.setItem('lvc_'+me,String((+ls('lvc_'+me,0))+1));rkPush()}catch(e){}}
 function rkStats(){var mine=POSTS.filter(function(p){return p.uid===me}),ids={};mine.forEach(function(p){ids[p.id]=1});
   return{pf:(P[me]&&P[me].bio&&P[me].bio.trim())?1:0,po:mine.length,rl:mine.filter(function(p){return p.type==='video'}).length,mu:mine.filter(function(p){return p.mu}).length,
   lg:LK.filter(function(l){return l.uid===me}).length,cm:CM.filter(function(c){return c.uid===me}).length,lr:LK.filter(function(l){return l.uid!==me&&ids[l.pid]}).length,
-  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cq:(function(){var o={};CM.forEach(function(c){if(c.uid!==me&&ids[c.pid])o[c.uid]=1});return Object.keys(o).length})(),cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0),le:+ls('lvle_'+me,0),lv:+ls('lvc_'+me,0),st:rkStreak()}}
+  ms:MS.filter(function(m){return m.from===me}).length,cr:CM.filter(function(c){return c.uid!==me&&ids[c.pid]}).length,cq:(function(){var o={};CM.forEach(function(c){if(c.uid!==me&&ids[c.pid])o[c.uid]=1});return Object.keys(o).length})(),cd:(function(){var o={};CM.forEach(function(c){if(c.uid===me)o[c.pid]=1});return Object.keys(o).length})(),fo:mine.filter(function(p){return p.type!=='video'}).length,sv:SV.filter(function(x){return x.uid===me}).length,ht:mine.filter(function(p){return /#\S/.test(p.cap||'')}).length,mn:mine.filter(function(p){return /@\w/.test(p.cap||'')}).length+CM.filter(function(c){return c.uid===me&&/@\w/.test(c.text||'')}).length,du:rkDays(),gr:GR.filter(inG).length,bp:(function(){var o={};LK.forEach(function(l){if(ids[l.pid])o[l.pid]=(o[l.pid]||0)+1});return Math.max.apply(null,[0].concat(Object.keys(o).map(function(k){return o[k]})))})(),lw:+ls('lvlw_'+me,0),lc:+ls('lvlc_'+me,0)+rkX('c'),le:+ls('lvle_'+me,0)+rkX('e'),lv:+ls('lvc_'+me,0)+rkX('l'),st:rkStreak()}}
+/* ===== Sincronização do Lagarto Levels entre aparelhos (coleção 'levels', 1 documento por conta) ===== */
+var LVL={};
+function rkDev(){var d=ls('rkdev','');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36);lset('rkdev',d)}return d}
+function rkMig(){if(!me)return;var mx=+ls('rkmax_'+me,0);if(ls('rkv_'+me,'')!=='2'){if(mx>=5)mx++;lset('rkv_'+me,'2');lset('rkmax_'+me,String(mx))}}
+function rkArr(k){try{var a=JSON.parse(ls(k,'[]'));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function rkDt(s){var p=String(s).split('-');return new Date(+p[0],(+p[1])-1,+p[2]).getTime()||0}
+function rkUni(a,b){var o={},r=[];(a||[]).concat(b||[]).forEach(function(x){if(x!=null&&!o[x]){o[x]=1;r.push(x)}});return r}
+function rkDays2(a,b){return rkUni(a,b).sort(function(x,y){return rkDt(x)-rkDt(y)}).slice(-400)}
+function rkX(k){var r=LVL[me];if(!r||!r.dv)return 0;var dv=rkDev(),t=0;for(var d in r.dv)if(d!==dv&&r.dv[d])t+=(+r.dv[d][k])||0;return t}
+function rkSig(o){var dv=o.dv||{};return [(o.d||[]).slice().sort().join(','),(o.w||[]).slice().sort().join(','),+o.wc||0,+o.mx||0,Object.keys(dv).sort().map(function(k){var b=dv[k]||{};return k+':'+(+b.c||0)+'/'+(+b.e||0)+'/'+(+b.l||0)}).join(';')].join('|')}
+function rkPull(){if(!me)return;var r=LVL[me];if(!r)return;
+  try{rkMig();
+    lset('rkd_'+me,JSON.stringify(rkDays2(rkArr('rkd_'+me),r.d)));
+    var w=rkUni(r.w,rkArr('rkuw_'+me)).slice(-300);lset('rkuw_'+me,JSON.stringify(w));
+    lset('lvlw_'+me,String(Math.max(+ls('lvlw_'+me,0),+r.wc||0,w.length)));
+    lset('rkmax_'+me,String(Math.max(+ls('rkmax_'+me,0),+r.mx||0)))}catch(e){}
+  rkPush()}
+function rkPush(){clearTimeout(rkPush.t);rkPush.t=setTimeout(rkPushNow,1500)}
+function rkPushNow(){if(!me||typeof db==='undefined'||!db)return;
+  try{rkMig();var r=LVL[me]||{},dv=Object.assign({},r.dv||{});
+    dv[rkDev()]={c:+ls('lvlc_'+me,0),e:+ls('lvle_'+me,0),l:+ls('lvc_'+me,0)};
+    var w=rkUni(r.w,rkArr('rkuw_'+me)).slice(-300);
+    var doc={d:rkDays2(r.d,rkArr('rkd_'+me)),w:w,wc:Math.max(+ls('lvlw_'+me,0),+r.wc||0,w.length),mx:Math.max(+ls('rkmax_'+me,0),+r.mx||0),dv:dv,ts:Date.now()};
+    if(r.id&&rkSig(doc)===rkSig(r))return;
+    Promise.resolve(db.doc('levels/'+me).set(doc)).catch(function(e){console.error('levels',e)})}catch(e){}}
 var RKX=[0,120,300,560,730,900,1300,1800];
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
@@ -2030,7 +2055,7 @@ var RKM=[
 ['st',3,'Entrar 3 dias seguidos',20,'Dias seguidos'],['st',7,'Entrar 7 dias seguidos',40,'Dias seguidos'],['st',15,'Entrar 15 dias seguidos',70,'Dias seguidos'],['st',30,'Entrar 30 dias seguidos',120,'Dias seguidos']
 ];
 function rkCalc(){var s=rkStats(),xp=0,n=0;RKM.forEach(function(m){if(s[m[0]]>=m[1])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
-  var mx=+ls('rkmax_'+me,0);if(ls('rkv_'+me,'')!=='2'){if(mx>=5)mx++;try{localStorage.setItem('rkv_'+me,'2');localStorage.setItem('rkmax_'+me,String(mx))}catch(e){}}if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp}}
+  rkMig();var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp}}
 function RKN(){return me?rkCalc().n:0}
 function rkOf(u){return u===me?RKN():((P[u]&&+P[u].rk)||0)}
 function rkHid(u){return !!(P[u]&&P[u].rkh)}
@@ -2051,10 +2076,10 @@ function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n]
   h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.filter(function(m){return !m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Missões secundárias</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Pontos extras para quem prefere outro jeito de subir de rank. Dá para chegar ao Legend sem fazer nenhuma live.</div>'+nxt.filter(function(m){return m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Todos os ranks</b>'+RK.map(function(x,i){var on=n>=i+1;return '<div class="rkr2'+(on?'':' lk2')+'"><span class="rks">'+rkIcon(x,'l'+i)+'</span><span style="flex:1;min-width:0"><b>'+x.n+'</b> · '+x.t+' <small class="mut">('+RKX[i]+' pts)</small><br><small class="mut">'+x.rw+'</small></span><span>'+(on?'✅':'🔒')+'</span></div>'}).join('');
-  h+='<label class="srow" style="margin-top:12px"><input type="checkbox" data-a="rkhide" '+(P[me]&&P[me].rkh?'':'checked')+'> Mostrar meu título e rank no perfil</label><button class="btn" data-a="editprof" style="margin-top:8px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Lives e dias seguidos são contados neste aparelho. O rank não cai depois de conquistado.</p>';
+  h+='<label class="srow" style="margin-top:12px"><input type="checkbox" data-a="rkhide" '+(P[me]&&P[me].rkh?'':'checked')+'> Mostrar meu título e rank no perfil</label><button class="btn" data-a="editprof" style="margin-top:8px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Suas missões ficam salvas na sua conta e valem em qualquer aparelho em que você entrar. O rank não cai depois de conquistado.</p>';
   modal('<h3>🦎 Lagarto Levels</h3>'+h)}
 FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
-setInterval(function(){rkDay();rkSync()},20000);setTimeout(function(){rkDay();rkSync()},3000);
+setInterval(function(){rkDay();rkSync();rkPush()},20000);setTimeout(function(){rkDay();rkSync();rkPush()},3000);
 </script>
 </body>
 </html>
