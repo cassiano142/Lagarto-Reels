@@ -645,10 +645,39 @@ function msgEdit(){const ms=selMsgs();if(ms.length!==1)return;const m=ms[0];if(m
   modal(`<h3 style="margin:0 0 10px">Editar mensagem</h3><input class="sr" id="mei" maxlength="500" value="${esc(m.text)}" autocomplete="off" style="width:100%;margin:0 0 10px"><button class="btn" data-a="mesave" data-id="${esc(String(m.id))}">Salvar</button>`);
   const i=$('#mei');i.addEventListener('keydown',e=>{if(e.key==='Enter')msgSave(m.id)});setTimeout(()=>{i.focus();i.setSelectionRange(i.value.length,i.value.length)},50)}
 function postMenu(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
-  modal(`<h3 style="margin:0 0 12px">Opções da publicação</h3><div style="display:grid;gap:8px"><button class="btn" data-a="pedit" data-id="${esc(id)}">Editar legenda</button><button class="btn g" style="color:#ed4956" data-a="pdelask" data-id="${esc(id)}">Excluir</button></div>`)}
-function postEdit(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
-  modal(`<h3 style="margin:0 0 10px">Editar publicação</h3><textarea class="sr" id="pei" maxlength="2200" rows="4" placeholder="Escreva uma legenda…" style="width:100%;margin:0 0 10px;resize:vertical;font:inherit">${esc(p.cap||'')}</textarea><button class="btn" data-a="pesave" data-id="${esc(id)}">Salvar</button>`);
-  setTimeout(()=>{const e=$('#pei');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},50)}
+  modal(`<h3 style="margin:0 0 12px">Opções da publicação</h3><div style="display:grid;gap:8px"><button class="btn" data-a="pedit" data-id="${esc(id)}">Editar publicação</button><button class="btn g" style="color:#ed4956" data-a="pdelask" data-id="${esc(id)}">Excluir</button></div>`)}
+function postEdit(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;closeM();
+  const V=p.type==='video',c=CAM={m:V?'reel':'post',edit:id,f:{type:V?'video/mp4':'image/jpeg'},u:p.url,er:0,cover:null};
+  if(p.mu){c.mf={ex:1};c.mu=p.mu;c.mn=p.mn||'Música';c.ms=p.ms||0;c.me=p.me||30;c.md=Math.max(c.me,1);c.mv=p.mv==null?70:p.mv;c.vv=p.vv==null?100:p.vv;
+    const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{if(CAM===c&&isFinite(a.duration)&&a.duration>=2){c.md=a.duration;if(c.me>c.md)c.me=c.md;camMusUI()}};a.src=p.mu}
+  let o=$('#cmr');if(o)o.remove();o=document.createElement('div');o.id='cmr';document.body.appendChild(o);
+  o.innerHTML=`<div class="cmh"><button class="ic" data-r="back" aria-label="Voltar">${I('back',24)}</button><b>${V?'Editar reel':'Editar publicação'}</b></div>
+<div class="cmpv" id="cmpv">${V?`<video src="${esc(p.url)}#t=0.1" muted playsinline preload="metadata"></video>`:`<img src="${esc(p.url)}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button></div>
+<textarea id="pc" rows="3" maxlength="2200" placeholder="Escreva uma legenda…">${esc(p.cap||'')}</textarea>
+<button class="cmrw" data-r="tag">${I('user',22)}<span style="flex:1">Marcar pessoas</span>›</button>
+${V?`<div class="cmrw" style="cursor:default">${I('mic',22)}<span>Renomear áudio</span></div><input class="cmau" id="cmau" maxlength="40" placeholder="Áudio original" value="${esc(p.au||'')}" autocomplete="off">`:''}
+<div class="cmrw" style="cursor:default">${I('vol',22)}<span>Música</span></div><div class="cmmu" id="cmmu"></div>
+<div id="cmps" class="mut" style="padding:6px 14px"></div>
+<div class="cmft"><button class="btn g" data-r="back">Cancelar</button><button class="btn" id="cmpb" data-r="save">Salvar</button></div>`;
+  camMusUI();
+  o.onclick=e=>{const t=e.target.closest('[data-r]');if(!t)return;const r=t.dataset.r;
+    if(r==='back'){MX.stop();o.remove();CAM=null}
+    else if(r==='tag'){const x=$('#pc');x.value+=(x.value&&!/\s$/.test(x.value)?' ':'')+'@';x.focus();x.dispatchEvent(new Event('input',{bubbles:true}))}
+    else if(r==='prev')camPrev(V)
+    else if(r==='save')postEditSave(id,V)}}
+async function postEditSave(id,V){const c=CAM,p=POSTS.find(x=>x.id===id),st=$('#cmps'),b=$('#cmpb');if(!c||!p||p.uid!==me)return;
+  b.disabled=true;st.textContent='Salvando…';
+  try{const d=Object.assign({},p);delete d.id;d.cap=$('#pc').value.trim();
+    if(V){const au=(($('#cmau')||{}).value||'').trim();if(au)d.au=au;else delete d.au}
+    if(!c.mf){['mu','ms','me','mn','mv','vv'].forEach(k=>delete d[k])}
+    else if(c.mf.ex){d.ms=Math.round(c.ms*10)/10;d.me=Math.round(c.me*10)/10;d.mn=(c.mn||'').trim()||'Música';d.mv=Math.round(c.mv);if(V)d.vv=Math.round(c.vv)}
+    else{st.textContent='Preparando música…';const tr=await mxTrim(c).catch(()=>null);st.textContent='Enviando música…';
+      if(tr){d.mu=await up(tr.file);d.ms=0;d.me=Math.floor(tr.dur*10)/10}else{d.mu=await up(c.mf);d.ms=Math.round(c.ms*10)/10;d.me=Math.round(c.me*10)/10}
+      d.mn=(c.mn||'').trim()||'Música';d.mv=Math.round(c.mv);if(V)d.vv=Math.round(c.vv)}
+    d.ed=1;d.edts=Date.now();
+    MX.stop();if(c.mu&&c.mu.startsWith('blob:'))URL.revokeObjectURL(c.mu);const o=$('#cmr');if(o)o.remove();CAM=null;
+    Object.keys(p).forEach(k=>{if(k!=='id')delete p[k]});Object.assign(p,d);render();w(db.doc('posts/'+id).set(d));toast('Publicação editada')}
+  catch(e){console.error(e);st.textContent=(e&&e.message)||'Falha ao salvar.';b.disabled=false}}
 function postSave(id){const p=POSTS.find(x=>x.id===id),t=(($('#pei')||{}).value||'').trim();if(!p||p.uid!==me)return;
   if(t===(p.cap||'')){closeM();return}
   const d=Object.assign({},p);delete d.id;d.cap=t;d.ed=1;d.edts=Date.now();p.cap=t;p.ed=1;p.edts=d.edts;closeM();render();w(db.doc('posts/'+id).set(d));toast('Publicação editada')}
