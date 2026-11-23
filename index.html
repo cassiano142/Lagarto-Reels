@@ -512,6 +512,12 @@ header.top{position:sticky}
 .rkm{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkm.ok{opacity:.6}.rkm small{color:var(--mut);flex:none}
 .rkr2{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkr2.lk2 .rks{filter:grayscale(1);opacity:.55}.rks{width:38px;height:36px;flex:none}
 .rkln{display:inline-flex;align-items:center;margin:4px 0;font-size:14px;gap:6px}.rkln .rkt{margin:0}
+.rktabs{display:flex;gap:6px;margin:0 0 10px;border-bottom:1px solid var(--bd)}
+.rktabs button{flex:1;padding:8px 4px;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font:inherit;font-weight:700;cursor:pointer}
+.rktabs button.on{color:var(--ac);border-bottom-color:var(--ac)}
+.rkpager{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.rkpager::-webkit-scrollbar{display:none}
+.rkpg{flex:none;width:100%;scroll-snap-align:start;scroll-snap-stop:always;max-height:68vh;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -1370,7 +1376,7 @@ document.addEventListener('click',e=>{
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
   else if(a==='lvstart')lvStart();
   else if(a==='lvstart2'){closeM();lvStart()}
-  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();else if(a==='rkhide')rkHide();else if(a==='rktt')rkTtOpen();else if(a==='rkttset')rkTtSet(id);
+  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();else if(a==='rkhide')rkHide();else if(a==='rktt')rkTtOpen();else if(a==='rkpg')rkPg(+id);else if(a==='rkttset')rkTtSet(id);
   else if(a==='lvchat')lvChatTog();
   else if(a==='lvgift')lvGift();
   else if(a==='lvemote')lvEmoteSend(id);
@@ -2079,7 +2085,7 @@ function rkTtOpen(){var cur=ttOf(me),h='<p class="mut" style="font-size:13px;mar
 function rkBoard(){var L=Object.keys(P).filter(function(u){var p=P[u];return p&&p.name&&!p.oculto&&!p.rkh&&rkOf(u)>0}).map(function(u){var n=rkOf(u),x=u===me?Math.max(rkCalc().xp,+P[me].xp||0):Math.max(+P[u].xp||0,RKX[n-1]||0);return{u:u,n:n,x:x}}).sort(function(a,b){return b.n-a.n||b.x-a.x||String(P[a.u].name).localeCompare(String(P[b.u].name))});
   var top=TOPD&&P[TOPD.u]?'Top 1° Global: <b>'+esc(P[TOPD.u].name)+'</b> 🏆':'Top 1° Global: ainda ninguém. Será a primeira pessoa a chegar no '+RK[RK.length-1].n+'.';
   var row=function(o,i){var r=RK[o.n-1],m=['🥇','🥈','🥉'][i]||('#'+(i+1)),mine=o.u===me;return '<div class="rkr2" data-a="prof" data-id="'+esc(o.u)+'" style="cursor:pointer'+(mine?';background:var(--card);border-radius:10px;padding-left:6px;padding-right:6px':'')+'"><span style="width:30px;text-align:center;font-weight:700;flex:none">'+m+'</span>'+av(o.u)+'<span style="flex:1;min-width:0"><b>'+esc(P[o.u].name)+'</b>'+(TOPD&&TOPD.u===o.u?' 🏆':'')+'<br><span class="rkln" style="margin:0"><span class="rks" style="width:22px;height:20px">'+rkIcon(r,'k'+i)+'</span><small style="color:'+r.c+';font-weight:700">'+r.n+'</small></span></span><span style="text-align:right;flex:none"><b style="color:var(--ac)">'+o.x+'</b><br><small class="mut">pontos</small></span></div>'};
-  var h='<b style="display:block;margin-top:14px">🏆 Ranked</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Quem está na frente, por rank e depois por pontos. '+top+'</div>';
+  var h='<b style="display:block">🏆 Rank global</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Quem está na frente, por rank e depois por pontos. '+top+'</div>';
   if(!L.length)return h+'<div class="mut" style="font-size:13px">Ninguém no ranked ainda.</div>';
   h+=L.slice(0,10).map(row).join('');
   var mi=L.findIndex(function(o){return o.u===me});if(mi>=10)h+='<div class="mut" style="text-align:center">⋮</div>'+row(L[mi],mi);
@@ -2093,13 +2099,15 @@ function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n]
   h='<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?ttChip(ttOf(me))+'<br><button class="btn g" data-a="rktt" style="padding:4px 12px;font-size:12px;margin-top:4px">Mudar título</button>':'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
   if(nx)h+='<div class="rkx">Próximo: <b>'+nx.n+'</b> · '+xp+' / '+hi+' pontos</div><div class="rkpb"><i style="width:'+Math.round(pr*100)+'%;background:'+nx.c+'"></i></div>';
   else h+='<p style="text-align:center;font-weight:700">Você chegou ao topo: Legend 👑</p>';
-  h+=rkBoard();var seen={},nxt=[],done=0;RKM.forEach(function(m){if(s[m[0]]>=m[1]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
+  var seen={},nxt=[],done=0;RKM.forEach(function(m){if(s[m[0]]>=m[1]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
   var rm=function(m){var c=Math.min(s[m[0]],m[1]);return '<div class="rkm"><span><small class="mut">'+m[4]+'</small><br>'+m[2]+'</span><span style="text-align:right;flex:none"><b style="color:var(--ac)">+'+m[3]+'</b><br><small>'+c+'/'+m[1]+'</small></span></div>'};
   h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.filter(function(m){return !m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Missões secundárias</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Pontos extras para quem prefere outro jeito de subir de rank. Dá para chegar ao Legend sem fazer nenhuma live.</div>'+nxt.filter(function(m){return m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Todos os ranks</b>'+RK.map(function(x,i){var on=n>=i+1;return '<div class="rkr2'+(on?'':' lk2')+'"><span class="rks">'+rkIcon(x,'l'+i)+'</span><span style="flex:1;min-width:0"><b>'+x.n+'</b> · '+x.t+' <small class="mut">('+RKX[i]+' pts)</small><br><small class="mut">'+x.rw+'</small></span><span>'+(on?'✅':'🔒')+'</span></div>'}).join('');
   h+='<label class="srow" style="margin-top:12px"><input type="checkbox" data-a="rkhide" '+(P[me]&&P[me].rkh?'':'checked')+'> Mostrar meu título e rank no perfil</label><button class="btn" data-a="editprof" style="margin-top:8px">Equipar moldura</button><p class="mut" style="font-size:11px;margin:8px 0 0">Suas missões ficam salvas na sua conta e valem em qualquer aparelho em que você entrar. O rank não cai depois de conquistado.</p>';
-  modal('<h3>🦎 Lagarto Levels</h3>'+h)}
+  modal('<h3>🦎 Lagarto Levels</h3><div class="rktabs"><button class="on" data-a="rkpg" data-id="0">Levels</button><button data-a="rkpg" data-id="1">Rank global</button></div><div class="rkpager" id="rkpager"><div class="rkpg">'+h+'</div><div class="rkpg">'+rkBoard()+'</div></div>');rkPagerInit()}
+function rkPagerInit(){var p=document.getElementById('rkpager');if(!p)return;p.addEventListener('scroll',function(){var i=Math.round(p.scrollLeft/Math.max(1,p.clientWidth));document.querySelectorAll('.rktabs button').forEach(function(b,k){b.classList.toggle('on',k===i)})},{passive:true})}
+function rkPg(i){var p=document.getElementById('rkpager');if(p)p.scrollTo({left:i*p.clientWidth,behavior:'smooth'})}
 FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
 setInterval(function(){rkDay();rkSync();rkPush()},20000);setTimeout(function(){rkDay();rkSync();rkPush()},3000);
 </script>
