@@ -522,6 +522,11 @@ header.top{position:sticky}
 .ttb{width:auto;border:0;border-radius:99px;padding:5px 12px;font:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--c);cursor:pointer;white-space:nowrap}
 .ttb.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ac)}
 .ttb.lk{opacity:.4;cursor:default}
+#rkn{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);transform:translateX(-50%);z-index:95;display:flex;flex-direction:column;gap:8px;width:min(360px,92vw);pointer-events:none}
+.rkn1{pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:var(--bg);color:var(--fg);border:1.5px solid var(--ac);box-shadow:0 8px 24px #0004;animation:rknin .3s ease-out;transition:opacity .3s,transform .3s}
+.rkn1.out{opacity:0;transform:translateY(-10px)}
+.rkn1 .e{font-size:26px;flex:none}.rkn1 span{min-width:0;overflow-wrap:anywhere}.rkn1 small{display:block;color:var(--mut)}.rkn1 b.x{margin-left:auto;flex:none;color:var(--ac)}
+@keyframes rknin{from{transform:translateY(-14px);opacity:0}}
 nav.bar .dsk{display:none}
 /* ===== VERSÃO PARA COMPUTADOR (telas largas) — não afeta o celular ===== */
 @media (min-width:900px) and (hover:hover){
@@ -2181,6 +2186,22 @@ function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n]
   modal('<h3>🦎 Lagarto Levels</h3><div class="rktabs"><button class="on" data-a="rkpg" data-id="0">Levels</button><button data-a="rkpg" data-id="1">Rank global</button></div><div class="rkpager" id="rkpager"><div class="rkpg">'+h+'</div><div class="rkpg">'+rkBoard()+'</div></div>');rkPagerInit()}
 function rkPagerInit(){var p=document.getElementById('rkpager');if(!p)return;p.addEventListener('scroll',function(){var i=Math.round(p.scrollLeft/Math.max(1,p.clientWidth));document.querySelectorAll('.rktabs button').forEach(function(b,k){b.classList.toggle('on',k===i)})},{passive:true})}
 function rkPg(i){var p=document.getElementById('rkpager');if(p)p.scrollTo({left:i*p.clientWidth,behavior:'smooth'})}
+/* ===== Mini notificação ao completar missão ===== */
+function rkToast(m){var box=document.getElementById('rkn');if(!box){box=document.createElement('div');box.id='rkn';document.body.appendChild(box)}
+  var d=document.createElement('div');d.className='rkn1';d.innerHTML='<span class="e">🎯</span><span><b>Missão concluída!</b><small>'+esc(m[2])+'</small></span><b class="x">+'+m[3]+'</b>';
+  d.onclick=function(){d.remove();try{rkOpen()}catch(e){}};box.appendChild(d);
+  setTimeout(function(){d.classList.add('out');setTimeout(function(){d.remove()},320)},4500)}
+function rkNotify(){if(!me||typeof POSTS==='undefined')return;
+  try{var k='rkdn_'+me,raw=localStorage.getItem(k),s=rkStats(),done=RKM.filter(function(m){return s[m[0]]>=m[1]}),
+    key=function(m){return m[0]+':'+m[1]};
+    if(rkNotify.u!==me){rkNotify.u=me;rkNotify.t0=Date.now()}
+    var old=raw?JSON.parse(raw):[],warm=Date.now()-rkNotify.t0<25000;
+    var fresh=done.filter(function(m){return old.indexOf(key(m))<0});
+    if(!fresh.length)return;
+    localStorage.setItem(k,JSON.stringify(old.concat(fresh.map(key))));
+    if(raw===null||warm||fresh.length>4)return; /* primeira vez / carregando dados: só registra, sem avisar */
+    fresh.forEach(function(m,i){setTimeout(function(){rkToast(m)},i*1500)})}catch(e){}}
+setInterval(rkNotify,4000);
 FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
 setInterval(function(){rkDay();rkSync();rkPush()},20000);setTimeout(function(){rkDay();rkSync();rkPush()},3000);
 </script>
