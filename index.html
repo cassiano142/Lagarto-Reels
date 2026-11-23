@@ -492,6 +492,7 @@ header.top{position:sticky}
 #mnb .bar3{display:flex;flex-direction:column;gap:4px;width:18px}
 #mnb .bar3 i{display:block;height:2.5px;border-radius:3px;background:currentColor}
 #mnb .mdot{position:absolute;top:5px;right:5px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg);box-sizing:content-box}
+#rkb.rkon::after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg);box-sizing:content-box}
 #mnp{position:absolute;top:calc(100% + 6px);right:10px;z-index:60;min-width:210px;padding:6px;border-radius:18px;background:rgba(20,20,24,.62);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border:1px solid #ffffff2e;box-shadow:0 10px 30px #0006;color:#fff;animation:mnin .16s ease-out}
 #mnp[hidden]{display:none}
 @keyframes mnin{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:none}}
@@ -512,6 +513,17 @@ header.top{position:sticky}
 .rkm{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkm.ok{opacity:.6}.rkm small{color:var(--mut);flex:none}
 .rkr2{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.rkr2.lk2 .rks{filter:grayscale(1);opacity:.55}.rks{width:38px;height:36px;flex:none}
 .rkln{display:inline-flex;align-items:center;margin:4px 0;font-size:14px;gap:6px}.rkln .rkt{margin:0}
+.cdb{margin:0 0 12px;padding:12px;border-radius:14px;background:linear-gradient(135deg,var(--card),var(--bd));border:1px solid var(--bd);text-align:center}
+.cdb b{display:block;font-size:14px;margin-bottom:8px}
+.cdn{display:flex;justify-content:center;gap:8px}
+.cdn span{min-width:56px;padding:6px 4px;border-radius:10px;background:var(--bg);font-size:11px;color:var(--mut);line-height:1.1}
+.cdn i{display:block;font-style:normal;font-size:22px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}
+.cdn .cdd{font-style:normal;font-weight:700;padding:8px 0}
+.cdb small{display:block;margin-top:6px;color:var(--mut);font-size:12px}
+.cdb.nt{background:linear-gradient(135deg,#7f1d1d,#14532d);border-color:#b91c1c;color:#fff}
+.cdb.nt .cdn span{background:#0007;color:#ffe}
+.cdb.nt .cdn i{color:#fff}
+.cdb.nt small{color:#ffd}
 .rktabs{display:flex;gap:6px;margin:0 0 10px;border-bottom:1px solid var(--bd)}
 .rktabs button{flex:1;padding:8px 4px;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font:inherit;font-weight:700;cursor:pointer}
 .rktabs button.on{color:var(--ac);border-bottom-color:var(--ac)}
@@ -602,7 +614,7 @@ nav.bar .dsk{display:none}
 </head>
 <body>
 <div class="wrap">
-<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="mnb" aria-label="Menu" aria-expanded="false"></button></span><div id="mnp" hidden><div class="mit" data-a="notif"><button class="ic" id="ntb" tabindex="-1" aria-label="Notificações"></button><span>Notificações</span></div><div class="mit" data-a="lvopen"><button class="ic" id="lvb" tabindex="-1" aria-label="Lives"></button><span>Lives</span></div><div class="mit" data-a="rklv"><button class="ic" id="rkb" tabindex="-1" aria-label="Lagarto Levels">🏆</button><span>Lagarto Levels</span></div><div class="mit" data-a="settings"><button class="ic" id="stb" tabindex="-1" aria-label="Configurações"></button><span>Configurações</span></div></div></header>
+<header class="top"><span class="logo"><img class="lg" src="logo.png" alt=""><span class="lt">Lagarto Reels</span></span><span style="display:flex;align-items:center"><span class="mut" id="who"></span><button class="ic" id="dmb" data-a="dm" aria-label="Mensagens"></button><button class="ic" id="mnb" aria-label="Menu" aria-expanded="false"></button></span><div id="mnp" hidden><div class="mit" data-a="notif"><button class="ic" id="ntb" tabindex="-1" aria-label="Notificações"></button><span>Notificações</span></div><div class="mit" data-a="lvopen"><button class="ic" id="lvb" tabindex="-1" aria-label="Lives"></button><span>Lives</span></div><div class="mit" data-a="rklv"><button class="ic" id="rkb" tabindex="-1" aria-label="Lagarto Levels">🏆</button><span>Lagarto Levels</span></div><div class="mit" data-a="natal"><button class="ic" tabindex="-1" aria-label="Evento de Natal">🎄</button><span>Evento de Natal</span></div><div class="mit" data-a="settings"><button class="ic" id="stb" tabindex="-1" aria-label="Configurações"></button><span>Configurações</span></div></div></header>
 <main id="app"><div class="splash"><img src="logo.png" alt=""><b>Lagarto Reels</b><div class="lbar"><i></i></div></div></main>
 </div>
 <nav class="bar"></nav>
@@ -1456,7 +1468,7 @@ document.addEventListener('click',e=>{
   else if(a==='themeauto'){lset('theme',t.checked?'auto':themeCur());applyTheme();settings('look')}
   else if(a==='lvstart')lvStart();
   else if(a==='lvstart2'){closeM();lvStart()}
-  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();else if(a==='rkhide')rkHide();else if(a==='rkpg')rkPg(+id);else if(a==='rkttset')rkTtSet(id);
+  else if(a==='lvopen')lvOpen();else if(a==='rklv')rkOpen();else if(a==='natal')natalOpen();else if(a==='rkhide')rkHide();else if(a==='rkpg')rkPg(+id);else if(a==='rkttset')rkTtSet(id);
   else if(a==='lvchat')lvChatTog();
   else if(a==='lvgift')lvGift();
   else if(a==='lvemote')lvEmoteSend(id);
@@ -2046,7 +2058,7 @@ function start(){
   m.addEventListener('click',()=>setTimeout(close,0));
   document.addEventListener('click',e=>{if(!m.hidden&&!m.contains(e.target)&&e.target!==b&&!b.contains(e.target))close()},true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-  window.mnDot=function(){const on=!!(document.querySelector('#ntb .cnt')||document.querySelector('#lvb.lvon'));let d=b.querySelector('.mdot');if(on&&!d){d=document.createElement('em');d.className='mdot';b.appendChild(d)}else if(!on&&d)d.remove()};
+  window.mnDot=function(){if(window.rkBadge)rkBadge();const on=!!(document.querySelector('#ntb .cnt')||document.querySelector('#lvb.lvon')||document.querySelector('#rkb.rkon'));let d=b.querySelector('.mdot');if(on&&!d){d=document.createElement('em');d.className='mdot';b.appendChild(d)}else if(!on&&d)d.remove()};
   setInterval(mnDot,1500);mnDot();
 })();
 /* ===== LAGARTO LEVELS ===== */
@@ -2098,20 +2110,20 @@ function rkDt(s){var p=String(s).split('-');return new Date(+p[0],(+p[1])-1,+p[2
 function rkUni(a,b){var o={},r=[];(a||[]).concat(b||[]).forEach(function(x){if(x!=null&&!o[x]){o[x]=1;r.push(x)}});return r}
 function rkDays2(a,b){return rkUni(a,b).sort(function(x,y){return rkDt(x)-rkDt(y)}).slice(-400)}
 function rkX(k){var r=LVL[me];if(!r||!r.dv)return 0;var dv=rkDev(),t=0;for(var d in r.dv)if(d!==dv&&r.dv[d])t+=(+r.dv[d][k])||0;return t}
-function rkSig(o){var dv=o.dv||{};return [(o.d||[]).slice().sort().join(','),(o.w||[]).slice().sort().join(','),+o.wc||0,+o.mx||0,Object.keys(dv).sort().map(function(k){var b=dv[k]||{};return k+':'+(+b.c||0)+'/'+(+b.e||0)+'/'+(+b.l||0)}).join(';')].join('|')}
+function rkSig(o){var dv=o.dv||{};return [(o.d||[]).slice().sort().join(','),(o.w||[]).slice().sort().join(','),+o.wc||0,+o.mx||0,(o.m||[]).slice().sort().join(','),+o.bn||0,o.fx?1:0,Object.keys(dv).sort().map(function(k){var b=dv[k]||{};return k+':'+(+b.c||0)+'/'+(+b.e||0)+'/'+(+b.l||0)}).join(';')].join('|')}
 function rkPull(){if(!me)return;var r=LVL[me];if(!r)return;
   try{rkMig();
     lset('rkd_'+me,JSON.stringify(rkDays2(rkArr('rkd_'+me),r.d)));
     var w=rkUni(r.w,rkArr('rkuw_'+me)).slice(-300);lset('rkuw_'+me,JSON.stringify(w));
     lset('lvlw_'+me,String(Math.max(+ls('lvlw_'+me,0),+r.wc||0,w.length)));
-    lset('rkmax_'+me,String(Math.max(+ls('rkmax_'+me,0),+r.mx||0)))}catch(e){}
+    lset('rkmax_'+me,String(Math.max(+ls('rkmax_'+me,0),+r.mx||0)));var b0=rkArr('rkdn_'+me),m2=rkUni(b0,r.m);lset('rkdn_'+me,JSON.stringify(m2));if(m2.length>b0.length&&Date.now()-RKT0>12000)lset('rknew_'+me,'1');lset('rkbn_'+me,String(Math.max(+ls('rkbn_'+me,0),+r.bn||0)));if(r.fx)lset('rkfx_'+me,'1')}catch(e){}
   rkPush()}
 function rkPush(){clearTimeout(rkPush.t);rkPush.t=setTimeout(rkPushNow,1500)}
 function rkPushNow(){if(!me||typeof db==='undefined'||!db)return;
   try{rkMig();var r=LVL[me]||{},dv=Object.assign({},r.dv||{});
     dv[rkDev()]={c:+ls('lvlc_'+me,0),e:+ls('lvle_'+me,0),l:+ls('lvc_'+me,0)};
     var w=rkUni(r.w,rkArr('rkuw_'+me)).slice(-300);
-    var doc={d:rkDays2(r.d,rkArr('rkd_'+me)),w:w,wc:Math.max(+ls('lvlw_'+me,0),+r.wc||0,w.length),mx:Math.max(+ls('rkmax_'+me,0),+r.mx||0),dv:dv,ts:Date.now()};
+    var doc={d:rkDays2(r.d,rkArr('rkd_'+me)),w:w,wc:Math.max(+ls('lvlw_'+me,0),+r.wc||0,w.length),mx:Math.max(+ls('rkmax_'+me,0),+r.mx||0),m:rkUni(r.m,rkArr('rkdn_'+me)),bn:Math.max(+ls('rkbn_'+me,0),+r.bn||0),fx:(ls('rkfx_'+me,'')==='1'||r.fx)?1:0,dv:dv,ts:Date.now()};
     if(r.id&&rkSig(doc)===rkSig(r))return;
     Promise.resolve(db.doc('levels/'+me).set(doc)).catch(function(e){console.error('levels',e)})}catch(e){}}
 var RKX=[0,120,300,560,730,900,1300,1800];
@@ -2140,8 +2152,14 @@ var RKM=[
 ['lv',1,'Fazer sua 1ª live',30,'Lives'],['lv',3,'Fazer 3 lives',50,'Lives'],['lv',10,'Fazer 10 lives',90,'Lives'],['lv',25,'Fazer 25 lives',150,'Lives'],
 ['st',3,'Entrar 3 dias seguidos',20,'Dias seguidos'],['st',7,'Entrar 7 dias seguidos',40,'Dias seguidos'],['st',15,'Entrar 15 dias seguidos',70,'Dias seguidos'],['st',30,'Entrar 30 dias seguidos',120,'Dias seguidos']
 ];
-function rkCalc(){var s=rkStats(),xp=0,n=0;RKM.forEach(function(m){if(s[m[0]]>=m[1])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
-  rkMig();var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp}}
+var RKT0=Date.now(),RKFRESH=[];
+function rkBadge(){var b=document.getElementById('rkb');if(b)b.classList.toggle('rkon',!!me&&ls('rknew_'+me,'')==='1')}
+function rkCalc(){var s=rkStats(),set={},ch=0;try{JSON.parse(ls('rkdn_'+me,'[]')).forEach(function(k){set[k]=1})}catch(e){}
+  var first=false;try{first=localStorage.getItem('rkdn_'+me)===null}catch(e){}
+  RKM.forEach(function(m){var k=m[0]+':'+m[1];if(!set[k]&&s[m[0]]>=m[1]){set[k]=1;ch=1;if(!first)RKFRESH.push(m)}});
+  if(ch){try{localStorage.setItem('rkdn_'+me,JSON.stringify(Object.keys(set)))}catch(e){}rkPush()}
+  var xp=+ls('rkbn_'+me,0)||0,n=0;RKM.forEach(function(m){if(set[m[0]+':'+m[1]])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
+  rkMig();var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp,dn:set}}
 function RKN(){return me?rkCalc().n:0}
 function rkOf(u){return u===me?RKN():((P[u]&&+P[u].rk)||0)}
 function rkHid(u){return !!(P[u]&&P[u].rkh)}
@@ -2172,12 +2190,20 @@ var rkLast=-1;
 function rkSave(o){var p=P[me];return Promise.resolve(db.doc('profiles/'+me).set(Object.assign({name:p.name,bio:p.bio||'',av:p.av||'🦎',frame:p.frame||'',rk:RKN(),xp:Math.max(rkCalc().xp,+p.xp||0),rkh:p.rkh?1:0,ts:p.ts||Date.now()},p.tt?{tt:p.tt}:{},p.oculto?{oculto:true}:{},p.priv?{priv:true}:{},o||{})))}
 function rkSync(){if(!me||!P[me]||!P[me].name||typeof db==='undefined'||!db)return;var r=rkCalc(),n=r.n,xp=Math.max(r.xp,+P[me].xp||0),sg=n+':'+xp;rkClaim();if(sg===rkLast||((+P[me].rk||0)===n&&(+P[me].xp||0)===xp)){rkLast=sg;return}rkLast=sg;try{rkSave().catch(function(){rkLast=-1})}catch(e){rkLast=-1}}
 function rkHide(){if(!me||!P[me])return;var v=P[me].rkh?0:1;P[me].rkh=v;try{rkSave({rkh:v}).catch(function(){toast('Não foi possível salvar.')})}catch(e){}}
-function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n],h='';
+/* ===== Contagens regressivas: atualização/rankeado (05/12) e Evento de Natal (01/12) ===== */
+function cdParts(iso){var p=iso.split('-'),t=new Date(+p[0],(+p[1])-1,+p[2]).getTime()-Date.now();if(t<=0)return null;var q=Math.floor(t/1000);return{d:Math.floor(q/86400),h:Math.floor(q%86400/3600),m:Math.floor(q%3600/60),s:q%60}}
+function cdPd(n){return n<10?'0'+n:''+n}
+function cdInner(c,done){return c?'<span><i>'+c.d+'</i>'+(c.d===1?'dia':'dias')+'</span><span><i>'+cdPd(c.h)+'</i>h</span><span><i>'+cdPd(c.m)+'</i>min</span><span><i>'+cdPd(c.s)+'</i>s</span>':'<em class="cdd">'+done+'</em>'}
+function cdBanner(k){var n=k==='nt',iso=n?'2026-12-01':'2026-12-05',dn=n?'O evento de Natal começou! 🎅':'A nova atualização chegou! 🎉';return '<div class="cdb'+(n?' nt':'')+'"><b>'+(n?'🎄 Evento de Natal começa em':'🚀 Nova atualização + Rankeado em')+'</b><div class="cdn" data-cd="'+iso+'" data-done="'+dn+'">'+cdInner(cdParts(iso),dn)+'</div><small>'+(n?'Dia 01/12':'Dia 05/12')+'</small></div>'}
+function cdTick(){document.querySelectorAll('[data-cd]').forEach(function(e){e.innerHTML=cdInner(cdParts(e.dataset.cd),e.dataset.done)})}
+setInterval(cdTick,1000);
+function natalOpen(){modal('<h3>🎄 Evento de Natal</h3>'+cdBanner('nt')+'<p class="mut" style="font-size:13px;margin:0">'+(cdParts('2026-12-01')?'O Evento de Natal do Lagarto Reels começa no dia 01/12. Fique de olho!':'O Evento de Natal do Lagarto Reels já começou!')+'</p>')}
+function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n],h='';lset('rknew_'+me,'');if(window.mnDot)mnDot();
   var lo=n?RKX[n-1]:0,hi=nx?RKX[n]:xp,pr=nx?Math.max(0,Math.min(1,(xp-lo)/(hi-lo))):1,dv=pr<.34?'III':pr<.67?'II':'I';
-  h='<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?ttChip(ttOf(me)):'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
+  h=cdBanner('rk')+'<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?ttChip(ttOf(me)):'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
   if(nx)h+='<div class="rkx">Próximo: <b>'+nx.n+'</b> · '+xp+' / '+hi+' pontos</div><div class="rkpb"><i style="width:'+Math.round(pr*100)+'%;background:'+nx.c+'"></i></div>';
   else h+='<p style="text-align:center;font-weight:700">Você chegou ao topo: Legend 👑</p>';
-  var seen={},nxt=[],done=0;RKM.forEach(function(m){if(s[m[0]]>=m[1]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
+  var seen={},nxt=[],done=0;RKM.forEach(function(m){if(r.dn[m[0]+':'+m[1]]){done++;return}if(seen[m[4]])return;seen[m[4]]=1;nxt.push(m)});
   var rm=function(m){var c=Math.min(s[m[0]],m[1]);return '<div class="rkm"><span><small class="mut">'+m[4]+'</small><br>'+m[2]+'</span><span style="text-align:right;flex:none"><b style="color:var(--ac)">+'+m[3]+'</b><br><small>'+c+'/'+m[1]+'</small></span></div>'};
   h+='<b>Missões</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Faça as que quiser, na ordem que quiser. ✅ '+done+' de '+RKM.length+' concluídas</div>'+nxt.filter(function(m){return !m[5]}).map(rm).join('');
   h+='<b style="display:block;margin-top:14px">Missões secundárias</b><div class="mut" style="font-size:12px;margin:2px 0 4px">Pontos extras para quem prefere outro jeito de subir de rank. Dá para chegar ao Legend sem fazer nenhuma live.</div>'+nxt.filter(function(m){return m[5]}).map(rm).join('');
@@ -2192,15 +2218,11 @@ function rkToast(m){var box=document.getElementById('rkn');if(!box){box=document
   d.onclick=function(){d.remove();try{rkOpen()}catch(e){}};box.appendChild(d);
   setTimeout(function(){d.classList.add('out');setTimeout(function(){d.remove()},320)},4500)}
 function rkNotify(){if(!me||typeof POSTS==='undefined')return;
-  try{var k='rkdn_'+me,raw=localStorage.getItem(k),s=rkStats(),done=RKM.filter(function(m){return s[m[0]]>=m[1]}),
-    key=function(m){return m[0]+':'+m[1]};
-    if(rkNotify.u!==me){rkNotify.u=me;rkNotify.t0=Date.now()}
-    var old=raw?JSON.parse(raw):[],warm=Date.now()-rkNotify.t0<25000;
-    var fresh=done.filter(function(m){return old.indexOf(key(m))<0});
-    if(!fresh.length)return;
-    localStorage.setItem(k,JSON.stringify(old.concat(fresh.map(key))));
-    if(raw===null||warm||fresh.length>4)return; /* primeira vez / carregando dados: só registra, sem avisar */
-    fresh.forEach(function(m,i){setTimeout(function(){rkToast(m)},i*1500)})}catch(e){}}
+  try{if(rkNotify.u!==me){rkNotify.u=me;rkNotify.t0=Date.now()}
+    rkCalc();var q=RKFRESH.splice(0),warm=Date.now()-rkNotify.t0<25000;
+    if(!q.length||warm||q.length>4)return; /* carregando dados / lote grande: só registra, sem avisar */
+    lset('rknew_'+me,'1');rkBadge();
+    q.forEach(function(m,i){setTimeout(function(){rkToast(m)},i*1500)})}catch(e){}}
 setInterval(rkNotify,4000);
 FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
 setInterval(function(){rkDay();rkSync();rkPush()},20000);setTimeout(function(){rkDay();rkSync();rkPush()},3000);
