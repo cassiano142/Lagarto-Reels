@@ -2190,14 +2190,34 @@ var rkLast=-1;
 function rkSave(o){var p=P[me];return Promise.resolve(db.doc('profiles/'+me).set(Object.assign({name:p.name,bio:p.bio||'',av:p.av||'🦎',frame:p.frame||'',rk:RKN(),xp:Math.max(rkCalc().xp,+p.xp||0),rkh:p.rkh?1:0,ts:p.ts||Date.now()},p.tt?{tt:p.tt}:{},p.oculto?{oculto:true}:{},p.priv?{priv:true}:{},o||{})))}
 function rkSync(){if(!me||!P[me]||!P[me].name||typeof db==='undefined'||!db)return;var r=rkCalc(),n=r.n,xp=Math.max(r.xp,+P[me].xp||0),sg=n+':'+xp;rkClaim();if(sg===rkLast||((+P[me].rk||0)===n&&(+P[me].xp||0)===xp)){rkLast=sg;return}rkLast=sg;try{rkSave().catch(function(){rkLast=-1})}catch(e){rkLast=-1}}
 function rkHide(){if(!me||!P[me])return;var v=P[me].rkh?0:1;P[me].rkh=v;try{rkSave({rkh:v}).catch(function(){toast('Não foi possível salvar.')})}catch(e){}}
+/* ===== Hora do servidor (evita abrir antes mudando a data do celular) ===== */
+var SOFF=0;try{fetch(location.href,{method:'HEAD',cache:'no-store'}).then(function(r){var d=r.headers.get('date'),t=d?new Date(d).getTime():0;if(t>0)SOFF=t-Date.now()}).catch(function(){})}catch(e){}
+function nowS(){return Date.now()+SOFF}
+/* ===== Evento de Natal: calendário do advento (01/12 a 25/12) ===== */
+var ADV=[['Poste uma foto da árvore ou da decoração','fo',1],['Curta 5 posts','lg',5],['Comente em 3 posts','cm',3],['Poste um Reels','rl',1],['Mande 2 mensagens','ms',2],['Salve 3 posts','sv',3],['Poste uma foto de um enfeite','fo',1],['Curta 8 posts','lg',8],['Comente em 5 posts','cm',5],['Poste uma foto da ceia ou do lanche de Natal','fo',1],['Mande 3 mensagens','ms',3],['Poste um Reels da sua rua','rl',1],['Curta 10 posts','lg',10],['Salve 5 posts','sv',5],['Comente em 3 posts','cm',3],['Poste uma foto do seu pet','fo',1],['Mande 4 mensagens','ms',4],['Poste um Reels com um desejo','rl',1],['Curta 12 posts','lg',12],['Comente em 6 posts','cm',6],['Poste uma foto','fo',1],['Salve 6 posts','sv',6],['Mande 5 mensagens','ms',5],['Poste a foto da sua casa','fo',1],['Poste um Reels de Feliz Natal','rl',1]];
+function advSt(){try{return JSON.parse(ls('adv_'+me,'{}'))||{}}catch(e){return{}}}
+function advSv(o){try{localStorage.setItem('adv_'+me,JSON.stringify(o))}catch(e){}}
+function advDay(){var d=new Date(nowS());return d.getFullYear()>2026?99:d.getFullYear()<2026||d.getMonth()<11?0:d.getDate()}
+function advChk(){if(!me||!P[me]||Date.now()-loadTs<10000||!POSTS.length)return;var D=advDay();if(D<1||D>25)return;var o=advSt(),st=rkStats();o.done=o.done||{};
+  if(!o.base||o.base.d!==D)o.base={d:D,v:{fo:st.fo,lg:st.lg,cm:st.cm,ms:st.ms,rl:st.rl,sv:st.sv}};
+  var m=ADV[D-1];if(!o.done[D]&&st[m[1]]-o.base.v[m[1]]>=m[2]){o.done[D]=1;toast('Missão de Natal concluída! ⭐')}advSv(o)}
+setInterval(function(){try{advChk()}catch(e){}},15000);
 /* ===== Contagens regressivas: atualização/rankeado (05/12) e Evento de Natal (01/12) ===== */
-function cdParts(iso){var p=iso.split('-'),t=new Date(+p[0],(+p[1])-1,+p[2]).getTime()-Date.now();if(t<=0)return null;var q=Math.floor(t/1000);return{d:Math.floor(q/86400),h:Math.floor(q%86400/3600),m:Math.floor(q%3600/60),s:q%60}}
+function cdParts(iso){var p=iso.split('-'),t=new Date(+p[0],(+p[1])-1,+p[2]).getTime()-nowS();if(t<=0)return null;var q=Math.floor(t/1000);return{d:Math.floor(q/86400),h:Math.floor(q%86400/3600),m:Math.floor(q%3600/60),s:q%60}}
 function cdPd(n){return n<10?'0'+n:''+n}
 function cdInner(c,done){return c?'<span><i>'+c.d+'</i>'+(c.d===1?'dia':'dias')+'</span><span><i>'+cdPd(c.h)+'</i>h</span><span><i>'+cdPd(c.m)+'</i>min</span><span><i>'+cdPd(c.s)+'</i>s</span>':'<em class="cdd">'+done+'</em>'}
-function cdBanner(k){var n=k==='nt',iso=n?'2026-12-01':'2026-12-05',dn=n?'O evento de Natal começou! 🎅':'A nova atualização chegou! 🎉';return '<div class="cdb'+(n?' nt':'')+'"><b>'+(n?'🎄 Evento de Natal começa em':'🚀 Nova atualização + Rankeado em')+'</b><div class="cdn" data-cd="'+iso+'" data-done="'+dn+'">'+cdInner(cdParts(iso),dn)+'</div><small>'+(n?'Dia 01/12':'Dia 05/12')+'</small></div>'}
+function cdBanner(k){var n=k==='nt',iso=n?'2026-12-01':'2026-12-10',dn=n?'O evento de Natal começou! 🎅':'A nova atualização chegou! 🎉';return '<div class="cdb'+(n?' nt':'')+'"><b>'+(n?'🎄 Evento de Natal começa em':'🚀 Nova atualização + Rankeado em')+'</b><div class="cdn" data-cd="'+iso+'" data-done="'+dn+'">'+cdInner(cdParts(iso),dn)+'</div><small>'+(n?'Dia 01/12':'Dia 10/12')+'</small></div>'}
 function cdTick(){document.querySelectorAll('[data-cd]').forEach(function(e){e.innerHTML=cdInner(cdParts(e.dataset.cd),e.dataset.done)})}
 setInterval(cdTick,1000);
-function natalOpen(){modal('<h3>🎄 Evento de Natal</h3>'+cdBanner('nt')+'<p class="mut" style="font-size:13px;margin:0">'+(cdParts('2026-12-01')?'O Evento de Natal do Lagarto Reels começa no dia 01/12. Fique de olho!':'O Evento de Natal do Lagarto Reels já começou!')+'</p>')}
+function natalOpen(){var D=advDay();
+  if(D<1){modal('<h3>🎄 Evento de Natal</h3>'+cdBanner('nt')+'<p class="mut" style="font-size:13px;margin:0">O Evento de Natal do Lagarto Reels começa no dia 01/12. Fique de olho!</p>');return}
+  try{advChk()}catch(e){}var o=advSt(),dn=o.done||{},n=Object.keys(dn).length,st=rkStats(),ST='border:1px solid rgba(128,128,128,.35);border-radius:12px;padding:12px;margin:8px 0',h='<h3>🎄 Evento de Natal</h3><div style="'+ST+'"><b>⭐ '+n+' de 25 estrelas</b></div>';
+  if(D<=25){var m=ADV[D-1],pg=o.base&&o.base.d===D?Math.max(0,Math.min(m[2],st[m[1]]-o.base.v[m[1]])):0;
+    h+='<div style="'+ST+';border-color:#f4c542"><div class="mut" style="font-size:12px">Missão do dia '+D+'</div><b>'+m[0]+'</b><div style="margin-top:6px">'+(dn[D]?'✅ Concluída! +1 estrela':'Progresso: '+pg+' de '+m[2])+'</div></div>'}
+  else h+='<div style="'+ST+'">O Evento de Natal terminou. Feliz Natal! 🎅</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">';
+  for(var i=1;i<=25;i++){var c=dn[i]?'background:#2bb673;color:#fff':i===D?'background:#f4c542;color:#241800':i<D?'opacity:.45':'opacity:.7';h+='<div style="aspect-ratio:1;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(128,128,128,.35);font-weight:700;'+c+'">'+(dn[i]?'★':i>D?'🔒':i)+'</div>'}
+  modal(h+'</div><div class="mut" style="font-size:12px;margin-top:8px">Cada dia tem uma missão nova. Ela conta sozinha quando você faz.</div>')}
 function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n],h='';lset('rknew_'+me,'');if(window.mnDot)mnDot();
   var lo=n?RKX[n-1]:0,hi=nx?RKX[n]:xp,pr=nx?Math.max(0,Math.min(1,(xp-lo)/(hi-lo))):1,dv=pr<.34?'III':pr<.67?'II':'I';
   h=cdBanner('rk')+'<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?ttChip(ttOf(me)):'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
