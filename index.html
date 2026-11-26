@@ -2140,6 +2140,7 @@ function rkPushNow(){if(!me||typeof db==='undefined'||!db)return;
     if(r.id&&rkSig(doc)===rkSig(r))return;
     Promise.resolve(db.doc('levels/'+me).set(doc)).catch(function(e){console.error('levels',e)})}catch(e){}}
 var RKX=[0,120,300,560,730,900,1300,1800];
+function rkFromXp(x){var n=0;RKX.forEach(function(t,i){if(x>=t)n=i+1});return n}
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
 ['fo',5,'Postar 5 fotos',10,'Fotos',1],['fo',20,'Postar 20 fotos',30,'Fotos',1],['fo',50,'Postar 50 fotos',60,'Fotos',1],
@@ -2171,10 +2172,10 @@ function rkCalc(){var s=rkStats(),set={},ch=0;try{JSON.parse(ls('rkdn_'+me,'[]')
   var first=false;try{first=localStorage.getItem('rkdn_'+me)===null}catch(e){}
   RKM.forEach(function(m){var k=m[0]+':'+m[1];if(!set[k]&&s[m[0]]>=m[1]){set[k]=1;ch=1;if(!first)RKFRESH.push(m)}});
   if(ch){try{localStorage.setItem('rkdn_'+me,JSON.stringify(Object.keys(set)))}catch(e){}rkPush()}
-  var xp=+ls('rkbn_'+me,0)||0,n=0;RKM.forEach(function(m){if(set[m[0]+':'+m[1]])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
+  var xp=+ls('rkbn_'+me,0)||0,n=0;RKM.forEach(function(m){if(set[m[0]+':'+m[1]])xp+=m[3]});xp=Math.max(xp,P[me]?(+P[me].xp||0):0);RKX.forEach(function(t,i){if(xp>=t)n=i+1});
   rkMig();var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp,dn:set}}
 function RKN(){return me?rkCalc().n:0}
-function rkOf(u){return u===me?RKN():((P[u]&&+P[u].rk)||0)}
+function rkOf(u){return u===me?RKN():Math.max((P[u]&&+P[u].rk)||0,rkFromXp(P[u]?(+P[u].xp||0):0))}
 function rkHid(u){return !!(P[u]&&P[u].rkh)}
 function rkIc(u){var n=rkOf(u);return n&&!rkHid(u)?'<span class="rki">'+rkIcon(RK[n-1],'p'+n)+'</span>':''}
 var TOPD=null,TOPR=0,rkCl=0;
