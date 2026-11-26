@@ -1,4 +1,4 @@
-const SUPABASE_URL = "https://xnusrclhpcapiawjjzj.supabase.co";
+const SUPABASE_URL = "https://xnusrcclhpcapiawjjzj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_YKggcJR2XUiBEsP8VE1pQA_Tch_jht-";
 // Cloudinary (upload direto do navegador). O preset "Lagartotv" precisa estar como UNSIGNED.
 const CLOUDINARY_CLOUD_NAME = "ytbvkyzr";
