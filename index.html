@@ -808,7 +808,7 @@ function postEdit(id){const p=POSTS.find(x=>x.id===id);if(!p||p.uid!==me)return;
     const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{if(CAM===c&&isFinite(a.duration)&&a.duration>=2){c.md=a.duration;if(c.me>c.md)c.me=c.md;camMusUI()}};a.src=p.mu}
   let o=$('#cmr');if(o)o.remove();o=document.createElement('div');o.id='cmr';document.body.appendChild(o);
   o.innerHTML=`<div class="cmh"><button class="ic" data-r="back" aria-label="Voltar">${I('back',24)}</button><b>${V?'Editar reel':'Editar publicação'}${p.urls&&p.urls.length>1?' · '+p.urls.length+' fotos':''}</b></div>
-<div class="cmpv" id="cmpv">${V?`<video src="${esc(p.url)}#t=0.1" muted playsinline preload="metadata"></video>`:`<img src="${esc(p.url)}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button></div>
+<div class="cmpv" id="cmpv">${V?`<video src="${esc(p.url)}#t=0.1" muted playsinline preload="metadata"></video>`:`<img loading="lazy" src="${esc(p.url)}" alt="">`}<button data-r="prev" style="top:10px">Ver prévia</button></div>
 <textarea id="pc" rows="3" maxlength="2200" placeholder="Escreva uma legenda…">${esc(p.cap||'')}</textarea>
 <button class="cmrw" data-r="tag">${I('user',22)}<span style="flex:1">Marcar pessoas</span>›</button>
 ${V?`<div class="cmrw" style="cursor:default">${I('mic',22)}<span>Renomear áudio</span></div><input class="cmau" id="cmau" maxlength="40" placeholder="Áudio original" value="${esc(p.au||'')}" autocomplete="off">`:''}
@@ -845,7 +845,7 @@ function msgCopy(){const t=selMsgs().map(m=>m.text).join('\n');SELM.clear();selU
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado')).catch(()=>toast('Não foi possível copiar.'))}
 function avView(u){const g=isG(u),a=g?((gOf(u)||{}).av||'👥'):((P[u]&&P[u].av)||'🦎'),img=/^(https?:|\/_blob|data:)/.test(a);
   const old=$('#avv');if(old)old.remove();const o=document.createElement('div');o.id='avv';o.dataset.a='avclose';
-  o.innerHTML=`<button class="vx" data-a="avclose" aria-label="Fechar">✕</button>${img?`<img src="${esc(a)}" alt="">`:`<span class="big">${esc(a)}</span>`}<b>${esc(nm(u))}</b>`;
+  o.innerHTML=`<button class="vx" data-a="avclose" aria-label="Fechar">✕</button>${img?`<img loading="lazy" src="${esc(a)}" alt="">`:`<span class="big">${esc(a)}</span>`}<b>${esc(nm(u))}</b>`;
   document.body.append(o)}
 const avClose=()=>{const o=$('#avv');if(o)o.remove()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')avClose()});
@@ -1146,18 +1146,25 @@ function toast(t){let e=document.createElement('div');e.className='toast';e.text
 const w=p=>Promise.resolve(p).catch(e=>{console.error(e);toast('Não foi possível salvar. Verifique sua conexão.')});
 function need(){if(!db||!me){toast('Entre na sua conta para participar.');return false}if(!P[me]){editProf(true);return false}return true}
 
-async function up(f){const ext=(f.name.split('.').pop()||'bin').toLowerCase(),path=me+'/'+Date.now()+'.'+ext;const{error}=await sb.storage.from('midia').upload(path,f,{contentType:f.type});if(error)throw error;return sb.storage.from('midia').getPublicUrl(path).data.publicUrl}
+async function up(f,max){
+  if(typeof CLOUDINARY_CLOUD_NAME==='undefined'||!CLOUDINARY_CLOUD_NAME||CLOUDINARY_CLOUD_NAME==='COLE_SEU_CLOUD_NAME_AQUI')throw new Error('Defina CLOUDINARY_CLOUD_NAME no config.js');
+  if(f&&f.type&&f.type.startsWith('image/')&&!/gif|svg/.test(f.type))f=await shrink(f,max||1280);
+  const fd=new FormData();fd.append('file',f);fd.append('upload_preset',CLOUDINARY_PRESET);
+  const r=await fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/auto/upload',{method:'POST',body:fd});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.secure_url)throw new Error((j.error&&j.error.message)||'Falha no upload (Cloudinary)');
+  return j.resource_type==='image'?j.secure_url.replace('/upload/','/upload/f_auto,q_auto/'):j.secure_url}
 function small(f,max=640){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);const u=c.toDataURL('image/jpeg',.7);u.length>190000?no(new Error('Imagem grande demais.')):ok(u)};i.onerror=()=>no(new Error('Imagem inválida.'));i.src=URL.createObjectURL(f)})}
 
 function card(p){
-  const m=p.type==='video'?`<video src="${esc(p.url)}" data-pid="${p.id}"${xo(p)} controls loop playsinline preload="metadata"></video>`:(p.urls&&p.urls.length>1?`<div class="cs"><div class="cstr">${p.urls.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div><span class="cc">1/${p.urls.length}</span><div class="cdt">${p.urls.map((u,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></div>`:`<img src="${esc(p.url)}" alt="">`);
+  const m=p.type==='video'?`<video src="${esc(p.url)}" data-pid="${p.id}"${xo(p)} controls loop playsinline preload="metadata"></video>`:(p.urls&&p.urls.length>1?`<div class="cs"><div class="cstr">${p.urls.map(u=>`<img loading="lazy" src="${esc(u)}" alt="" loading="lazy">`).join('')}</div><span class="cc">1/${p.urls.length}</span><div class="cdt">${p.urls.map((u,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></div>`:`<img loading="lazy" src="${esc(p.url)}" alt="">`);
   const n=ncm(p.id),sv=SV.some(s=>s.pid===p.id&&s.uid===me);
   return `<article class="post"><div class="ph"><a data-a="prof" data-id="${esc(p.uid)}">${av(p.uid,'s')}<b>${esc(nm(p.uid))}${vb(p.uid)}</b></a><span class="mut">· ${ago(p.ts)}</span>${p.uid===me?`<button class="ic" data-a="pmenu" data-id="${p.id}" aria-label="Opções">${I('more',20)}</button>`:''}</div>
   <div class="md" data-a="dbl" data-id="${p.id}"${p.mu?` data-mx="${p.id}"`:''}>${m}${mxTag(p)}</div>
   <div class="ac"><button class="ic ${liked(p.id)?'lk':''}" data-a="like" data-id="${p.id}">${I('heart',26)}</button><button class="ic" data-a="open" data-id="${p.id}">${I('comment',26)}</button><button class="ic" data-a="share" data-id="${p.id}">${I('share',26)}</button><button class="ic r ${sv?'sv':''}" data-a="save" data-id="${p.id}">${I('bookmark',26)}</button></div>
   <div class="pb"><b>${likes(p.id)} curtidas</b>${p.cap?`<div><b>${esc(nm(p.uid))}${vb(p.uid)}</b> ${mnText(p.cap)}${p.ed?' <span class="mut" style="font-size:12px">(editado)</span>':''}</div>${mnLine(p.cap)}`:''}<a class="mut" data-a="open" data-id="${p.id}">${n?`Ver ${n} comentário${n>1?'s':''}`:'Comentar'}</a></div></article>`;
 }
-const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img src="${esc(p.url)}" alt="">${p.urls&&p.urls.length>1?'<i>❐</i>':''}`}</a>`;
+const gi=p=>`<a class="gi" data-a="open" data-id="${p.id}">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video><i>▶</i>`:`<img loading="lazy" src="${esc(p.url)}" alt="">${p.urls&&p.urls.length>1?'<i>❐</i>':''}`}</a>`;
 
 function render(){
   if(!ready)return;
@@ -1175,7 +1182,7 @@ function render(){
     h=`<input class="sr" id="sq" placeholder="Buscar no Lagarto Reels…" value="${esc(q)}"><div id="exr"></div>`;
   }else if(tab==='notif'){
     const ns=notifs();
-    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='m'?(n.cm?`mencionou você em um comentário: “${esc(n.t)}”`:'mencionou você em uma publicação'):n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'||n.k==='m'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
+    h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">${I('back')}</button><b>Notificações</b></div>`+reqBlock()+(ns.length?ns.map(n=>{const p=POSTS.find(x=>x.id===n.p),t=n.k==='c'?`comentou: “${esc(n.t)}”`:n.k==='m'?(n.cm?`mencionou você em um comentário: “${esc(n.t)}”`:'mencionou você em uma publicação'):n.k==='l'?'curtiu sua publicação':p&&p.type==='video'?'postou um novo reel':'postou uma nova foto';return `<a class="nt ${n.ts>nview?'nw':''}" data-a="open" data-id="${n.p}"><span class="nti">${av(n.u)}<em class="nk">${I(n.k==='c'||n.k==='m'?'comment':n.k==='l'?'heart':'image',12)}</em></span><div class="ntx"><b>${esc(nm(n.u))}</b> ${t} <span class="mut">${ago(n.ts)}</span></div>${p?`<span class="nth">${p.type==='video'?`<video src="${esc(p.url)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img loading="lazy" src="${esc(p.url)}" alt="">`}</span>`:''}</a>`}).join(''):`<div class="empty">Nenhuma notificação ainda.<br>Quando alguém comentar, curtir ou postar, aparece aqui. 🦎</div>`);
   }else if(tab==='dm'){
     h=`<div class="chh"><button class="ic" data-a="nav" data-id="home" aria-label="Voltar">‹</button><b style="font-size:20px">Mensagens</b><button class="ic" style="margin-left:auto" data-a="gnew" aria-label="Novo grupo">${I('plus',24)}</button></div><input class="sr" id="dq" placeholder="Pesquisar" value="${esc(dq)}" autocomplete="off"><div class="dmn" id="dmn"></div><div class="dmt" id="dmt"></div><div id="dml"></div>`;
   }else if(tab==='chat'){
@@ -1323,7 +1330,7 @@ ${V?`<div class="cmrw" style="cursor:default">${I('mic',22)}<span>Renomear áudi
     else if(a==='prev')camPrev(V)
     else if(a==='cover')camCover()
     else if(a==='pub')camPub(V)}}
-function camPrev(V){const d=document.createElement('div');d.id='cmo';d.innerHTML=(V?`<video src="${CAM.u}" controls autoplay loop playsinline></video>`:`<img src="${CAM.u}" alt="">`)+'<button class="btn" style="max-width:200px">Fechar</button>';d.onclick=e=>{if(e.target.tagName!=='VIDEO')d.remove()};document.body.appendChild(d);const pv=d.querySelector('video');if(pv&&CAM.mu)pv._p=camP(CAM)}
+function camPrev(V){const d=document.createElement('div');d.id='cmo';d.innerHTML=(V?`<video src="${CAM.u}" controls autoplay loop playsinline preload="metadata"></video>`:`<img src="${CAM.u}" alt="">`)+'<button class="btn" style="max-width:200px">Fechar</button>';d.onclick=e=>{if(e.target.tagName!=='VIDEO')d.remove()};document.body.appendChild(d);const pv=d.querySelector('video');if(pv&&CAM.mu)pv._p=camP(CAM)}
 function camCover(){const d=document.createElement('div');d.id='cmo';d.innerHTML=`<video src="${CAM.u}#t=0.1" muted playsinline preload="auto"></video><input type="range" min="0" max="100" value="0"><p class="mut">Arraste para escolher a capa</p><button class="btn" style="max-width:200px">Usar esta capa</button>`;document.body.appendChild(d);
   const v=d.querySelector('video'),r=d.querySelector('input');r.oninput=()=>{if(v.duration)v.currentTime=v.duration*r.value/100};
   d.querySelector('button').onclick=()=>{if(v.videoWidth){const cv=document.createElement('canvas');cv.width=v.videoWidth;cv.height=v.videoHeight;cv.getContext('2d').drawImage(v,0,0);cv.toBlob(b=>{if(!b){d.remove();return}CAM.cover=new File([b],'capa.jpg',{type:'image/jpeg'});const u=URL.createObjectURL(b),pv=$('#cmpv video');if(pv){pv.poster=u;pv.removeAttribute('src');pv.src=CAM.u;}d.remove();toast('Capa escolhida')},'image/jpeg',.85)}else d.remove()}}
@@ -1381,7 +1388,7 @@ async function saveProf(){
   if(n.length<2){st.textContent='Escolha um nome com pelo menos 2 letras.';return}
   if(Object.keys(P).some(u=>u!==me&&P[u].name.toLowerCase()===n.toLowerCase())){st.textContent='Esse nome já está em uso.';return}
   $('#sp').disabled=true;st.textContent='Salvando…';
-  try{const f=$('#af').files[0];let a=pav||'🦎';if(f)a=await up(f);
+  try{const f=$('#af').files[0];let a=pav||'🦎';if(f)a=await up(f,512);
     await db.doc('profiles/'+me).set(Object.assign({name:n,bio:$('#pbio').value.trim(),av:a,frame:pfr,rk:RKN(),xp:Math.max(rkCalc().xp,+(P[me]&&P[me].xp)||0),rkh:(P[me]&&P[me].rkh)?1:0,ts:(P[me]&&P[me].ts)||Date.now()},P[me]&&P[me].tt?{tt:P[me].tt}:{},P[me]&&P[me].oculto?{oculto:true}:{},P[me]&&P[me].priv?{priv:true}:{}));closeM();toast('Perfil salvo!')}
   catch(e){console.error(e);st.textContent=(e&&e.message)||'Falha ao salvar.';$('#sp').disabled=false}
 }
@@ -1534,7 +1541,14 @@ const RL={};
 const chk=r=>{if(r.error)throw r.error;return r};
 db={
   collection:c=>({
-    onSnapshot(f){const load=async()=>{const{data}=await sb.from('docs').select('id,data').eq('col',c);f({docs:(data||[]).map(r=>({id:r.id,data:()=>r.data}))})};RL[c]=load;load();sb.channel('c-'+c).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'col=eq.'+c},load).subscribe()},
+    onSnapshot(f){
+      let inflight=null,again=false,tm=null,dirty=false;
+      const run=async()=>{const{data}=await sb.from('docs').select('id,data').eq('col',c);f({docs:(data||[]).map(r=>({id:r.id,data:()=>r.data}))})};
+      const load=()=>{if(inflight){again=true;return inflight}inflight=run().catch(e=>console.warn('sync',c,e)).finally(()=>{inflight=null;if(again){again=false;load()}});return inflight};
+      const sched=()=>{if(document.hidden){dirty=true;return}clearTimeout(tm);tm=setTimeout(load,1500)};
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden&&dirty){dirty=false;sched()}});
+      RL[c]=load;load();
+      sb.channel('c-'+c).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'col=eq.'+c},sched).subscribe()},
     add:d=>sb.from('docs').insert({col:c,id:crypto.randomUUID(),data:d}).then(chk)
   }),
   doc:p=>{const[c,id]=p.split('/');return{set:d=>sb.from('docs').upsert({col:c,id,data:d}).then(chk),delete:()=>sb.from('docs').delete().eq('col',c).eq('id',id).then(chk)}}
@@ -1709,7 +1723,7 @@ function obFile(f){if(!f)return;OB.f=f;OB.p=true;if(OB.u)URL.revokeObjectURL(OB.
 function obPrev(){$('#obp').innerHTML=OB.f?`<img src="${OB.u}" alt="" style="width:100%;height:100%;object-fit:cover">`:esc(OB.a);document.querySelectorAll('.obe').forEach(b=>b.classList.toggle('on',!OB.f&&OB.p&&b.dataset.e===OB.a));$('#obs').textContent=OB.p?'Concluir':'Pular'}
 async function obDone(){
   const m=$('#am'),b=$('#obs');b.disabled=true;m.textContent='Salvando…';
-  try{let av=OB.a;if(OB.f)av=await up(OB.f);
+  try{let av=OB.a;if(OB.f)av=await up(OB.f,512);
     await db.doc('profiles/'+me).set({name:OB.n,bio:'',av,ts:Date.now()});
     $('#auth').style.display='none';$('#auth').innerHTML='';toast('Bem-vindo ao Lagarto Reels! 🦎')}
   catch(e){console.error(e);m.textContent=(e&&e.message)||'Falha ao salvar.';b.disabled=false}
@@ -1757,7 +1771,6 @@ async function acctDel(){
   const m=$('#dm');if($('#dc').value.trim().toUpperCase()!=='EXCLUIR'){m.textContent='Digite EXCLUIR para confirmar.';return}
   m.textContent='Excluindo…';
   try{
-    try{const l=await sb.storage.from('midia').list(me);if(l.data&&l.data.length)await sb.storage.from('midia').remove(l.data.map(f=>me+'/'+f.name))}catch(e){}
     const r=await sb.rpc('excluir_minha_conta');if(r.error)throw r.error;
     setAccts(accts().filter(x=>x.id!==me));try{await sb.auth.signOut({scope:'local'})}catch(e){}
     location.reload();
@@ -1766,7 +1779,7 @@ async function acctDel(){
 PA.mic='<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>';PA.up='<path d="M12 19V5M6 11l6-6 6 6"/>';PA.play='<path d="M7 4.500v15l13-7.500z" fill="currentColor"/>';PA.pause='<path d="M8 5v14M16 5v14" stroke-width="3.200"/>';
 const fmtD=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
 function chTog(){const i=$('#cmi');if(!i)return;const t=i.value.trim();$('#cact').style.display=t?'none':'flex';$('#csend').style.display=t?'flex':'none'}
-async function shrink(f){try{const bm=await createImageBitmap(f),k=Math.min(1,1280/Math.max(bm.width,bm.height));if(k===1&&f.size<8e5)return f;const c=document.createElement('canvas');c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));return new File([b],'foto.jpg',{type:'image/jpeg'})}catch(e){return f}}
+async function shrink(f,max=1280){try{const bm=await createImageBitmap(f),k=Math.min(1,max/Math.max(bm.width,bm.height));if(k===1&&f.size<8e5)return f;const c=document.createElement('canvas');c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.8));return new File([b],'foto.jpg',{type:'image/jpeg'})}catch(e){return f}}
 async function sendImg(f){if(!f||!need())return;const to=cu;toast('Enviando foto…');try{const u=await up(await shrink(f));await db.collection('messages').add({from:me,to,text:'',k:'i',url:u,ts:Date.now()})}catch(e){console.error(e);toast('Não foi possível enviar a foto.')}}
 let REC=null,AP=null;
 async function recStart(){
@@ -1807,7 +1820,7 @@ function aPlay(t){
   a.onended=()=>{aUI(id,0,false);if(AP&&AP.id===id)AP=null};a.onerror=()=>toast('Não foi possível tocar o áudio.');
   a.play().catch(()=>toast('Não foi possível tocar o áudio.'));
 }
-function lbx(u){const o=document.createElement('div');o.className='lbx';o.innerHTML=`<img src="${esc(u)}" alt="">`;o.onclick=()=>o.remove();document.body.append(o)}
+function lbx(u){const o=document.createElement('div');o.className='lbx';o.innerHTML=`<img loading="lazy" src="${esc(u)}" alt="">`;o.onclick=()=>o.remove();document.body.append(o)}
 document.addEventListener('change',e=>{if(e.target.id==='cfc'||e.target.id==='cfg'){sendImg(e.target.files[0]);e.target.value=''}});
 PA.phone='<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>';PA.micx='<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/>';
 const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
@@ -2025,7 +2038,7 @@ function gChips(){const c=$('#gch');if(c)c.innerHTML=[...GS.sel].map(u=>`<b data
 function gAdd(id){GS={add:id,sel:new Set()};const e=gShow();
   e.innerHTML=`<div class="gtop"><button class="gback" data-a="ginfo" data-id="${esc(id)}" aria-label="Voltar">${I('back',24)}</button><b style="font-size:18px">Adicionar pessoas</b><button class="lnk" style="margin-left:auto;font-weight:700;color:var(--ac)" data-a="gaddok">Concluir</button></div><div class="gto"><span class="mut">Para:</span><span class="gch" id="gch"></span><input id="gq" placeholder="Pesquisar" oninput="gList()" autocomplete="off"></div><p class="mut" id="gm" style="text-align:center;min-height:18px;margin:6px 0 0"></p><div class="gbd"><div id="gl"></div></div>`;gList()}
 function gEdit(id){const g=gOf(id);if(!g)return;GS={ed:id,name:g.name||'',file:null,prev:''};const e=gShow(),img=/^(https?:|\/_blob|data:)/.test(g.av||'');
-  e.innerHTML=`<div class="gtop"><button class="gback" data-a="ginfo" data-id="${esc(id)}" aria-label="Voltar">${I('back',24)}</button><b style="font-size:18px">Alterar nome e foto</b><button class="lnk" style="margin-left:auto;font-weight:700;color:var(--ac)" data-a="gedok" data-id="${esc(id)}">Salvar</button></div><div class="gbd" style="padding:0 18px"><label class="gph" for="gpf" id="gpv" style="width:140px;height:140px;margin-top:20px">${img?`<img src="${esc(g.av)}" alt="">`:'<span class="gsil" style="font-size:60px">👥</span>'}</label><input type="file" id="gpf" accept="image/*" hidden onchange="gEdPhoto(this)"><div style="text-align:center;margin:12px 0 22px"><label class="glk" for="gpf">Trocar foto</label></div><div class="gfld"><label for="gnm">Nome do grupo</label><input id="gnm" maxlength="40" value="${esc(GS.name)}" autocomplete="off" oninput="GS.name=this.value"></div></div>`}
+  e.innerHTML=`<div class="gtop"><button class="gback" data-a="ginfo" data-id="${esc(id)}" aria-label="Voltar">${I('back',24)}</button><b style="font-size:18px">Alterar nome e foto</b><button class="lnk" style="margin-left:auto;font-weight:700;color:var(--ac)" data-a="gedok" data-id="${esc(id)}">Salvar</button></div><div class="gbd" style="padding:0 18px"><label class="gph" for="gpf" id="gpv" style="width:140px;height:140px;margin-top:20px">${img?`<img loading="lazy" src="${esc(g.av)}" alt="">`:'<span class="gsil" style="font-size:60px">👥</span>'}</label><input type="file" id="gpf" accept="image/*" hidden onchange="gEdPhoto(this)"><div style="text-align:center;margin:12px 0 22px"><label class="glk" for="gpf">Trocar foto</label></div><div class="gfld"><label for="gnm">Nome do grupo</label><input id="gnm" maxlength="40" value="${esc(GS.name)}" autocomplete="off" oninput="GS.name=this.value"></div></div>`}
 function gEdPhoto(i){const f=i.files&&i.files[0];if(!f)return;GS.file=f;if(GS.prev)try{URL.revokeObjectURL(GS.prev)}catch(e){}GS.prev=URL.createObjectURL(f);const v=$('#gpv');if(v)v.innerHTML=`<img src="${GS.prev}" alt="">`}
 async function gEdSave(id){const g=gOf(id);if(!g||!GS||GS.ed!==id)return;const n=(GS.name||'').trim();if(n.length<2){toast('O nome precisa ter pelo menos 2 letras.');return}
   let a=g.av;if(GS.file){toast('Enviando foto…');try{a=await up(await shrink(GS.file))}catch(e){console.error(e);toast('Não consegui enviar a foto.');return}}
