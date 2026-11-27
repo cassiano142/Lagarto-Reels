@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lagarto Reels</title>
 <meta name="theme-color" content="#2e9e4f">
-<script>try{var _t=localStorage.getItem("theme");if(/^(light|dark|forest|midnight|neon|coffee|vice)$/.test(_t))document.documentElement.dataset.theme=_t;if(localStorage.getItem("bw")==="1")document.documentElement.classList.add("bw");if(localStorage.getItem("palm")==="0")document.documentElement.classList.add("nopalm")}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("theme");if(/^(light|dark|forest|midnight|neon|coffee|vice|gift)$/.test(_t))document.documentElement.dataset.theme=_t;if(localStorage.getItem("bw")==="1")document.documentElement.classList.add("bw");if(localStorage.getItem("palm")==="0")document.documentElement.classList.add("nopalm")}catch(e){}</script>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <style>
@@ -16,6 +16,9 @@
 :root[data-theme="midnight"]{--bg:#080d1c;--fg:#e8eeff;--mut:#8b97bd;--bd:#1c2547;--card:#141b36;--ac:#4a8dff}
 :root[data-theme="neon"]{--bg:#0d0a18;--fg:#f1eaff;--mut:#a090c4;--bd:#2a1f4a;--card:#1a1230;--ac:#a855f7}
 :root[data-theme="coffee"]{--bg:#17110d;--fg:#f6ece2;--mut:#b09a85;--bd:#3a2c22;--card:#261c16;--ac:#e0a25c}
+:root[data-theme="gift"]{--bg:#3b0c15;--fg:#fff3e6;--mut:#e3b3a8;--bd:#7a2231;--card:#5a1424;--ac:#ffd35a}
+:root[data-theme="gift"] body{background:radial-gradient(circle,rgba(255,255,255,.13) 2px,transparent 2.6px) 0 0/18px 18px,#3b0c15}
+:root[data-theme="gift"] .top{background-image:linear-gradient(90deg,#e8b53a,#ffe48a,#e8b53a);background-size:100% 6px;background-repeat:no-repeat;border-bottom:3px dashed #ffd35a}
 :root[data-theme="vice"]{--bg:#14041f;--fg:#fff0f8;--mut:#b48ac0;--bd:#3d1a5c;--card:#261040;--ac:#ff4fa3}
 :root[data-theme="vice"] body{background:radial-gradient(ellipse 90% 40% at 50% 100%,rgba(255,214,10,.5),transparent 70%) fixed,linear-gradient(180deg,#14041f 0%,#2b0b45 50%,#5a1560 75%,#b8346f 90%,#f5a623 100%) fixed}
 :root[data-theme="vice"] body::after{content:"";position:fixed;left:50%;transform:translateX(-50%);bottom:calc(52px + env(safe-area-inset-bottom,0px));width:min(470px,100%);height:130px;pointer-events:none;z-index:19;opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 160'%3E%3Cg fill='%233a0d4f' stroke='%23ff4fa3' stroke-opacity='.55' stroke-width='1' stroke-linejoin='round'%3E%3Cpath d='M50 30Q25 18 4 40Q28 28 50 33Z'/%3E%3Cpath d='M50 30Q30 2 8 8Q32 12 50 30Z'/%3E%3Cpath d='M50 30Q18 30 10 64Q30 42 50 34Z'/%3E%3Cpath d='M50 30Q44 6 50 0Q56 6 50 30Z'/%3E%3Cpath d='M 50 30 Q 75 18 96 40 Q 72 28 50 33 Z'/%3E%3Cpath d='M 50 30 Q 70 2 92 8 Q 68 12 50 30 Z'/%3E%3Cpath d='M 50 30 Q 82 30 90 64 Q 70 42 50 34 Z'/%3E%3C/g%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%233a0d4f' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%23ff4fa3' stroke-opacity='.35' stroke-width='1' transform='translate%282.5 0%29'/%3E%3C/svg%3E") left 4px bottom/auto 100% no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 160'%3E%3Cg transform='translate%28100 0%29 scale%28-1 1%29'%3E%3Cg fill='%233a0d4f' stroke='%23ff4fa3' stroke-opacity='.55' stroke-width='1' stroke-linejoin='round'%3E%3Cpath d='M50 30Q25 18 4 40Q28 28 50 33Z'/%3E%3Cpath d='M50 30Q30 2 8 8Q32 12 50 30Z'/%3E%3Cpath d='M50 30Q18 30 10 64Q30 42 50 34Z'/%3E%3Cpath d='M50 30Q44 6 50 0Q56 6 50 30Z'/%3E%3Cpath d='M 50 30 Q 75 18 96 40 Q 72 28 50 33 Z'/%3E%3Cpath d='M 50 30 Q 70 2 92 8 Q 68 12 50 30 Z'/%3E%3Cpath d='M 50 30 Q 82 30 90 64 Q 70 42 50 34 Z'/%3E%3C/g%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%233a0d4f' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M52 160Q58 100 50 32' fill='none' stroke='%23ff4fa3' stroke-opacity='.35' stroke-width='1' transform='translate%282.5 0%29'/%3E%3C/g%3E%3C/svg%3E") right 4px bottom/auto 82% no-repeat}
@@ -1359,8 +1362,9 @@ const APPT=[
   {id:'midnight',n:'Meia-noite',bg:'#080d1c',card:'#141b36',ac:'#4a8dff',mut:'#3a4a85',tx:'#e8eeff'},
   {id:'neon',n:'Neon roxo',bg:'#0d0a18',card:'#1a1230',ac:'#a855f7',mut:'#52358a',tx:'#f1eaff'},
   {id:'coffee',n:'Café',bg:'#17110d',card:'#261c16',ac:'#e0a25c',mut:'#6b4d3a',tx:'#f6ece2'},
-  {id:'vice',n:'Vice City',bg:'#14041f',card:'#261040',ac:'#ff4fa3',mut:'#7a3d8f',tx:'#fff0f8'}];
-const THEME_RE=/^(light|dark|forest|midnight|neon|coffee|vice)$/;
+  {id:'vice',n:'Vice City',bg:'#14041f',card:'#261040',ac:'#ff4fa3',mut:'#7a3d8f',tx:'#fff0f8'},
+  {id:'gift',n:'Caixa de presente 🎁',ev:'th_gift',bg:'#3b0c15',card:'#5a1424',ac:'#ffd35a',mut:'#a8404c',tx:'#fff3e6'}];
+const THEME_RE=/^(light|dark|forest|midnight|neon|coffee|vice|gift)$/;
 const themeCur=()=>{const t=ls('theme','auto');return THEME_RE.test(t)?t:(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')};
 function applyTheme(){const t=ls('theme','auto'),r=document.documentElement;if(THEME_RE.test(t))r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('bw',ls('bw','0')==='1');r.classList.toggle('nopalm',ls('palm','1')==='0')}
 function settings(cat){
@@ -1369,7 +1373,7 @@ function settings(cat){
   const back=ti=>`<button class="lnk" data-a="settings" style="margin-bottom:6px">‹ Configurações</button><h3>${ti}</h3>`;
   const chip=(v,l)=>`<button class="chip ${t===v?'on':''}" data-a="theme" data-id="${v}">${l}</button>`;
   let h;
-  if(cat==='look')h=back('Aparência')+`<b>Tema do app</b><div class="tg">${APPT.map(x=>{const on=x.id===themeCur();return `<button type="button" class="tp ${on?'on':''}" data-a="theme" data-id="${x.id}" style="--pb:${x.bg};--pc:${x.card};--pa:${x.ac};--pm:${x.mut};--pt:${x.tx}"><span class="tpv"><b><i></i>Lagarto Reels${x.id==='vice'?' 🌴':''}</b><span class="tpr"><i></i><i></i><i></i><i></i></span><span class="tpc"></span><span class="tpn"><i></i><i></i><i class="a"></i><i></i><i></i></span></span><span>${x.n}${on?' (atual)':''}</span></button>`}).join('')}</div><label class="srow"><input type="checkbox" data-a="themeauto" ${t==='auto'?'checked':''}> Seguir o tema do aparelho</label>${themeCur()==='vice'?`<label class="srow"><input type="checkbox" data-a="palm" ${ls('palm','1')==='1'?'checked':''}> Palmeiras no fundo 🌴</label>`:''}<label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
+  if(cat==='look')h=back('Aparência')+`<b>Tema do app</b><div class="tg">${APPT.filter(x=>!x.ev||evHas(x.ev)).map(x=>{const on=x.id===themeCur();return `<button type="button" class="tp ${on?'on':''}" data-a="theme" data-id="${x.id}" style="--pb:${x.bg};--pc:${x.card};--pa:${x.ac};--pm:${x.mut};--pt:${x.tx}"><span class="tpv"><b><i></i>Lagarto Reels${x.id==='vice'?' 🌴':''}</b><span class="tpr"><i></i><i></i><i></i><i></i></span><span class="tpc"></span><span class="tpn"><i></i><i></i><i class="a"></i><i></i><i></i></span></span><span>${x.n}${on?' (atual)':''}</span></button>`}).join('')}</div><label class="srow"><input type="checkbox" data-a="themeauto" ${t==='auto'?'checked':''}> Seguir o tema do aparelho</label>${themeCur()==='vice'?`<label class="srow"><input type="checkbox" data-a="palm" ${ls('palm','1')==='1'?'checked':''}> Palmeiras no fundo 🌴</label>`:''}<label class="srow"><input type="checkbox" data-a="bw" ${ls('bw','0')==='1'?'checked':''}> Preto e branco (sem cores)</label>`;
   else if(cat==='acc')h=back('Conta')+`<p class="mut">Conectado como <b>${n0}</b><br>${esc(myEmail)}</p><button class="btn g" data-a="editprof">Editar perfil</button>`+accx();
   else if(cat==='priv'){const pv=isPriv(me),rq=reqs();h=back('Privacidade')+`<label class="srow"><input type="checkbox" data-a="privtog" ${pv?'checked':''}> Conta privada</label><p class="mut" style="margin:0 0 14px">${pv?'Só quem você aprovar consegue ver suas publicações. Quem já seguia você continua seguindo.':'Qualquer pessoa pode ver suas publicações e te seguir.'}</p><b>Pedidos para seguir (${rq.length})</b>`+(rq.length?reqRows(rq):'<p class="mut">Nenhum pedido no momento.</p>')}
   else if(cat==='pw')h=back('Senha e segurança')+`<input type="password" id="np" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"><input type="password" id="np2" placeholder="Repita a nova senha" autocomplete="new-password"><button class="btn" style="margin-top:6px" data-a="chpw">Alterar senha</button><p id="pwm" class="mut"></p>`;
@@ -1381,7 +1385,7 @@ function settings(cat){
 }
 function editProf(first){
   const p=P[me]||{};pav=p.av||'🦎';pfr=p.frame||'';
-  modal(`<h3>${first?'Crie seu perfil 🦎':'Editar perfil'}</h3><div class="emo">${EM.map(e=>`<button class="ic ${e===pav?'on':''}" data-a="emo" data-id="${e}">${e}</button>`).join('')}</div><label class="drop s">${I('image',22)}<span>Ou envie uma foto</span><input type="file" id="af" accept="image/*"></label>${'<div class="mut" style="margin:8px 0 2px;font-size:12px">Moldura do perfil</div><div class="fpk"><button type="button" class="ft '+(pfr?'':'on')+'" data-a="frm" data-id="0"><span style="display:block;height:60px;line-height:60px;font-size:24px">🚫</span>Nenhuma</button>'+FRM.list.filter(f=>!f.rk||f.rk<=RKN()).map(f=>'<button type="button" class="ft '+(f.id===pfr?'on':'')+'" data-a="frm" data-id="'+f.id+'"><span style="display:block;width:60px;height:60px;margin:0 auto;position:relative"><span style="position:absolute;left:0;top:0;width:120px;height:120px;transform:scale(.5);transform-origin:0 0"><span class="frl" style="left:0;top:0">'+f.h()+'</span><span style="position:absolute;left:18px;top:18px;width:84px;height:84px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:46px">🦎</span></span></span>'+f.n+'</button>').join('')+'</div>'}${first?'':ttPicker()}<input type="text" id="pn" maxlength="24" placeholder="Nome de usuário" value="${esc(p.name||'')}"><textarea id="pbio" rows="2" maxlength="150" placeholder="Bio">${esc(p.bio||'')}</textarea><button class="btn" id="sp" data-a="saveprof">Salvar</button>${first?'':'<button class="btn g" style="margin-top:8px" data-a="logout">Sair da conta</button>'}<div id="ps" class="mut"></div>`);
+  modal(`<h3>${first?'Crie seu perfil 🦎':'Editar perfil'}</h3><div class="emo">${EM.map(e=>`<button class="ic ${e===pav?'on':''}" data-a="emo" data-id="${e}">${e}</button>`).join('')}</div><label class="drop s">${I('image',22)}<span>Ou envie uma foto</span><input type="file" id="af" accept="image/*"></label>${'<div class="mut" style="margin:8px 0 2px;font-size:12px">Moldura do perfil</div><div class="fpk"><button type="button" class="ft '+(pfr?'':'on')+'" data-a="frm" data-id="0"><span style="display:block;height:60px;line-height:60px;font-size:24px">🚫</span>Nenhuma</button>'+FRM.list.filter(f=>(!f.rk||f.rk<=RKN())&&(!f.ev||evHas(f.ev))).map(f=>'<button type="button" class="ft '+(f.id===pfr?'on':'')+'" data-a="frm" data-id="'+f.id+'"><span style="display:block;width:60px;height:60px;margin:0 auto;position:relative"><span style="position:absolute;left:0;top:0;width:120px;height:120px;transform:scale(.5);transform-origin:0 0"><span class="frl" style="left:0;top:0">'+f.h()+'</span><span style="position:absolute;left:18px;top:18px;width:84px;height:84px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:46px">🦎</span></span></span>'+f.n+'</button>').join('')+'</div>'}${first?'':ttPicker()}<input type="text" id="pn" maxlength="24" placeholder="Nome de usuário" value="${esc(p.name||'')}"><textarea id="pbio" rows="2" maxlength="150" placeholder="Bio">${esc(p.bio||'')}</textarea><button class="btn" id="sp" data-a="saveprof">Salvar</button>${first?'':'<button class="btn g" style="margin-top:8px" data-a="logout">Sair da conta</button>'}<div id="ps" class="mut"></div>`);
 }
 async function saveProf(){
   const n=$('#pn').value.trim().replace(/\s+/g,'_'),st=$('#ps');
@@ -2140,7 +2144,6 @@ function rkPushNow(){if(!me||typeof db==='undefined'||!db)return;
     if(r.id&&rkSig(doc)===rkSig(r))return;
     Promise.resolve(db.doc('levels/'+me).set(doc)).catch(function(e){console.error('levels',e)})}catch(e){}}
 var RKX=[0,120,300,560,730,900,1300,1800];
-function rkFromXp(x){var n=0;RKX.forEach(function(t,i){if(x>=t)n=i+1});return n}
 var RKM=[
 ['pf',1,'Escrever a bio do perfil',10,'Perfil'],
 ['fo',5,'Postar 5 fotos',10,'Fotos',1],['fo',20,'Postar 20 fotos',30,'Fotos',1],['fo',50,'Postar 50 fotos',60,'Fotos',1],
@@ -2172,15 +2175,15 @@ function rkCalc(){var s=rkStats(),set={},ch=0;try{JSON.parse(ls('rkdn_'+me,'[]')
   var first=false;try{first=localStorage.getItem('rkdn_'+me)===null}catch(e){}
   RKM.forEach(function(m){var k=m[0]+':'+m[1];if(!set[k]&&s[m[0]]>=m[1]){set[k]=1;ch=1;if(!first)RKFRESH.push(m)}});
   if(ch){try{localStorage.setItem('rkdn_'+me,JSON.stringify(Object.keys(set)))}catch(e){}rkPush()}
-  var xp=+ls('rkbn_'+me,0)||0,n=0;RKM.forEach(function(m){if(set[m[0]+':'+m[1]])xp+=m[3]});xp=Math.max(xp,P[me]?(+P[me].xp||0):0);RKX.forEach(function(t,i){if(xp>=t)n=i+1});
+  var xp=+ls('rkbn_'+me,0)||0,n=0;RKM.forEach(function(m){if(set[m[0]+':'+m[1]])xp+=m[3]});RKX.forEach(function(t,i){if(xp>=t)n=i+1});
   rkMig();var mx=+ls('rkmax_'+me,0);if(n>mx){mx=n;try{localStorage.setItem('rkmax_'+me,String(n))}catch(e){}}return{n:mx,s:s,xp:xp,dn:set}}
 function RKN(){return me?rkCalc().n:0}
-function rkOf(u){return u===me?RKN():Math.max((P[u]&&+P[u].rk)||0,rkFromXp(P[u]?(+P[u].xp||0):0))}
+function rkOf(u){return u===me?RKN():((P[u]&&+P[u].rk)||0)}
 function rkHid(u){return !!(P[u]&&P[u].rkh)}
 function rkIc(u){var n=rkOf(u);return n&&!rkHid(u)?'<span class="rki">'+rkIcon(RK[n-1],'p'+n)+'</span>':''}
 var TOPD=null,TOPR=0,rkCl=0;
-function ttAll(){return RK.map(function(r,i){return{id:r.id,t:r.t,c:r.c,rk:i+1,n:r.n}}).concat([{id:'top1',t:'Top 1° Global',c:'#ffd700',top:1}])}
-function ttHas(u,x){return x.top?!!(TOPD&&TOPD.u===u):x.rk<=rkOf(u)}
+function ttAll(){return RK.map(function(r,i){return{id:r.id,t:r.t,c:r.c,rk:i+1,n:r.n}}).concat([{id:'top1',t:'Top 1° Global',c:'#ffd700',top:1},{id:'ev_emb',t:'Embrulhado',c:'#d62828',ev:'t_emb'},{id:'ev_sort',t:'Sortudo do Natal',c:'#2bb673',ev:'t_sortudo'},{id:'ev_pm',t:'Presente misterioso',c:'#c77dff',ev:'t_pm'}])}
+function ttHas(u,x){return x.ev?(u===me?evHas(x.ev):true):x.top?!!(TOPD&&TOPD.u===u):x.rk<=rkOf(u)}
 function ttOf(u){var a=ttAll(),n=rkOf(u),id=P[u]&&P[u].tt,x=null;if(id){x=a.filter(function(z){return z.id===id})[0]||null;if(x&&!ttHas(u,x))x=null}if(!x&&n)x=a[n-1];return x}
 function ttChip(x){return '<span class="rkt" style="--c:'+x.c+(x.top?';color:#2b1f00':'')+'">'+x.t+'</span>'}
 function rkTt(u){var n=rkOf(u),x=n&&!rkHid(u)?ttOf(u):null;return x?ttChip(x):''}
@@ -2214,7 +2217,7 @@ function advSv(o){try{localStorage.setItem('adv_'+me,JSON.stringify(o))}catch(e)
 function advDay(){var d=new Date(nowS());return d.getFullYear()>2026?99:d.getFullYear()<2026||d.getMonth()<11?0:d.getDate()}
 function advChk(){if(!me||!P[me]||Date.now()-loadTs<10000||!POSTS.length)return;var D=advDay();if(D<1||D>25)return;var o=advSt(),st=rkStats();o.done=o.done||{};
   if(!o.base||o.base.d!==D)o.base={d:D,v:{fo:st.fo,lg:st.lg,cm:st.cm,ms:st.ms,rl:st.rl,sv:st.sv}};
-  var m=ADV[D-1];if(!o.done[D]&&st[m[1]]-o.base.v[m[1]]>=m[2]){o.done[D]=1;toast('Missão de Natal concluída! ⭐')}advSv(o)}
+  var m=ADV[D-1];if(!o.done[D]&&st[m[1]]-o.base.v[m[1]]>=m[2]){o.done[D]=1;toast('Missão de Natal concluída! ⭐');evDirty()}advSv(o)}
 setInterval(function(){try{advChk()}catch(e){}},15000);
 /* ===== Contagens regressivas: atualização/rankeado (05/12) e Evento de Natal (01/12) ===== */
 function cdParts(iso){var p=iso.split('-'),t=new Date(+p[0],(+p[1])-1,+p[2]).getTime()-nowS();if(t<=0)return null;var q=Math.floor(t/1000);return{d:Math.floor(q/86400),h:Math.floor(q%86400/3600),m:Math.floor(q%3600/60),s:q%60}}
@@ -2224,14 +2227,14 @@ function cdBanner(k){var n=k==='nt',iso=n?'2026-12-01':'2026-12-10',dn=n?'O even
 function cdTick(){document.querySelectorAll('[data-cd]').forEach(function(e){e.innerHTML=cdInner(cdParts(e.dataset.cd),e.dataset.done)})}
 setInterval(cdTick,1000);
 function natalOpen(){var D=advDay();
-  if(D<1){modal('<h3>🎄 Evento de Natal</h3>'+cdBanner('nt')+'<p class="mut" style="font-size:13px;margin:0">O Evento de Natal do Lagarto Reels começa no dia 01/12. Fique de olho!</p>');return}
+  if(D<1){modal(natalPrev());return}
   try{advChk()}catch(e){}var o=advSt(),dn=o.done||{},n=Object.keys(dn).length,st=rkStats(),ST='border:1px solid rgba(128,128,128,.35);border-radius:12px;padding:12px;margin:8px 0',h='<h3>🎄 Evento de Natal</h3><div style="'+ST+'"><b>⭐ '+n+' de 25 estrelas</b></div>';
   if(D<=25){var m=ADV[D-1],pg=o.base&&o.base.d===D?Math.max(0,Math.min(m[2],st[m[1]]-o.base.v[m[1]])):0;
     h+='<div style="'+ST+';border-color:#f4c542"><div class="mut" style="font-size:12px">Missão do dia '+D+'</div><b>'+m[0]+'</b><div style="margin-top:6px">'+(dn[D]?'✅ Concluída! +1 estrela':'Progresso: '+pg+' de '+m[2])+'</div></div>'}
   else h+='<div style="'+ST+'">O Evento de Natal terminou. Feliz Natal! 🎅</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">';
   for(var i=1;i<=25;i++){var c=dn[i]?'background:#2bb673;color:#fff':i===D?'background:#f4c542;color:#241800':i<D?'opacity:.45':'opacity:.7';h+='<div style="aspect-ratio:1;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(128,128,128,.35);font-weight:700;'+c+'">'+(dn[i]?'★':i>D?'🔒':i)+'</div>'}
-  modal(h+'</div><div class="mut" style="font-size:12px;margin-top:8px">Cada dia tem uma missão nova. Ela conta sozinha quando você faz.</div>')}
+  modal(h+'</div><div class="mut" style="font-size:12px;margin-top:8px">Cada dia tem uma missão nova. Ela conta sozinha quando você faz.</div>'+gSec())}
 function rkOpen(){var r=rkCalc(),n=r.n,s=r.s,xp=r.xp,cur=n?RK[n-1]:null,nx=RK[n],h='';lset('rknew_'+me,'');if(window.mnDot)mnDot();
   var lo=n?RKX[n-1]:0,hi=nx?RKX[n]:xp,pr=nx?Math.max(0,Math.min(1,(xp-lo)/(hi-lo))):1,dv=pr<.34?'III':pr<.67?'II':'I';
   h=cdBanner('rk')+'<div class="rkh"><div class="rkbig '+(n==RK.length?'rkhue':'')+'">'+(cur?rkIcon(cur,'b'):'<span style="font-size:44px">🥚</span>')+'</div><div><div class="rkn">'+(cur?cur.n+(nx?' '+dv:''):'Sem rank')+'</div>'+(cur?ttChip(ttOf(me)):'<small class="mut">Ganhe pontos nas missões</small>')+'</div></div>';
@@ -2259,6 +2262,91 @@ function rkNotify(){if(!me||typeof POSTS==='undefined')return;
     q.forEach(function(m,i){setTimeout(function(){rkToast(m)},i*1500)})}catch(e){}}
 setInterval(rkNotify,4000);
 FRM.list.push.apply(FRM.list,RK.map(function(r,i){return{id:r.id,n:'Rank '+r.n,an:1,rk:i+1,h:function(){return rkFr(r,i)}}}));
+/* ===== Moldura do Evento de Natal: Presente misterioso (presente gigante) ===== */
+const EVF=(()=>{const D=Math.PI/180;
+function an(t,v,d,b,x){return'<animateTransform attributeName="transform" type="'+t+'" values="'+v+'" dur="'+d+'s" '+(b?'begin="-'+b+'s" ':'')+'repeatCount="indefinite"'+(x||'')+'/>'}
+function tw(i,v,d,b){return'<g><animate attributeName="opacity" values="'+v+'" dur="'+d+'s" begin="-'+(b||0)+'s" repeatCount="indefinite"/>'+i+'</g>'}
+function star(x,y,s,f){return'<polygon points="'+x+','+(y-s)+' '+(x+s/3)+','+(y-s/3)+' '+(x+s)+','+y+' '+(x+s/3)+','+(y+s/3)+' '+x+','+(y+s)+' '+(x-s/3)+','+(y+s/3)+' '+(x-s)+','+y+' '+(x-s/3)+','+(y-s/3)+'" fill="'+f+'"/>'}
+function fr(){var i="pm",A=["#ff5e5e","#ffd35a","#5fe0a0","#5ec8ff","#c77dff","#ff5e5e"],B=A.slice().reverse();
+ function gs(a){return a.map(function(c,k){return'<stop offset="'+k/5+'" stop-color="'+c+'"/>'}).join('')}
+ function gr(id,a,d){return'<linearGradient id="'+id+i+'" x1="0" y1="0" x2="1" y2="1">'+gs(a)+'<animateTransform attributeName="gradientTransform" type="rotate" values="0 .5 .5;360 .5 .5" dur="'+d+'s" repeatCount="indefinite"/></linearGradient>'}
+ var dots='',k,rays='',pt=function(a,r){return(100+r*Math.cos(a*D))+','+(50+r*Math.sin(a*D))};
+ for(k=0;k<30;k++){var x=34+k%6*26+(Math.floor(k/6)%2)*13,y=90+Math.floor(k/6)*18;dots+='<circle cx="'+x+'" cy="'+y+'" r="3" fill="#fff" fill-opacity=".4"/>'}
+ for(k=-150;k<=-30;k+=20)rays+='<polygon points="'+pt(k-5,14)+' '+pt(k,70)+' '+pt(k+5,14)+'" fill="#fff6c0"/>';
+ var lid='';for(k=0;k<7;k++)lid+='<circle cx="'+(30+k*23)+'" cy="64" r="2.5" fill="#fff" fill-opacity=".45"/>';
+ var up='';[[70,0],[88,.5],[104,1],[122,1.5],[136,.8]].forEach(function(p,j){up+='<g transform="translate('+p[0]+' 76)"><g>'+an('translate','0 0;'+(j%2?-8:8)+' -64',2.4,p[1])+'<g><animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="-'+p[1]+'s" repeatCount="indefinite"/>'+star(0,0,5,["#fff","#ffe27a","#ff9bd6","#9be0ff","#fff"][j])+'</g></g></g>'});
+ return'<svg viewBox="0 0 120 120" style="overflow:visible"><g transform="translate(-30 -53.4) scale(.9)"><defs>'+gr('p',A,5)+gr('q',B,6)+'<linearGradient id="r'+i+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".5" stop-color="#e0a526"/><stop offset="1" stop-color="#ffe9a0"/></linearGradient><linearGradient id="w'+i+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#a81818"/></linearGradient></defs>'
+ +'<ellipse cx="100" cy="190" rx="72" ry="6" fill="rgba(0,0,0,.25)"/>'
+ +'<g>'+an('rotate','-6 100 50;6 100 50;-6 100 50',3)+'<g><animate attributeName="opacity" values=".35;.9;.35" dur="2s" repeatCount="indefinite"/>'+rays+'</g></g>'
+ +'<rect x="24" y="74" width="152" height="110" rx="8" fill="url(#p'+i+')" stroke="rgba(0,0,0,.4)" stroke-width="2"/>'+dots
+ +'<rect x="88" y="74" width="24" height="110" fill="url(#r'+i+')" stroke="rgba(0,0,0,.35)"/>'
+ +'<g>'+an('translate','0 0;0 -5;0 0',1.6)+'<rect x="16" y="50" width="168" height="28" rx="7" fill="url(#q'+i+')" stroke="rgba(0,0,0,.4)" stroke-width="2"/>'+lid+'<rect x="88" y="50" width="24" height="28" fill="url(#r'+i+')" stroke="rgba(0,0,0,.35)"/>'
+ +'<g transform="translate(100 50)"><g>'+an('scale','1;1.07;1',1.6)+'<g transform="translate(-100 -50)"><path d="M96 56L76 88L90 80L98 94ZM104 56L124 88L110 80L102 94Z" fill="#c42a2a" stroke="#6e0f0f"/><path d="M100 50C70 12 36 26 52 48C62 62 90 58 100 50Z" fill="url(#w'+i+')" stroke="#6e0f0f"/><path d="M100 50C130 12 164 26 148 48C138 62 110 58 100 50Z" fill="url(#w'+i+')" stroke="#6e0f0f"/><circle cx="100" cy="50" r="8" fill="#ffd35a" stroke="#7a5a00"/></g></g></g>'
+ +'<path d="M108 54Q130 48 150 62" fill="none" stroke="#7a5a00" stroke-width="1.5"/><g transform="translate(150 62)"><g>'+an('rotate','-14;14;-14',2)+'<rect x="-9" y="6" width="18" height="22" rx="3" fill="#fff" stroke="#7a5a00"/><text x="0" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#8e44d6" font-family="Bricolage Grotesque,sans-serif">?</text></g></g></g>'
+ +up
+ +'<circle cx="100" cy="126" r="50" fill="none" stroke="#fff" stroke-width="6"/><circle cx="100" cy="126" r="50" fill="none" stroke="#ffd35a" stroke-width="3" stroke-linecap="round" stroke-dasharray="40 275"><animateTransform attributeName="transform" type="rotate" values="0 100 126;360 100 126" dur="3s" repeatCount="indefinite"/></circle>'
+ +tw(star(12,104,6,"#fff"),"1;0;1",1.5,0)+tw(star(190,150,6,"#ffe27a"),"0;1;0",1.5,0)+tw(star(30,30,5,"#fff"),"1;0;1",1.3,.4)+tw(star(172,30,5,"#ff9bd6"),"0;1;0",1.7,0)
+ +'</g></svg>'}
+return fr})();
+function evHas(k){try{return localStorage.getItem('ev_'+k+'_'+me)==='1'}catch(e){return false}}
+function evGive(k){try{localStorage.setItem('ev_'+k+'_'+me,'1')}catch(e){}evDirty()}
+FRM.list.push({id:'pm',n:'Presente misterioso',an:1,ev:'pm',h:EVF});
+
+/* ===== Caça aos presentes (05/12 a 25/12): 5 por dia, um a cada 2 horas, não aparece em lives ===== */
+var SHOP=[['t_emb','Embrulhado',300,'título'],['t_sortudo','Sortudo do Natal',900,'título'],['th_gift','Tema Caixa de presente',1500,'tema']];
+function gXp(){return +ls('ev_xp_'+me,0)||0}
+function gXpSet(v){try{localStorage.setItem('ev_xp_'+me,String(v))}catch(e){}evDirty()}
+function gOn(){var d=new Date(nowS());return d.getFullYear()===2026&&d.getMonth()===11&&d.getDate()>=5&&d.getDate()<=25}
+function gSt(){var o={};try{o=JSON.parse(ls('ev_g_'+me,'{}'))||{}}catch(e){}var d=new Date(nowS()),k=d.getMonth()+'-'+d.getDate();return o.d===k?o:{d:k,n:0}}
+function gAvail(){if(!me||!gOn())return 0;var d=new Date(nowS()),h=d.getHours()+d.getMinutes()/60,p=[8,10,12,14,16].filter(function(x){return h>=x}).length;return Math.max(0,p-gSt().n)}
+function gRoll(){var r=Math.random()*100,o=gSt(),m;
+  if(r<70){gXpSet(gXp()+20);m={e:'🎀',t:'Presente comum',d:'+20 XP de Natal'}}
+  else if(r<95){m={e:'✨',t:'Presente raro!'};var pl=['t_sortudo','th_gift'].filter(function(k){return!evHas(k)});if(pl.length){var k2=pl[Math.floor(Math.random()*pl.length)];evGive(k2);gXpSet(gXp()+80);m.d=k2==='th_gift'?'+80 XP de Natal e o tema Caixa de presente! Escolha em Configurações > Aparência.':'+80 XP de Natal e o título Sortudo do Natal! Escolha em Editar perfil.'}else{gXpSet(gXp()+200);m.d='+200 XP de Natal'}}
+  else{m={e:'🌈',t:'PRESENTE MÍSTICO!!!'};var pool=['pm','t_pm'].filter(function(k){return!evHas(k)});
+    if(!pool.length){gXpSet(gXp()+300);m.d='+300 XP de Natal'}else{var k=pool[Math.floor(Math.random()*pool.length)];evGive(k);m.d=k==='pm'?'Você ganhou a moldura Presente misterioso! Escolha em Editar perfil.':'Você ganhou o título Presente misterioso! Escolha em Editar perfil.'}}
+  o.n++;try{localStorage.setItem('ev_g_'+me,JSON.stringify(o))}catch(e){}evDirty();return m}
+function gOpen(){if(!gAvail())return;if(gEl){gEl.remove();gEl=null}var m=gRoll(),left=Math.max(0,5-gSt().n);
+  modal('<div style="text-align:center"><div style="font-size:64px">'+m.e+'</div><h3>'+m.t+'</h3><p>'+m.d+'</p><div class="mut" style="font-size:12px">Presentes abertos hoje: '+gSt().n+' de 5'+(left?'':' · volte amanhã!')+'</div></div>')}
+var gEl=null,gKey='';
+function gTick(){try{var L=(typeof LIVE!=='undefined'&&LIVE);if(!gAvail()||L){if(gEl){gEl.remove();gEl=null}return}
+  if(!gEl){gEl=document.createElement('button');gEl.id='gft';gEl.textContent='🎁';gEl.setAttribute('aria-label','Presente escondido');gEl.style.cssText='position:fixed;z-index:50;font-size:34px;line-height:1;background:none;border:0;padding:6px;cursor:pointer;filter:drop-shadow(0 0 6px #ffd35a);animation:zbob 1.6s ease-in-out infinite';gEl.addEventListener('click',gOpen);document.body.appendChild(gEl);gKey=''}
+  var k=tab+'|'+(cu||'')+'|'+(openP||'');if(k!==gKey){gKey=k;gEl.style.left=(8+Math.random()*74)+'vw';gEl.style.top=(18+Math.random()*58)+'vh'}}catch(e){}}
+setInterval(gTick,2500);
+
+/* ===== Evento de Natal salvo por conta (coleção "evento" na nuvem), não por aparelho ===== */
+var EVK=['pm','t_pm','t_sortudo','t_emb','th_gift'],EVL='',EVT=null,EVB=false;
+function evSnap(){var it={};EVK.forEach(function(k){if(evHas(k))it[k]=1});return{xp:gXp(),it:it,g:gSt(),dn:advSt().done||{},ts:+ls('ev_ts_'+me,0)||0}}
+function evDirty(){if(!me)return;try{localStorage.setItem('ev_ts_'+me,String(Date.now()))}catch(e){}clearTimeout(EVT);EVT=setTimeout(evPush,1500)}
+function evPush(){if(!me||EVL!==me||typeof db==='undefined'||!db)return;try{Promise.resolve(db.doc('evento/'+me).set(evSnap())).catch(function(e){console.warn('evento',e)})}catch(e){}}
+async function evLoad(){if(!me||EVL===me||EVB||typeof sb==='undefined'||!sb)return;EVB=true;
+  try{var r=await sb.from('docs').select('data').eq('col','evento').eq('id',me).maybeSingle();if(r.error)throw r.error;
+    var sv=r.data&&r.data.data,l=evSnap(),w=false;
+    if(sv){Object.keys(sv.it||{}).forEach(function(k){if(EVK.indexOf(k)>=0&&!evHas(k)){try{localStorage.setItem('ev_'+k+'_'+me,'1')}catch(e){}}});
+      var o=advSt();o.done=o.done||{};Object.keys(sv.dn||{}).forEach(function(d){o.done[d]=1});try{localStorage.setItem('adv_'+me,JSON.stringify(o))}catch(e){}
+      if((+sv.ts||0)>l.ts){try{localStorage.setItem('ev_xp_'+me,String(+sv.xp||0));localStorage.setItem('ev_ts_'+me,String(+sv.ts))}catch(e){}}
+      if(sv.g&&sv.g.d===l.g.d&&(+sv.g.n||0)>l.g.n){try{localStorage.setItem('ev_g_'+me,JSON.stringify(sv.g))}catch(e){}}}
+    EVL=me;var m=evSnap();if(sv||m.xp||Object.keys(m.it).length||Object.keys(m.dn).length)evPush()}
+  catch(e){console.warn('evento',e)}EVB=false}
+setInterval(function(){if(me&&EVL!==me)evLoad()},4000);
+function gSec(){var a=gAvail(),o=gSt(),h='<h3 style="margin-top:18px">🎁 Caça aos presentes</h3>';
+  if(!gOn()&&!gXp())return h+'<div class="mut" style="font-size:13px">Começa no dia 05/12. Presentes escondidos aparecem pelo app (menos nas lives), até 5 por dia, um a cada 2 horas!</div>';
+  h+='<div style="border:1px solid rgba(128,128,128,.35);border-radius:12px;padding:12px;margin:8px 0"><b>✨ '+gXp()+' XP de Natal</b><div class="mut" style="font-size:12px">Presentes abertos hoje: '+o.n+' de 5'+(a?' · tem um presente escondido esperando você!':'')+'</div></div>';
+  SHOP.forEach(function(x){h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="flex:1">'+x[1]+'<div class="mut" style="font-size:12px">'+x[3]+'</div></span>'+(evHas(x[0])?'<span class="mut">Você tem</span>':'<button data-ev="'+x[0]+'" style="padding:6px 12px;border-radius:999px;border:0;background:var(--ac);color:#fff">'+x[2]+' XP</button>')+'</div>'});
+  return h+'<div class="mut" style="font-size:12px;margin-top:4px">A moldura e o título Presente misterioso só caem nos presentes místicos.</div>'}
+/* ===== Prévia do Evento de Natal (antes de 01/12): só mostra o que vem por aí ===== */
+function natalPrev(){var C='font-size:12px',B='border:1px solid rgba(128,128,128,.35);border-radius:10px;',g='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px">';
+  for(var i=1;i<=25;i++)g+='<div style="aspect-ratio:1;display:grid;place-items:center;'+B+'font-weight:700;'+(i===1?'background:#f4c542;color:#241800':'opacity:.7')+'">'+i+'</div>';
+  return '<h3>🎄 Evento de Natal</h3>'+cdBanner('nt')+'<div class="mut" style="'+C+'">Prévia: o evento começa no dia 01/12. Tudo isso fica ativo quando começar.</div>'
+  +'<h3 style="margin-top:16px">📅 Calendário do advento</h3><div class="mut" style="'+C+'">Uma missão nova por dia, de 01/12 a 25/12. Ela conta sozinha quando você faz, e cada missão dá uma estrela. Missão do dia 1: <b>'+ADV[0][0]+'</b></div>'+g+'</div>'
+  +'<h3 style="margin-top:18px">🎁 Caça aos presentes (a partir de 05/12)</h3><div class="mut" style="'+C+'">Presentes escondidos aparecem pelo app (menos nas lives), até 5 por dia, um a cada 2 horas. Todo presente dá algo:</div>'
+  +'<div style="'+B+'padding:10px;margin:8px 0;font-size:13px"><div>🎀 <b>Comum (70%)</b>: XP de Natal</div><div>✨ <b>Raro (25%)</b>: XP de Natal e o título Sortudo do Natal ou o tema Caixa de presente</div><div>🌈 <b>Místico (5%)</b>: a moldura ou o título Presente misterioso</div></div>'
+  +'<div style="position:relative;width:84px;height:84px;margin:76px auto 34px"><div style="position:absolute;left:-18px;top:-18px;width:120px;height:120px;pointer-events:none">'+EVF()+'</div><div style="position:relative;width:84px;height:84px;border-radius:50%;background:#cfe8d6;display:grid;place-items:center;font-size:44px">🦎</div></div>'
+  +'<div class="mut" style="'+C+';text-align:center">Moldura Presente misterioso, a mais rara do evento</div>'
+  +'<div style="text-align:center;margin:12px 0"><button data-evprev="gift" style="padding:8px 16px;border-radius:999px;border:0;background:var(--ac);color:#fff">Ver o tema Caixa de presente (só teste)</button></div>'
+  +'<div class="mut" style="'+C+'">Loja de Natal (com XP de Natal): título Embrulhado (300 XP), título Sortudo do Natal (900 XP) e tema Caixa de presente (1500 XP).</div>'}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-evprev]');if(!b)return;var r=document.documentElement;if(r.dataset.theme==='gift'){applyTheme();toast('Tema de volta ao normal')}else{r.dataset.theme='gift';toast('Tema Caixa de presente (só teste, não fica salvo)')}});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-ev]');if(!b)return;var k=b.dataset.ev,x=SHOP.filter(function(z){return z[0]===k})[0];if(!x||evHas(k))return;if(gXp()<x[2]){toast('XP de Natal insuficiente');return}gXpSet(gXp()-x[2]);evGive(k);toast('Item liberado! 🎉');natalOpen()});
+
 setInterval(function(){rkDay();rkSync();rkPush()},20000);setTimeout(function(){rkDay();rkSync();rkPush()},3000);
 </script>
 </body>
